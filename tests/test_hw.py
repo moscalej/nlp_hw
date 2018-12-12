@@ -1,6 +1,6 @@
 import unittest
 from models.prerocesing import PreprocessTags
-from models.rapnaparkhi import Ratnaparkhi
+from models.features import Ratnaparkhi
 import pandas as pd
 class test_model_1(unittest.TestCase):
     def test_fit(self):
@@ -93,6 +93,20 @@ class test_rapnaparkhi(unittest.TestCase):
         print(r.y[place2])
         self.failUnlessEqual(r.f_107(place2), 0)
 
+class test_model(unittest.TestCase):
+    def test_question1(self):
+        """
+        LOAD THE DATA
+        PRE PROCESS
+        FIT - TRAIN
+        PREDICT -
 
+        :return:
+        """
+        acc=90
+        print(acc)
+        self.assertGreaterEqual(acc,90,msg=f'current acc:{acc}')
 
+if __name__ == '__main__':
+    unittest.main()
 

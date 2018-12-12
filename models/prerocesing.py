@@ -23,13 +23,13 @@ class PreprocessTags:
         self.y.fillna('<PAD>', inplace=True)
         return self
 
-    def load_comp(self,path):
+    def load_comp(self, path):
         x = []
         with open(path, 'r') as fb:
             raw_file = fb.readlines()
         for line in raw_file:
             temp = line.strip().strip(" .")
-            sentence = ['*', '*'] +temp.split()
+            sentence = ['*', '*'] + temp.split()
 
             sentence.append('<STOP>')
             x.append(sentence)
@@ -52,4 +52,4 @@ class PreprocessTags:
 
 if __name__ == '__main__':
     a = PreprocessTags().load_comp(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\comp.words')
-    b= PreprocessTags().load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')
+    b = PreprocessTags().load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')

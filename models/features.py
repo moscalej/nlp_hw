@@ -3,6 +3,7 @@ import numpy as np
 
 
 class Ratnaparkhi:
+
     def __init__(self, x, y):
         assert isinstance(x, pd.Series)
         assert isinstance(y, pd.Series)
@@ -13,7 +14,7 @@ class Ratnaparkhi:
         return 1 if self.x[place] == 'base' and self.y[place] == 'Vt' else 0
 
     def f_101(self, place):
-        if len(self.x[place]) <4 :return 0
+        if len(self.x[place]) < 4: return 0
         return 1 if self.x[place][-3:] == 'ing' and self.y[place] == 'VBG' else 0
 
     def f_102(self, place):
@@ -33,3 +34,26 @@ class Ratnaparkhi:
 
     def f_107(self, place):
         return 1 if self.y[place + 1] == 'the' and self.y[place] == 'Vt' else 0
+
+    def fill_test(self, tests=range(8)):
+        """
+
+        :param tests:
+        :return: Return vector where each value is the value of a test
+        """
+        out = pd.DataFrame([self.x, self.y], columns=['Sentence', 'labels'])
+        for test in tests:
+
+            test_series = [0, 0]
+            for i in range(3, self.x.size):
+                pass
+
+        return 'hello'
+
+
+class CustomFeatures:
+    def __init__(self, x, y):
+        assert isinstance(x, pd.Series)
+        assert isinstance(y, pd.Series)
+        self.x = x
+        self.y = y
