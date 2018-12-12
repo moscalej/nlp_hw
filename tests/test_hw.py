@@ -9,7 +9,7 @@ class test_model_1(unittest.TestCase):
 
 class test_PreprocessTags(unittest.TestCase):
     def test_Preprocess(self):
-        a = PreprocessTags(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')
+        a = PreprocessTags(r'..\data\test.wtag')
         line = "hola_a chau_b '_'"
         result = (['*','*','hola', 'chau',"'",'<STOP>'],
                   ['*', '*', 'a', 'b',"'", '<STOP>'])
