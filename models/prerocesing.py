@@ -3,7 +3,12 @@ import pandas as pd
 
 class PreprocessTags:
 
-    def __init__(self, path):
+    def __init__(self):
+        self.x = pd.DataFrame()
+        self.y = pd.DataFrame()
+        self.path = str()
+
+    def load_data(self, path):
         x = []
         y = []
         with open(path, 'r') as fb:
@@ -16,19 +21,35 @@ class PreprocessTags:
         self.y = pd.DataFrame(y)
         self.x.fillna('<PAD>', inplace=True)
         self.y.fillna('<PAD>', inplace=True)
+        return self
+
+    def load_comp(self,path):
+        x = []
+        with open(path, 'r') as fb:
+            raw_file = fb.readlines()
+        for line in raw_file:
+            temp = line.strip().strip(" .")
+            sentence = ['*', '*'] +temp.split()
+
+            sentence.append('<STOP>')
+            x.append(sentence)
+        self.x = pd.DataFrame(x)
+        self.x.fillna('<PAD>', inplace=True)
+        return self
 
     def _create_sentence(self, line):
         sentence = ['*', '*']
         sentence_tag = ['*', '*']
-        line = line.strip(' ._.').split(' ')
+        line = line.strip().strip('? ._.').split(' ')
         for word in line:
             temp = word.split('_')
             sentence.append(temp[0])
             sentence_tag.append(temp[1])
         sentence.append('<STOP>')
         sentence_tag.append('<STOP>')
-        return sentence , sentence_tag
+        return sentence, sentence_tag
 
 
 if __name__ == '__main__':
-    a = PreprocessTags(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\train.wtag')
+    a = PreprocessTags().load_comp(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\comp.words')
+    b= PreprocessTags().load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')
