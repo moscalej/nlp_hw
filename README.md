@@ -1,13 +1,8 @@
 Authors :       Alex Finkelshtein : 307573378
                 Alejandro Moscoso : 332336908
 
-HW2:            github:  https://github.com/moscalej/Deep_learning_hw
+HW1:            github:  https://github.com/moscalej/nlp_hw
 
-Files:          report.pdf
-                Layer.py
-                Macros.py
-                mydnn.py
-                Nodes.py
-                main.py
-                README.md
-                requirements.txt
+Thinks todo
+ - creat basic
+Files:
