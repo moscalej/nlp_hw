@@ -4,11 +4,13 @@ import numpy as np
 
 class Ratnaparkhi:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, tests):
         assert isinstance(x, pd.Series)
         assert isinstance(y, pd.Series)
+        self.tests = tests
         self.x = x
         self.y = y
+        self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
 
     def f_100(self, place):
         return 1 if self.x[place] == 'base' and self.y[place] == 'Vt' else 0
@@ -33,25 +35,26 @@ class Ratnaparkhi:
         return 1 if self.x[place - 1] == 'the' and self.y[place] == 'Vt' else 0
 
     def f_107(self, place):
-        if place == self.y.size -1:
+        if place == self.y.size - 1:
             return 0
         return 1 if self.y[place + 1] == 'the' and self.y[place] == 'Vt' else 0
 
-    def fill_test(self, tests=range(8)):
+    def fill_test(self):
         """
 
         :param tests:
         :return: Return vector where each value is the value of a test
         """
+        for test in self.tests:
+            self.run_line_tests(test)
 
-        return np.array([self.run_line_tests(test) for test in tests])
+        return self.f_x_y
 
-    def run_line_tests(self, test_):
-        test = getattr(self, test_)
+    def run_line_tests(self, test_name):
+
+        test = getattr(self, test_name)
         for i in range(3, self.x.size):
-            if test(i) is 1: return 1
-        return 0
-
+            self.f_x_y.loc[test_name, i] = test(i)
 
 
 class CustomFeatures:

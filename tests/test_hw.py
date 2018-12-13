@@ -35,7 +35,7 @@ class test_rapnaparkhi(unittest.TestCase):
                        'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                        'VBP', 'DT', 'NN', 'IN', 'VBG','NN','Vt',
                        '<STOP>'])
-        r = Ratnaparkhi(x, y)
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
         print('')
         print(r.x[6],r.y[6])
         self.failUnlessEqual(r.f_100(6),0)
@@ -103,7 +103,7 @@ class test_rapnaparkhi(unittest.TestCase):
                        'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                        'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                        '<STOP>'])
-        r = Ratnaparkhi(x, y)
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
         a = r.run_line_tests('f_101')
         self.assertEqual(1,1)
     def test_features(self):
@@ -118,18 +118,18 @@ class test_rapnaparkhi(unittest.TestCase):
                        'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                        'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                        '<STOP>'])
-        r = Ratnaparkhi(x, y)
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
         print()
-        print(r.fill_test([f'f_10{x}'for x in range(8)]))
+        print(r.fill_test())
         self.assertEqual(r.fill_test([f'f_10{x}'for x in range(8)]),[0, 1, 1, 0, 0, 1, 0, 0])
 
-class test_Misseleanous(unittest.TestCase):
-    def test_iter_vect(self):
-        b = PreprocessTags().load_data(r'..\data\test.wtag')
-        tests = [f'f_10{x}' for x in range(8)]
-        result = pd.DataFrame(columns=tests, index = b.x.index)
-        for i in range(b.x.shape[0]):
-            result.loc[i,:] = Ratnaparkhi(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
+# class test_Misseleanous(unittest.TestCase):
+    # def test_iter_vect(self):
+    #     b = PreprocessTags().load_data(r'..\data\test.wtag')
+    #     tests = [f'f_10{x}' for x in range(8)]
+    #     result = pd.DataFrame(columns=tests, index = b.x.index)
+    #     for i in range(b.x.shape[0]):
+    #         result.loc[i,:] = Ratnaparkhi(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
 
 
 
