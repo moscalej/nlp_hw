@@ -23,8 +23,6 @@ class test_PreprocessTags(unittest.TestCase):
 
 class test_rapnaparkhi(unittest.TestCase):
 
-
-
     def test_rapna_100_107(self):
         x = pd.Series(['*', '*',
                        'The', 'Treasury', 'is', 'still', 'working', 'out',
@@ -92,6 +90,50 @@ class test_rapnaparkhi(unittest.TestCase):
         self.failUnlessEqual(r.f_107(place), 0)
         print(r.y[place2])
         self.failUnlessEqual(r.f_107(place2), 0)
+
+    def test_run_line(self):
+        x = pd.Series(['*', '*',
+                       'The', 'Treasury', 'is', 'still', 'working', 'out',
+                       'the', 'details', 'with', 'bank', 'trade', 'associations',
+                       'and', 'the', 'other', 'government', 'agencies',
+                       'that', 'have', 'a', 'hand', 'in', 'fighting', "preencounte", 'word', '<STOP>'])
+        y = pd.Series(['*', '*',
+                       'DT', 'NNP', 'VBZ', 'RB', 'VBG', 'RP',
+                       'DT', 'NNS', 'IN', 'NN', 'NN', 'NNS',
+                       'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
+                       'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
+                       '<STOP>'])
+        r = Ratnaparkhi(x, y)
+        a = r.run_line_tests('f_101')
+        self.assertEqual(1,1)
+    def test_features(self):
+        x = pd.Series(['*', '*',
+                       'The', 'Treasury', 'is', 'still', 'working', 'out',
+                       'the', 'details', 'with', 'bank', 'trade', 'associations',
+                       'and', 'the', 'other', 'government', 'agencies',
+                       'that', 'have', 'a', 'hand', 'in', 'fighting', "preencounte", 'word', '<STOP>'])
+        y = pd.Series(['*', '*',
+                       'DT', 'NNP', 'VBZ', 'RB', 'VBG', 'RP',
+                       'DT', 'NNS', 'IN', 'NN', 'NN', 'NNS',
+                       'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
+                       'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
+                       '<STOP>'])
+        r = Ratnaparkhi(x, y)
+        print()
+        print(r.fill_test([f'f_10{x}'for x in range(8)]))
+        self.assertEqual(r.fill_test([f'f_10{x}'for x in range(8)]),[0, 1, 1, 0, 0, 1, 0, 0])
+
+class test_Misseleanous(unittest.TestCase):
+    def test_iter_vect(self):
+        b = PreprocessTags().load_data(r'..\data\test.wtag')
+        tests = [f'f_10{x}' for x in range(8)]
+        result = pd.DataFrame(columns=tests, index = b.x.index)
+        for i in range(b.x.shape[0]):
+            result.loc[i,:] = Ratnaparkhi(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
+
+
+
+
 
 class test_model(unittest.TestCase):
     def test_question1(self):

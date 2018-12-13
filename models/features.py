@@ -33,6 +33,8 @@ class Ratnaparkhi:
         return 1 if self.x[place - 1] == 'the' and self.y[place] == 'Vt' else 0
 
     def f_107(self, place):
+        if place == self.y.size -1:
+            return 0
         return 1 if self.y[place + 1] == 'the' and self.y[place] == 'Vt' else 0
 
     def fill_test(self, tests=range(8)):
@@ -41,14 +43,15 @@ class Ratnaparkhi:
         :param tests:
         :return: Return vector where each value is the value of a test
         """
-        out = pd.DataFrame([self.x, self.y], columns=['Sentence', 'labels'])
-        for test in tests:
 
-            test_series = [0, 0]
-            for i in range(3, self.x.size):
-                pass
+        return np.array([self.run_line_tests(test) for test in tests])
 
-        return 'hello'
+    def run_line_tests(self, test_):
+        test = getattr(self, test_)
+        for i in range(3, self.x.size):
+            if test(i) is 1: return 1
+        return 0
+
 
 
 class CustomFeatures:
