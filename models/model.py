@@ -5,8 +5,8 @@ from models.features import Ratnaparkhi
 
 
 class Model:
-    def __init__(self, tests=[]):
-        self.test = tests
+    def __init__(self, tests):
+        self.tests = tests
         self.v = None
         self.x = None
         self.y = None
@@ -31,9 +31,11 @@ class Model:
         """
         assert isinstance(x,pd.DataFrame)
         assert isinstance(y, pd.DataFrame)
-        self._vectorize(x,y)
+        self.x = x
+        self.y = y
 
-        pass
+
+        return self._vectorize()
 
     def predict(self,x):
         """
@@ -43,10 +45,10 @@ class Model:
         """
         pass
 
-    def _vectorize(self, x, y):
+    def _vectorize(self):
 
-        self.vector_x = pd.DataFrame([
-            Ratnaparkhi(x_row[1], y_row[1])
-                .fill_test(self.test) for x_row, y_row in zip(x.iterrows(), y.iterrows())
-        ])
-        return self.vector_x
+        vectors = []
+        for i in range(self.x.shape[0]):
+            a= Ratnaparkhi(self.x.loc[i,:],self.y.loc[i,:],tests=self.tests)
+            vectors.append(a.fill_test())
+        return vectors

@@ -16,17 +16,20 @@ class Ratnaparkhi:
         return 1 if self.x[place] == 'base' and self.y[place] == 'Vt' else 0
 
     def f_101(self, place):
-        if len(self.x[place]) < 4: return 0
+        if len(self.x[place]) < 4:
+            return 0
         return 1 if self.x[place][-3:] == 'ing' and self.y[place] == 'VBG' else 0
 
     def f_102(self, place):
+        if len(self.x[place]) < 4:
+            return 0
         return 1 if self.x[place][:3] == 'pre' and self.y[place] == 'NN' else 0
 
     def f_103(self, place):
-        return 1 if np.min(self.y[[place, place - 1, place - 2]] == ['Vt', 'JJ', 'DT']) else 0
+        return 1 if self.y[place] == 'Vt' and self.y[place - 1] == 'JJ' and self.y[place - 2] == 'DT' else 0
 
     def f_104(self, place):
-        return 1 if np.min(self.y[[place, place - 1]] == ['Vt', 'JJ']) else 0
+        return 1 if self.y[place] == 'Vt' and self.y[place - 1] == 'JJ' else 0
 
     def f_105(self, place):
         return 1 if self.y[place] == 'Vt' else 0
@@ -47,14 +50,15 @@ class Ratnaparkhi:
         """
         for test in self.tests:
             self.run_line_tests(test)
-
         return self.f_x_y
 
     def run_line_tests(self, test_name):
 
         test = getattr(self, test_name)
+        list_1 =[0,0,0]
         for i in range(3, self.x.size):
-            self.f_x_y.loc[test_name, i] = test(i)
+            list_1.append(test(i))
+        self.f_x_y.loc[:, test_name] = list_1
 
 
 class CustomFeatures:
