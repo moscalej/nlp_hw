@@ -47,7 +47,7 @@ class test_PreprocessTags(unittest.TestCase):
 class test_rapnaparkhi(unittest.TestCase):
 
     def test_rapna_100_107(self):
-        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
         print('')
         print(r.x[6], r.y[6])
         self.failUnlessEqual(r.f_100(6, r.y.loc[6]), 0)
@@ -104,12 +104,12 @@ class test_rapnaparkhi(unittest.TestCase):
         self.failUnlessEqual(r.f_107(place2, r.y.loc[place2]), 0)
 
     def test_run_line(self):
-        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
         a = r.run_line_tests('f_101')
         # self.assertEqual(1,1)
 
     def test_features(self):
-        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
         print()
         print(r.fill_test())
 

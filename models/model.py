@@ -116,7 +116,7 @@ class Model:
         vectors = []
         matrix = []
         for i in range(self.x.shape[0]):
-            a = FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, y_corpus=self.tag_corpus)
+            a = FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, tag_corpus=self.tag_corpus)
             vectors.append(a.fill_test())
             matrix.append(a.f_x_y)
         self.vector_x_y = np.array(vectors, dtype=FinkMos)
