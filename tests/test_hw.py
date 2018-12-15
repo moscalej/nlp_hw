@@ -130,13 +130,6 @@ class test_rapnaparkhi(unittest.TestCase):
         self.assertAlmostEqual(value, 69.3147, 3)
 
 
-# class test_Misseleanous(unittest.TestCase):
-# def test_iter_vect(self):
-#     b = PreprocessTags().load_data(r'..\data\test.wtag')
-#     tests = [f'f_10{x}' for x in range(8)]
-#     result = pd.DataFrame(columns=tests, index = b.x.index)
-#     for i in range(b.x.shape[0]):
-#         result.loc[i,:] = FinkMos(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
 
 
 class test_model(unittest.TestCase):
