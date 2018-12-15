@@ -4,9 +4,10 @@ import numpy as np
 
 class Ratnaparkhi:
 
-    def __init__(self, x, y, tests):
+    def __init__(self, x, y, tests, y_corpus):
         assert isinstance(x, pd.Series)
         assert isinstance(y, pd.Series)
+        self.y_corpus = y_corpus
         self.tests = tests
         self.x = x
         self.y = y
@@ -55,10 +56,34 @@ class Ratnaparkhi:
     def run_line_tests(self, test_name):
 
         test = getattr(self, test_name)
-        list_1 =[0,0,0]
+        list_1 = [0, 0, 0]
         for i in range(3, self.x.size):
             list_1.append(test(i, self.y[i]))
         self.f_x_y.loc[:, test_name] = list_1
+
+    def create_vector(self, h_word, y):
+        results = []
+        for test in self.tests:
+            test = getattr(self, test)
+            results.append(test(h_word, y))
+        return np.array([results])  # todo check if np.array is faster or list
+
+    def non_linear_e(self, v, history_word_index):
+        results = []
+        for word in self.y_corpus:
+            results.append(self.create_vector(history_word_index, word))
+        f_matrix = np.concatenate(results, axis=0)
+        v_f = f_matrix @ v
+        e_val = np.sum(np.exp(v_f))
+        return e_val
+
+    def non_lineard_sentence(self, v):
+        end = self.y[self.y == '<STOP>'].index[0]
+        values = []
+        for word in range(2, end):
+            values.append(self.non_linear_e(v, word))
+        sentence_normal = np.sum(np.log(np.array(values)))
+        return sentence_normal
 
 
 class CustomFeatures:

@@ -51,10 +51,10 @@ class Model:
 
         vectors = []
         for i in range(self.x.shape[0]):
-            a= Ratnaparkhi(self.x.loc[i,:],self.y.loc[i,:],tests=self.tests)
+            a= Ratnaparkhi(self.x.loc[i,:],self.y.loc[i,:],tests=self.tests,y_corpus=self.y_values)
             vectors.append(a.fill_test())
         self.vector_x_y = np.array(vectors,dtype=Ratnaparkhi)
-        return vectors
+
 
     def _loss(self, v):
         positive = self._calculate_positive(v)
@@ -64,15 +64,27 @@ class Model:
         return positive + normalization + penalti
 
     def _calculate_positive(self, v):
-
+        """
+        This method will solve the positive part of the loss Function
+        for all the sentence
+        sum (sum (v * f(h_i^(k),y_i), for i=0 to max sise word), for k =0 to last sentence)
+        = sum( F dot v ) where F is concatenate matrix for all the vectors f
+        :param v:
+        :return:
+        """
+        assert isinstance(v, np.ndarray)
         matrix = []
         for mat in self.vector_x_y:
             assert isinstance(mat,Ratnaparkhi)
             matrix.append(mat.f_x_y)
-        matrix.x_y = np.hstack(matrix)
-
-
-        pass
+        matrix_x_y = np.concatenate(matrix, axis=0)
+        dot_m = matrix_x_y @ v
+        return dot_m.sum()
 
     def _calculate_nonlinear(self, v):
-        pass
+        assert isinstance(v, np.ndarray)
+        matrix = []
+        for mat in self.vector_x_y:
+            assert isinstance(mat, Ratnaparkhi)
+            matrix.append(mat.non_lineard_sentence(v))
+        return np.sum(matrix)

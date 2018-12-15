@@ -3,7 +3,24 @@ from models.prerocesing import PreprocessTags
 from models.features import Ratnaparkhi
 from models.model import Model
 import pandas as pd
+import numpy as np
 
+# y_tags = [ 'IN', 'NN', 'DT', 'PRP', 'CC', 'RB', 'NNS', 'JJ', '``', 'EX',
+#        'NNP', 'CD', 'VBG', 'UH', 'PRP$', 'WRB', 'WP', 'VBZ', 'RBR',
+#        '-LRB-', 'JJS', 'WDT', 'NNPS', 'TO', 'VBN', ':', 'JJR', 'VB', 'VBD',
+#        'RBS', 'PDT', 'MD', ',', 'VBP', 'POS', 'RP', '$', 'FW','NNP',
+#        "''", 'WP$', '.', '#', '-RRB-']
+x = pd.Series(['*', '*','The', 'Treasury', 'is', 'still', 'working', 'out',
+                       'the', 'details', 'with', 'bank', 'trade', 'associations',
+                       'and', 'the', 'other', 'government', 'agencies',
+                       'that', 'have', 'a', 'hand', 'in', 'fighting', "preencounte", 'word', '<STOP>'])
+y = pd.Series(['*', '*',
+               'DT', 'NNP', 'VBZ', 'RB', 'VBG', 'RP',
+               'DT', 'NNS', 'IN', 'NN', 'NN', 'NNS',
+               'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
+               'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
+               '<STOP>'])
+y_tags = y.unique()
 
 class test_model_1(unittest.TestCase):
     def test_fit(self):
@@ -27,18 +44,8 @@ class test_PreprocessTags(unittest.TestCase):
 class test_rapnaparkhi(unittest.TestCase):
 
     def test_rapna_100_107(self):
-        x = pd.Series(['*', '*',
-                       'The', 'Treasury', 'is', 'still', 'working', 'out',
-                       'the', 'details', 'with', 'bank', 'trade', 'associations',
-                       'and', 'the', 'other', 'government', 'agencies',
-                       'that', 'have', 'a', 'hand', 'in', 'fighting',"preencounte",'word', '<STOP>'])
-        y = pd.Series(['*', '*',
-                       'DT', 'NNP', 'VBZ', 'RB', 'VBG', 'RP',
-                       'DT', 'NNS', 'IN', 'NN', 'NN', 'NNS',
-                       'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
-                       'VBP', 'DT', 'NN', 'IN', 'VBG','NN','Vt',
-                       '<STOP>'])
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
+
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
         print('')
         print(r.x[6],r.y[6])
         self.failUnlessEqual(r.f_100(6, r.y.loc[6]), 0)
@@ -95,23 +102,18 @@ class test_rapnaparkhi(unittest.TestCase):
         self.failUnlessEqual(r.f_107(place2, r.y.loc[place2]), 0)
 
     def test_run_line(self):
-        x = pd.Series(['*', '*',
-                       'The', 'Treasury', 'is', 'still', 'working', 'out',
-                       'the', 'details', 'with', 'bank', 'trade', 'associations',
-                       'and', 'the', 'other', 'government', 'agencies',
-                       'that', 'have', 'a', 'hand', 'in', 'fighting', "preencounte", 'word', '<STOP>'])
-        y = pd.Series(['*', '*',
-                       'DT', 'NNP', 'VBZ', 'RB', 'VBG', 'RP',
-                       'DT', 'NNS', 'IN', 'NN', 'NN', 'NNS',
-                       'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
-                       'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
-                       '<STOP>'])
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
+
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
         a = r.run_line_tests('f_101')
         # self.assertEqual(1,1)
     def test_features(self):
-        x = pd.Series(['*', '*',
-                       'The', 'Treasury', 'is', 'still', 'working', 'out',
+
+        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
+        print()
+        print(r.fill_test())
+
+    def test_normalize(self):
+        x = pd.Series(['*', '*', 'The', 'Treasury', 'is', 'still', 'working', 'out',
                        'the', 'details', 'with', 'bank', 'trade', 'associations',
                        'and', 'the', 'other', 'government', 'agencies',
                        'that', 'have', 'a', 'hand', 'in', 'fighting', "preencounte", 'word', '<STOP>'])
@@ -121,10 +123,11 @@ class test_rapnaparkhi(unittest.TestCase):
                        'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                        'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                        '<STOP>'])
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
-        print()
-        print(r.fill_test())
-        # self.assertEqual(r.fill_test(),[0, 1, 1, 0, 0, 1, 0, 0])
+        y_tags = y.unique()
+        r = Ratnaparkhi(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
+        value = r.non_lineard_sentence(np.zeros([8]))
+        self.assertAlmostEqual(value, 69.3147,3)
+
 
 # class test_Misseleanous(unittest.TestCase):
     # def test_iter_vect(self):
