@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from models.features import FinkMos
@@ -7,13 +6,14 @@ from scipy.optimize import minimize
 class Model:
     def __init__(self, tests):
         self.tests = tests
-        self.v = None
+        self.v = np.ones(len(tests))  # TODO: init wisely ?
         self.x = None
         self.y = None
-        self.vector_x_y=None
+        self.vector_x_y = None
         self.tag_corpus = None
+        self.tag_corpus_tokenized = None
 
-    def fit(self,x , y, learning_rate=0.02,x_val=None , y_val = None):
+    def fit(self, x, y, learning_rate=0.02, x_val=None, y_val=None):
         """
         Fit will train the Model
             - Encoding
@@ -30,23 +30,27 @@ class Model:
         :param y_val:[row = sentence tag , col = Word tag]
         :return: metrics dict {} $# TODO check witch metrics we need
         """
-        assert isinstance(x,pd.DataFrame)
+        assert isinstance(x, pd.DataFrame)
         assert isinstance(y, pd.DataFrame)
         self.x = x
         self.y = y
-        self.tag_corpus = pd.unique(y.values.ravel('K')) # TODO remove '*' , '<PAD>' , '<STOP>"
+        self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._vectorize()
-        v = np.zeros([len(self.tests)])
-        v_tag = minimize(self._loss,v, method='BFGS',options =dict(disp =True))
 
-        return v_tag
+        return
 
-    def predict(self,x):
+    def predict(self, sentence):
         """
         This will work with the Viterbi
         :param x:
         :return:
         """
+        # validity check
+        tokenized_ans = self._viterbi(sentence, self.tag_corpus_tokenized)
+        # translate to tags
+        tag_ans = tokenized_ans  # TODO
+        return tag_ans
+
         pass
 
     def eval(self, next_tag, word_num, previous_tags, sentence):
@@ -65,12 +69,54 @@ class Model:
         """
 
 
+
+    def _viterbi(self, sentence, all_tags):
+        """
+        :param sentence: List of words
+        :type sentence: List
+        :param all_tags: List of possible tags (ordered in the same order used for the learning) #TODO: consider passing num of tags
+        :type all_tags: List
+        :return: List of tags
+        :rtype: List
+        """
+        num_words = len(sentence)
+        num_tags = len(all_tags)
+        dims = (num_words, num_tags, num_tags)
+        p_table = np.empty(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
+        # ending in tags u,v at position k
+        p_table[0, 0, 0] = 1  # init
+        bp_table = np.empty(dims, dtype=np.int8)
+        answer = [None] * num_words
+        for k in range(num_words):
+            if k == 1:
+                tags1 = [0]
+            elif k < len(sentence) - 2:
+                tags1 = all_tags
+            for t1 in range(len(tags1)):
+                for t2 in range(len(all_tags)):
+                    if k == 1 or k == 2:  # 0 -> '*' tag
+                        w = [0]
+                    else:
+                        w = range(len(all_tags))
+                    options = p_table[k - 1, w, t1] * self.eval(next_tag=t2, word_num=k,
+                                                                previous_tags=[w, t1],
+                                                                sentence=sentence)
+                    bp_table[k, t1, t2] = np.argmax(options)
+                    p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
+        answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
+                                                                        bp_table[num_words - 1, :, :].shape)
+
+        for k in reversed(range(num_words - 2)):
+            answer[k] = bp_table[k + 2, answer[k + 1], answer[k + 2]]
+
+        return answer
+
     def _vectorize(self):
 
         vectors = []
         matrix = []
         for i in range(self.x.shape[0]):
-            a= FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, tag_corpus=self.tag_corpus)
+            a = FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, y_corpus=self.tag_corpus)
             vectors.append(a.fill_test())
             matrix.append(a.f_x_y)
         self.vector_x_y = np.array(vectors, dtype=FinkMos)
@@ -78,13 +124,12 @@ class Model:
         self.lin_loss_matrix_x_y = np.concatenate(matrix, axis=0)
         # is a sentence
 
-
     def _loss(self, v):
         positive = self._calculate_positive(v)
         non_linear = self._calculate_nonlinear(v)
         penalty = 0.5 * np.linalg.norm(v)
 
-        return -1 * positive + non_linear + penalty
+        return positive - non_linear + penalty
 
     def _calculate_positive(self, v):
         """
