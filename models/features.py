@@ -90,6 +90,8 @@ class FinkMos:
         return sentence_normal
 
 
+
+
 class CustomFeatures:
     def __init__(self, x, y):
         assert isinstance(x, pd.Series)

@@ -83,7 +83,7 @@ def feature_factory(previous_tags, word_num, sentence, next_tag):
     feature_num = 10
     print(next_tag)
     return 10 * [(next_tag % 2)]
-
+from sklearn.ensemble import RandomForestClassifier
 
 
 

@@ -145,6 +145,7 @@ class test_model(unittest.TestCase):
         model1 = Model(tests)
         data = PreprocessTags().load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')
         a = model1.fit(data.x, data.y)
+        print (a)
 
     def test_question1(self):
         """
