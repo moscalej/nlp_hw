@@ -1,6 +1,6 @@
 import unittest
 from models.prerocesing import PreprocessTags
-from models.features import Ratnaparkhi
+from models.features import FinkMos
 from models.model import Model
 import pandas as pd
 import numpy as np
@@ -45,7 +45,7 @@ class test_rapnaparkhi(unittest.TestCase):
 
     def test_rapna_100_107(self):
 
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
         print('')
         print(r.x[6],r.y[6])
         self.failUnlessEqual(r.f_100(6, r.y.loc[6]), 0)
@@ -103,12 +103,12 @@ class test_rapnaparkhi(unittest.TestCase):
 
     def test_run_line(self):
 
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
         a = r.run_line_tests('f_101')
         # self.assertEqual(1,1)
     def test_features(self):
 
-        r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)],y_corpus=y_tags)
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
         print()
         print(r.fill_test())
 
@@ -124,8 +124,8 @@ class test_rapnaparkhi(unittest.TestCase):
                        'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                        '<STOP>'])
         y_tags = y.unique()
-        r = Ratnaparkhi(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
-        value = r.non_lineard_sentence(np.zeros([8]))
+        r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], y_corpus=y_tags)
+        value = r.sentence_non_lineard_loss(np.zeros([8]))
         self.assertAlmostEqual(value, 69.3147,3)
 
 
@@ -135,7 +135,7 @@ class test_rapnaparkhi(unittest.TestCase):
     #     tests = [f'f_10{x}' for x in range(8)]
     #     result = pd.DataFrame(columns=tests, index = b.x.index)
     #     for i in range(b.x.shape[0]):
-    #         result.loc[i,:] = Ratnaparkhi(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
+    #         result.loc[i,:] = FinkMos(b.x.loc[i,:], b.y.loc[i,:]).fill_test(tests)
 
 
 

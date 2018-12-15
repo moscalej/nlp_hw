@@ -2,15 +2,16 @@ import pandas as pd
 import numpy as np
 
 
-class Ratnaparkhi:
+class FinkMos:
 
-    def __init__(self, x, y, tests, y_corpus):
+    def __init__(self, x, y, tests, tag_corpus):
         assert isinstance(x, pd.Series)
         assert isinstance(y, pd.Series)
-        self.y_corpus = y_corpus
+        self.tag_corpus = tag_corpus
         self.tests = tests
         self.x = x
         self.y = y
+        self.f_matrix = None
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
 
     def f_100(self, place, y):
@@ -61,27 +62,30 @@ class Ratnaparkhi:
             list_1.append(test(i, self.y[i]))
         self.f_x_y.loc[:, test_name] = list_1
 
-    def create_vector(self, h_word, y):
+    def to_feature_space(self, history_word_index, y):
         results = []
         for test in self.tests:
             test = getattr(self, test)
-            results.append(test(h_word, y))
+            results.append(test(history_word_index, y))
         return np.array([results])  # todo check if np.array is faster or list
 
-    def non_linear_e(self, v, history_word_index):
-        results = []
-        for word in self.y_corpus:
-            results.append(self.create_vector(history_word_index, word))
-        f_matrix = np.concatenate(results, axis=0)
-        v_f = f_matrix @ v
+    def sentence_non_linear_loss_inner(self, v, history_word_index):
+        if self.f_matrix is None:
+            results = []
+            for word in self.tag_corpus:
+                results.append(self.to_feature_space(history_word_index, word))
+            f_matrix = np.concatenate(results, axis=0)
+            self.f_matrix = f_matrix
+
+        v_f = self.f_matrix @ v
         e_val = np.sum(np.exp(v_f))
         return e_val
 
-    def non_lineard_sentence(self, v):
+    def sentence_non_lineard_loss(self, v):
         end = self.y[self.y == '<STOP>'].index[0]
         values = []
         for word in range(2, end):
-            values.append(self.non_linear_e(v, word))
+            values.append(self.sentence_non_linear_loss_inner(v, word))
         sentence_normal = np.sum(np.log(np.array(values)))
         return sentence_normal
 

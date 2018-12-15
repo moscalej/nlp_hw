@@ -1,7 +1,7 @@
 
 import pandas as pd
 import numpy as np
-from models.features import Ratnaparkhi
+from models.features import FinkMos
 
 
 class Model:
@@ -11,7 +11,7 @@ class Model:
         self.x = None
         self.y = None
         self.vector_x_y=None
-        self.y_values = None
+        self.tag_corpus = None
 
     def fit(self,x , y, learning_rate=0.02,x_val=None , y_val = None):
         """
@@ -34,7 +34,7 @@ class Model:
         assert isinstance(y, pd.DataFrame)
         self.x = x
         self.y = y
-        self.y_values = pd.unique(y.values.ravel('K'))
+        self.tag_corpus = pd.unique(y.values.ravel('K')) # TODO remove '*' , '<PAD>' , '<STOP>"
         self._vectorize()
 
         return
@@ -66,18 +66,23 @@ class Model:
     def _vectorize(self):
 
         vectors = []
+        matrix = []
         for i in range(self.x.shape[0]):
-            a= Ratnaparkhi(self.x.loc[i,:],self.y.loc[i,:],tests=self.tests,y_corpus=self.y_values)
+            a= FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, y_corpus=self.tag_corpus)
             vectors.append(a.fill_test())
-        self.vector_x_y = np.array(vectors,dtype=Ratnaparkhi)
+            matrix.append(a.f_x_y)
+        self.vector_x_y = np.array(vectors, dtype=FinkMos)
+
+        self.lin_loss_matrix_x_y = np.concatenate(matrix, axis=0)
+        # is a sentence
 
 
     def _loss(self, v):
         positive = self._calculate_positive(v)
-        normalization = self._calculate_nonlinear(v)
-        penalti = 0.5 * np.linalg.norm(v)
+        non_linear = self._calculate_nonlinear(v)
+        penalty = 0.5 * np.linalg.norm(v)
 
-        return positive + normalization + penalti
+        return positive - non_linear + penalty
 
     def _calculate_positive(self, v):
         """
@@ -89,18 +94,14 @@ class Model:
         :return:
         """
         assert isinstance(v, np.ndarray)
-        matrix = []
-        for mat in self.vector_x_y:
-            assert isinstance(mat,Ratnaparkhi)
-            matrix.append(mat.f_x_y)
-        matrix_x_y = np.concatenate(matrix, axis=0)
-        dot_m = matrix_x_y @ v
+
+        dot_m = self.lin_loss_matrix_x_y @ v
         return dot_m.sum()
 
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
         matrix = []
         for mat in self.vector_x_y:
-            assert isinstance(mat, Ratnaparkhi)
-            matrix.append(mat.non_lineard_sentence(v))
+            assert isinstance(mat, FinkMos)
+            matrix.append(mat.sentence_non_lineard_loss(v))
         return np.sum(matrix)
