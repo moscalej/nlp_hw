@@ -43,6 +43,8 @@ def viterbi(model, sentence, all_tags):
                 bp_table[k, t1, t2] = np.argmax(options)
                 print("bp_table[k, t1, t2]")
                 print(bp_table[k, t1, t2])
+                print("options[bp_table[k, t1, t2]]")
+                print(options[bp_table[k, t1, t2]])
                 p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
 
     answer[num_words - 1], answer[num_words] = np.argmax(bp_table[num_words, :, :])
@@ -64,17 +66,21 @@ class DummyModel:
         res = []
         for tag in enumerate(previous_tags[0]):
             q_val = self.q(next_tag, word_num, [tag, previous_tags[1]], sentence, self.feature_factory)
-            res += [np.dot(self.weights, q_val)]
+            print("q_val")
+            print(q_val)
+            res += [(self.weights @ q_val)]
         return res
 
 
 def q_func(next_tag, word_num, previous_tags, sentence, feature_factory):
     ans = feature_factory(previous_tags, word_num, sentence, next_tag)
-    return previous_tags[0]
+
+    return ans
 
 
 def feature_factory(previous_tags, word_num, sentence, next_tag):
     feature_num = 10
+    print(next_tag)
     return 10 * [(next_tag % 2)]
 
 
