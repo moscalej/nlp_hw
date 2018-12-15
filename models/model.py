@@ -47,6 +47,22 @@ class Model:
         """
         pass
 
+    def eval(self, next_tag, word_num, previous_tags, sentence):
+        """
+
+        :param next_tag: Next tag
+        :type next_tag: int
+        :param word_num: Number of word in the sentence
+        :type word_num: int
+        :param previous_tags: [t_-2, t_-1] first index list of -2 position tag, second tag for -1 position tag
+        :type previous_tags: [list, int]
+        :param sentence: List of words
+        :type sentence: List of strings
+        :return: List of Probabilities of next_tag
+        :rtype: List of Floats
+        """
+
+
     def _vectorize(self):
 
         vectors = []

@@ -15,18 +15,24 @@ def viterbi(model, sentence, all_tags):
     num_words = len(sentence)
     num_tags = len(all_tags)
     dims = (num_words, num_tags, num_tags)
-    p_table = np.empty(dims, dtype=np.int8)  # pi(k,u,v) - maximum probability of tag sequence
+    p_table = np.empty(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
     # ending in tags u,v at position k
     p_table[0, 0, 0] = 1  # init
     bp_table = np.empty(dims, dtype=np.int8)
     answer = [None] * num_words
     for k in range(num_words):
+        print("k")
+        print(k)
         if k == 1:
             tags1 = [0]
         elif k < len(sentence) - 2:
             tags1 = all_tags
         for t1 in range(len(tags1)):
             for t2 in range(len(all_tags)):
+                print("t1")
+                print(t1)
+                print("t2")
+                print(t2)
                 if k == 1 or k == 2:  # 0 -> '*' tag
                     w = [0]
                 else:
@@ -55,8 +61,10 @@ class DummyModel:
         self.feature_factory = feature_factory
 
     def eval(self, next_tag, word_num, previous_tags, sentence):
-        q_val = self.q(next_tag, word_num, previous_tags, sentence, self.feature_factory)
-        res = np.dot(self.weights, q_val)
+        res = []
+        for tag in enumerate(previous_tags[0]):
+            q_val = self.q(next_tag, word_num, [tag, previous_tags[1]], sentence, self.feature_factory)
+            res += [np.dot(self.weights, q_val)]
         return res
 
 
@@ -65,9 +73,11 @@ def q_func(next_tag, word_num, previous_tags, sentence, feature_factory):
     return previous_tags[0]
 
 
-def feature_factory(previous_tags, word_num, sentence, tag):
+def feature_factory(previous_tags, word_num, sentence, next_tag):
     feature_num = 10
-    return 10 * [(tag % 2)]
+    return 10 * [(next_tag % 2)]
+
+
 
 
 if __name__ == '__main__':
@@ -75,5 +85,5 @@ if __name__ == '__main__':
     feature_num = 10
     num_tags = 10
     weights = np.random.rand(feature_num)
-    model = DummyModel(weights, q_func)
+    model = DummyModel(weights, q_func, feature_factory)
     result = viterbi(model, sentence=["the", "dog", "barks"], all_tags=range(num_tags))
