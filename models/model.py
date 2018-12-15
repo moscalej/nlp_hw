@@ -12,6 +12,8 @@ class Model:
         self.vector_x_y = None
         self.tag_corpus = None
         self.tag_corpus_tokenized = None
+        self.strin2token =dict()
+        self.token2string = dict()
 
     def fit(self, x, y, learning_rate=0.02, x_val=None, y_val=None):
         """
@@ -39,35 +41,33 @@ class Model:
 
         return
 
-    def predict(self, sentence):
+    def predict(self, x):
         """
         This will work with the Viterbi
-        :param x:
-        :return:
+        :param x: [sentences * words]
+        :return: matrix [ sentence_tags * words]
         """
         # validity check
-        tokenized_ans = self._viterbi(sentence, self.tag_corpus_tokenized)
+        tokenized_ans = self._viterbi(x, self.tag_corpus_tokenized)
         # translate to tags
         tag_ans = tokenized_ans  # TODO
         return tag_ans
 
         pass
 
-    def eval(self, next_tag, word_num, previous_tags, sentence):
+    def model_function(self, next_tag, word_num, previous_tags, sentence):
         """
-
         :param next_tag: Next tag
         :type next_tag: int
         :param word_num: Number of word in the sentence
         :type word_num: int
         :param previous_tags: [t_-2, t_-1] first index list of -2 position tag, second tag for -1 position tag
-        :type previous_tags: [list, int]
+        :type previous_tags: [int, int]
         :param sentence: List of words
-        :type sentence: List of strings
+        :type sentence: np.array ['*','*', 'first','second', ..... ,'<STOP>', '<PAD>']
         :return: List of Probabilities of next_tag
         :rtype: List of Floats
         """
-
 
 
     def _viterbi(self, sentence, all_tags):
@@ -83,6 +83,8 @@ class Model:
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
         p_table = np.empty(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
+
+
         # ending in tags u,v at position k
         p_table[0, 0, 0] = 1  # init
         bp_table = np.empty(dims, dtype=np.int8)
@@ -98,9 +100,8 @@ class Model:
                         w = [0]
                     else:
                         w = range(len(all_tags))
-                    options = p_table[k - 1, w, t1] * self.eval(next_tag=t2, word_num=k,
-                                                                previous_tags=[w, t1],
-                                                                sentence=sentence)
+                    options = p_table[k - 1, w, t1] * self.model_function(next_tag=t2, word_num=k,
+                                                                          previous_tags=[w, t1], sentence=sentence)
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),

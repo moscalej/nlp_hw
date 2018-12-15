@@ -31,9 +31,8 @@ def viterbi(model, sentence, all_tags):
                     w = [0]
                 else:
                     w = range(len(all_tags))
-                options = p_table[k - 1, w, t1] * model.eval(next_tag=t2, word_num=k,
-                                                             previous_tags=[w, t1],
-                                                             sentence=sentence)
+                options = p_table[k - 1, w, t1] * model.model_function(next_tag=t2, word_num=k, previous_tags=[w, t1],
+                                                                       sentence=sentence)
                 bp_table[k, t1, t2] = np.argmax(options)
                 p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
     answer[num_words - 2], answer[num_words-1] = np.unravel_index(bp_table[num_words-1, :, :].argmax(),
