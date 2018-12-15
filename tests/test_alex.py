@@ -9,3 +9,4 @@ class test_model(unittest.TestCase):
         model = DummyModel(weights, q_func, feature_factory)
         result = viterbi(model, sentence=["the", "dog", "barks"], all_tags=range(num_tags))
 
+    def test_viterbi(self):

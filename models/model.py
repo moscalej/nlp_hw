@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from models.features import FinkMos
-
+from scipy.optimize import minimize
 
 class Model:
     def __init__(self, tests):
@@ -36,8 +36,10 @@ class Model:
         self.y = y
         self.tag_corpus = pd.unique(y.values.ravel('K')) # TODO remove '*' , '<PAD>' , '<STOP>"
         self._vectorize()
+        v = np.zeros([len(self.tests)])
+        v_tag = minimize(self._loss,v, method='BFGS',options =dict(disp =True))
 
-        return
+        return v_tag
 
     def predict(self,x):
         """
@@ -68,7 +70,7 @@ class Model:
         vectors = []
         matrix = []
         for i in range(self.x.shape[0]):
-            a= FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, y_corpus=self.tag_corpus)
+            a= FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, tag_corpus=self.tag_corpus)
             vectors.append(a.fill_test())
             matrix.append(a.f_x_y)
         self.vector_x_y = np.array(vectors, dtype=FinkMos)
@@ -82,7 +84,7 @@ class Model:
         non_linear = self._calculate_nonlinear(v)
         penalty = 0.5 * np.linalg.norm(v)
 
-        return positive - non_linear + penalty
+        return -1 * positive + non_linear + penalty
 
     def _calculate_positive(self, v):
         """
