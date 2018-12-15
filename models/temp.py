@@ -46,8 +46,9 @@ def viterbi(model, sentence, all_tags):
                 print("options[bp_table[k, t1, t2]]")
                 print(options[bp_table[k, t1, t2]])
                 p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
+    answer[num_words - 2], answer[num_words-1] = np.unravel_index(bp_table[num_words-1, :, :].argmax(),
+                                                                  bp_table[num_words-1, :, :].shape)
 
-    answer[num_words - 1], answer[num_words] = np.argmax(bp_table[num_words, :, :])
     for k in reversed(range(num_words - 2)):
         answer[k] = bp_table[k + 2, answer[k + 1], answer[k + 2]]
 
@@ -93,3 +94,4 @@ if __name__ == '__main__':
     weights = np.random.rand(feature_num)
     model = DummyModel(weights, q_func, feature_factory)
     result = viterbi(model, sentence=["the", "dog", "barks"], all_tags=range(num_tags))
+    print(result)
