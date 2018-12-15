@@ -21,18 +21,12 @@ def viterbi(model, sentence, all_tags):
     bp_table = np.empty(dims, dtype=np.int8)
     answer = [None] * num_words
     for k in range(num_words):
-        print("k")
-        print(k)
         if k == 1:
             tags1 = [0]
         elif k < len(sentence) - 2:
             tags1 = all_tags
         for t1 in range(len(tags1)):
             for t2 in range(len(all_tags)):
-                print("t1")
-                print(t1)
-                print("t2")
-                print(t2)
                 if k == 1 or k == 2:  # 0 -> '*' tag
                     w = [0]
                 else:
@@ -41,10 +35,6 @@ def viterbi(model, sentence, all_tags):
                                                              previous_tags=[w, t1],
                                                              sentence=sentence)
                 bp_table[k, t1, t2] = np.argmax(options)
-                print("bp_table[k, t1, t2]")
-                print(bp_table[k, t1, t2])
-                print("options[bp_table[k, t1, t2]]")
-                print(options[bp_table[k, t1, t2]])
                 p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
     answer[num_words - 2], answer[num_words-1] = np.unravel_index(bp_table[num_words-1, :, :].argmax(),
                                                                   bp_table[num_words-1, :, :].shape)
