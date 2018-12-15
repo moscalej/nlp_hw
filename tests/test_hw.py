@@ -41,58 +41,58 @@ class test_rapnaparkhi(unittest.TestCase):
         r = Ratnaparkhi(x, y,tests=[f'f_10{x}'for x in range(8)])
         print('')
         print(r.x[6],r.y[6])
-        self.failUnlessEqual(r.f_100(6),0)
+        self.failUnlessEqual(r.f_100(6, r.y.loc[6]), 0)
         # Test 101
         print(r.x[24],r.y[24])
-        self.failUnlessEqual(r.f_101(24), 1)
+        self.failUnlessEqual(r.f_101(24, r.y.loc[24]), 1)
         print(r.x[4], r.y[4])
-        self.failUnlessEqual(r.f_101(4), 0)
+        self.failUnlessEqual(r.f_101(4, r.y.loc[4]), 0)
 
         # Test 102
         print(r.x[25], r.y[25])
-        self.failUnlessEqual(r.f_102(25), 1)
+        self.failUnlessEqual(r.f_102(25, r.y.loc[25]), 1)
         print(r.x[4], r.y[4])
-        self.failUnlessEqual(r.f_102(4), 0)
+        self.failUnlessEqual(r.f_102(4, r.y.loc[4]), 0)
 
         # Test 103
         place = 7
         place2 =3
         print( r.y[[place, place - 1, place - 2]])
-        self.failUnlessEqual(r.f_103(place), 0)
+        self.failUnlessEqual(r.f_103(place, r.y.loc[place]), 0)
         print(r.x[4], r.y[4])
-        self.failUnlessEqual(r.f_103(4), 0)
+        self.failUnlessEqual(r.f_103(place2, r.y.loc[place2]), 0)
 
         # Test 104
         place = 5
         place2 = 6
         print(r.y[[place, place - 1]])
-        self.failUnlessEqual(r.f_104(place), 0)
+        self.failUnlessEqual(r.f_104(place, r.y.loc[place]), 0)
         print(r.x[4], r.y[4])
-        self.failUnlessEqual(r.f_104(4), 0)
+        self.failUnlessEqual(r.f_104(place2, r.y.loc[place2]), 0)
 
         # Test 105
         place = 26
         place2 = 6
         print(r.y[place],105)
-        self.failUnlessEqual(r.f_105(place), 1)
+        self.failUnlessEqual(r.f_105(place, r.y.loc[place]), 1)
         print(r.y[place2])
-        self.failUnlessEqual(r.f_105(4), 0)
+        self.failUnlessEqual(r.f_105(place2, r.y.loc[place2]), 0)
 
         # Test 106
         place = 26
         place2 = 6
         print(r.y[place])
-        self.failUnlessEqual(r.f_106(place), 0)
+        self.failUnlessEqual(r.f_106(place, r.y.loc[place]), 0)
         print(r.y[place2])
-        self.failUnlessEqual(r.f_106(place2), 0)
+        self.failUnlessEqual(r.f_106(place2, r.y.loc[place2]), 0)
 
         # Test 107
         place = 26
         place2 = 6
         print(r.y[place])
-        self.failUnlessEqual(r.f_107(place), 0)
+        self.failUnlessEqual(r.f_107(place, r.y.loc[place]), 0)
         print(r.y[place2])
-        self.failUnlessEqual(r.f_107(place2), 0)
+        self.failUnlessEqual(r.f_107(place2, r.y.loc[place2]), 0)
 
     def test_run_line(self):
         x = pd.Series(['*', '*',

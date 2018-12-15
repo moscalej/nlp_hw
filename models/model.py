@@ -10,7 +10,8 @@ class Model:
         self.v = None
         self.x = None
         self.y = None
-        self.vector_x=None
+        self.vector_x_y=None
+        self.y_values = None
 
     def fit(self,x , y, learning_rate=0.02,x_val=None , y_val = None):
         """
@@ -33,9 +34,10 @@ class Model:
         assert isinstance(y, pd.DataFrame)
         self.x = x
         self.y = y
+        self.y_values = pd.unique(y.values.ravel('K'))
+        self._vectorize()
 
-
-        return self._vectorize()
+        return
 
     def predict(self,x):
         """
@@ -51,4 +53,26 @@ class Model:
         for i in range(self.x.shape[0]):
             a= Ratnaparkhi(self.x.loc[i,:],self.y.loc[i,:],tests=self.tests)
             vectors.append(a.fill_test())
+        self.vector_x_y = np.array(vectors,dtype=Ratnaparkhi)
         return vectors
+
+    def _loss(self, v):
+        positive = self._calculate_positive(v)
+        normalization = self._calculate_nonlinear(v)
+        penalti = 0.5 * np.linalg.norm(v)
+
+        return positive + normalization + penalti
+
+    def _calculate_positive(self, v):
+
+        matrix = []
+        for mat in self.vector_x_y:
+            assert isinstance(mat,Ratnaparkhi)
+            matrix.append(mat.f_x_y)
+        matrix.x_y = np.hstack(matrix)
+
+
+        pass
+
+    def _calculate_nonlinear(self, v):
+        pass
