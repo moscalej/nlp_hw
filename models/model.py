@@ -38,6 +38,7 @@ class Model:
         self.y = y
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._vectorize()
+        self.v = minimize(self._loss,np.zeros(len(self.tests)))
 
         return
 
