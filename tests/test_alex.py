@@ -16,9 +16,5 @@ class test_model(unittest.TestCase):
         tests = [f'f_10{x}' for x in range(8)]
         model1 = Model(tests)
         model1.tag_corpus_tokenized = range(5)
-        model1.predict(["*", "*", "the", "dog", "barks", "<STOP>"])
-
-
-
-
-        
+        answer = model1.predict(["*", "*", "the", "dog", "barks", "<STOP>"])
+        print(answer)

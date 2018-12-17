@@ -48,8 +48,13 @@ class Model:
         :param x: [sentences * words]
         :return: matrix [ sentence_tags * words]
         """
+        # TODO: decide about sentence format (['*','*'..])
         # validity check
+        # check x type
+        # check sentence format
+        #
         tokenized_ans = self._viterbi(x, self.tag_corpus_tokenized)
+
         # translate to tags
         tag_ans = tokenized_ans  # TODO
         return tag_ans
@@ -75,8 +80,8 @@ class Model:
         """
         :param sentence: List of words
         :type sentence: List
-        :param all_tags: List of possible tags (ordered in the same order used for the learning) #TODO: consider passing num of tags
-        :type all_tags: List
+        :param all_tags: tokenized tags
+        :type all_tags: List TODO: np.array??
         :return: List of tags
         :rtype: List
         """
@@ -101,12 +106,15 @@ class Model:
                         w = [0]
                     else:
                         w = range(len(all_tags))
-                    options = p_table[k - 1, w, t1] * self.model_function(next_tag=t2, word_num=k,
-                                                                          previous_tags=[w, t1], sentence=sentence)
+                    options = np.array([])
+                    for w_ in w:
+                        options += [p_table[k - 1, w_, t1] * self.model_function(next_tag=t2, word_num=k,
+                                                                          previous_tags=[w_, t1], sentence=sentence)]
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
-                                                                        bp_table[num_words - 1, :, :].shape)
+                                                                        bp_table[num_words - 1, :, :].shape) # argmax()
+        # returns index of flatten array, unravel() gives the original 2d indices
 
         for k in reversed(range(num_words - 2)):
             answer[k] = bp_table[k + 2, answer[k + 1], answer[k + 2]]
