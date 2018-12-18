@@ -3,6 +3,7 @@ import numpy as np
 from models.features import FinkMos
 from scipy.optimize import minimize
 
+
 class Model:
     def __init__(self, tests):
         self.tests = tests
@@ -12,7 +13,7 @@ class Model:
         self.vector_x_y = None
         self.tag_corpus = None
         self.tag_corpus_tokenized = None
-        self.strin2token =dict()
+        self.strin2token = dict()
         self.token2string = dict()
 
     def fit(self, x, y, learning_rate=0.02, x_val=None, y_val=None):
@@ -38,7 +39,7 @@ class Model:
         self.y = y
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._vectorize()
-        self.v = minimize(self._loss,np.zeros(len(self.tests)))
+        self.v = minimize(self._loss, np.zeros(len(self.tests)))
 
         return
 
@@ -74,9 +75,18 @@ class Model:
         :return: List of Probabilities of next_tag
         :rtype: List of Floats
         """
+        y_1 = self.token2string[previous_tags[0]]
+        y_2 = self.token2string[previous_tags[1]]
+        y = self.token2string[next_tag]
 
+        fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
+        f = fm.to_feature_space2(word_num, y, y_1, y_2)
+        linear = f @ self.v
+        non_linear = fm.sentence_non_lineard_loss(self.v)
+        result = linear - non_linear
+        return result
 
-    def _viterbi(self, sentence, all_tags):
+    def _viterbi(self, sentence):
         """
         :param sentence: List of words
         :type sentence: List
@@ -86,10 +96,10 @@ class Model:
         :rtype: List
         """
         num_words = len(sentence)
+        all_tags = self.tag_corpus
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
         p_table = np.empty(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
-
 
         # ending in tags u,v at position k
         p_table[0, 0, 0] = 1  # init
@@ -109,17 +119,24 @@ class Model:
                     options = np.array([])
                     for w_ in w:
                         options += [p_table[k - 1, w_, t1] * self.model_function(next_tag=t2, word_num=k,
-                                                                          previous_tags=[w_, t1], sentence=sentence)]
+                                                                                 previous_tags=[w_, t1],
+                                                                                 sentence=sentence)]
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
-                                                                        bp_table[num_words - 1, :, :].shape) # argmax()
+                                                                        bp_table[num_words - 1, :, :].shape)  # argmax()
         # returns index of flatten array, unravel() gives the original 2d indices
 
         for k in reversed(range(num_words - 2)):
             answer[k] = bp_table[k + 2, answer[k + 1], answer[k + 2]]
 
         return answer
+
+    def _translation(self):
+        assert (self.tag_corpus[0] == '*')
+        self.token2string = {key: value for key, value in
+                             enumerate(self.tag_corpus)}  # TODO make sure that self.tag_corpus[0] is '*'
+        self.string2token = {value: key for key, value in enumerate(self.tag_corpus)}
 
     def _vectorize(self):
 

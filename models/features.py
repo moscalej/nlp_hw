@@ -14,32 +14,32 @@ class FinkMos:
         self.f_matrix = None
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
 
-    def f_100(self, place, y):
+    def f_100(self, place, y, y_1, y_2):
         return 1 if self.x[place] == 'base' and y == 'Vt' else 0
 
-    def f_101(self, place, y):
+    def f_101(self, place, y, y_1, y_2):
         if len(self.x[place]) < 4:
             return 0
         return 1 if self.x[place][-3:] == 'ing' and y == 'VBG' else 0
 
-    def f_102(self, place, y):
+    def f_102(self, place, y, y_1, y_2):
         if len(self.x[place]) < 4:
             return 0
         return 1 if self.x[place][:3] == 'pre' and y == 'NN' else 0
 
-    def f_103(self, place, y):
-        return 1 if y == 'Vt' and self.y[place - 1] == 'JJ' and self.y[place - 2] == 'DT' else 0
+    def f_103(self, place, y, y_1, y_2):
+        return 1 if y == 'Vt' and y_1 == 'JJ' and y_2 == 'DT' else 0
 
-    def f_104(self, place, y):
-        return 1 if y == 'Vt' and self.y[place - 1] == 'JJ' else 0
+    def f_104(self, place, y, y_1, y_2):
+        return 1 if y == 'Vt' and y_1 == 'JJ' else 0
 
-    def f_105(self, place, y):
+    def f_105(self, place, y, y_1, y_2):
         return 1 if y == 'Vt' else 0
 
-    def f_106(self, place, y):
+    def f_106(self, place, y, y_1, y_2):
         return 1 if self.x[place - 1] == 'the' and y == 'Vt' else 0
 
-    def f_107(self, place, y):
+    def f_107(self, place, y, y_1, y_2):
         if place == self.x.size - 1:
             return 0
         return 1 if self.x[place + 1] == 'the' and y == 'Vt' else 0
@@ -59,15 +59,24 @@ class FinkMos:
         test = getattr(self, test_name)
         list_1 = [0, 0, 0]
         for i in range(3, self.x.size):
-            list_1.append(test(i, self.y[i]))
+            list_1.append(test(i, self.y[i], self.y[i-1], self.y[i-2]))
         self.f_x_y.loc[:, test_name] = list_1
 
-    def to_feature_space(self, history_word_index, y):
+    def to_feature_space(self, history_i, y):
         results = []
         for test in self.tests:
             test = getattr(self, test)
-            results.append(test(history_word_index, y))
+            results.append(test(history_i, y, self.y[history_i-1], self.y[history_i-2]))
         return np.array([results])  # todo check if np.array is faster or list
+
+
+    def to_feature_space2(self, history_i, y, y_1, y_2):
+        results = []
+        for test in self.tests:
+            test = getattr(self, test)
+            results.append(test(history_i, y, y_1, y_2))
+        return np.array([results])  # todo check if np.array is faster or list
+
 
     def sentence_non_linear_loss_inner(self, v, history_word_index):
         if self.f_matrix is None:
