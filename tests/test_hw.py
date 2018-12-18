@@ -182,9 +182,9 @@ class test_model(unittest.TestCase):
         data = PreprocessTags().load_data(
             r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\data\test.wtag')
         a = model1.model_function(1, 3, [2, 3], x)
-        self.assertAlmostEqual(a.value, -71.864, 2)
         print("model function result")
         print(a)
+        self.assertAlmostEqual(float(a), -2.77, 2)
         b = model1._viterbi(x)
         print("viterbi result")
         print(b)

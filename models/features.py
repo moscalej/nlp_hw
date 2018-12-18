@@ -78,6 +78,19 @@ class FinkMos:
         return np.array([results])  # todo check if np.array is faster or list
 
 
+    def sentence_non_linear_loss_inner2(self, v, history_i, y, y_2):
+        if self.f_matrix is None:
+            results = []
+            for tag in self.tag_corpus:
+                results.append(self.to_feature_space2(history_i, y, tag, y_2))
+            f_matrix = np.concatenate(results, axis=0)
+            self.f_matrix = f_matrix
+
+        v_f = self.f_matrix @ v
+        e_val = np.log(np.sum(np.exp(v_f)))
+        return e_val
+
+
     def sentence_non_linear_loss_inner(self, v, history_word_index):
         if self.f_matrix is None:
             results = []
@@ -89,6 +102,7 @@ class FinkMos:
         v_f = self.f_matrix @ v
         e_val = np.sum(np.exp(v_f))
         return e_val
+
 
     def sentence_non_lineard_loss(self, v):
         end = self.y[self.y == '<STOP>'].index[0]

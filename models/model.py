@@ -82,7 +82,7 @@ class Model:
         fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
         f = fm.to_feature_space2(word_num, y, y_1, y_2)
         linear = f @ self.v
-        non_linear = fm.sentence_non_lineard_loss(self.v)
+        non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
         result = linear - non_linear
         return result
 
@@ -106,13 +106,13 @@ class Model:
         bp_table = np.empty(dims, dtype=np.int8)
         answer = [None] * num_words
         for k in range(num_words):
-            if k == 1:
+            if k == 0:
                 tags1 = [0]
             elif k < len(sentence) - 2:
                 tags1 = all_tags
             for t1 in range(len(tags1)):
                 for t2 in range(len(all_tags)):
-                    if k == 1 or k == 2:  # 0 -> '*' tag
+                    if k in [0, 1]:  # 0 -> '*' tag
                         w = [0]
                     else:
                         w = range(len(all_tags))
