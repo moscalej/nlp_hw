@@ -111,7 +111,6 @@ class Model:
         result = linear - non_linear
         return result
 
-
     def _viterbi(self, sentence):
         """
         :param sentence: List of words
@@ -131,22 +130,28 @@ class Model:
         p_table[0, 0, 0] = 1  # init
         bp_table = np.empty(dims, dtype=np.int8)
         answer = [None] * num_words
-        for k in range(num_words):
-            if k == 0:
+        for k in range(1, num_words):
+            if k == 1:
                 tags1 = [0]
-            elif k < len(sentence) - 2:
+            # elif k < len(sentence) - 2:
+            else:
                 tags1 = all_tags
             for t1 in range(len(tags1)):
                 for t2 in range(len(all_tags)):
-                    if k in [0, 1]:  # 0 -> '*' tag
-                        w = [0]
+                    if k in [1, 2]:  # 0 -> '*' tag
+                        optional_tags = [0]
                     else:
-                        w = range(len(all_tags))
-                    options = np.array([])
-                    for w_ in w:
-                        options += [p_table[k - 1, w_, t1] * self.model_function(next_tag=t2, word_num=k,
-                                                                                 previous_tags=[w_, t1],
-                                                                                 sentence=sentence)]
+                        optional_tags = range(len(all_tags))
+                    options = []  # np.array([])
+                    for t_1 in optional_tags:  # t_1 is previous tag
+                        print("input_values")
+                        print("t_1 " +str(t_1))
+                        print("t1 " +str(t1))
+                        print("t2 " +str(t2))
+                        options += [p_table[k - 1, t_1, t1] * self.model_function(next_tag=t2, word_num=k,
+                                                                                           previous_tags=[t_1, t1],
+                                                                                           sentence=sentence)]
+                    print(options)
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
