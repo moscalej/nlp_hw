@@ -38,6 +38,7 @@ class Model:
         self.x = x
         self.y = y
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
+        self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         self.v = minimize(self._loss, np.zeros(len(self.tests)))
 
@@ -60,6 +61,30 @@ class Model:
         tag_ans = tokenized_ans  # TODO
         return tag_ans
 
+        pass
+
+    def confusion(self, x, y):
+        """
+
+        :param x:
+        :type x:
+        :param y:
+        :type y:
+        :return:
+        :rtype:
+        """
+        pass
+
+    def accuracy(self, x, y):
+        """
+
+        :param x:
+        :type x:
+        :param y:
+        :type y:
+        :return:
+        :rtype:
+        """
         pass
 
     def model_function(self, next_tag, word_num, previous_tags, sentence):
@@ -85,6 +110,7 @@ class Model:
         non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
         result = linear - non_linear
         return result
+
 
     def _viterbi(self, sentence):
         """
@@ -147,7 +173,6 @@ class Model:
             vectors.append(a.fill_test())
             matrix.append(a.f_x_y)
         self.vector_x_y = np.array(vectors, dtype=FinkMos)
-
         self.lin_loss_matrix_x_y = np.concatenate(matrix, axis=0)
         # is a sentence
 
