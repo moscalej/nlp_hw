@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 from models.features import FinkMos
+from models.score import Score
 from scipy.optimize import minimize
-
 
 class Model:
     def __init__(self, tests):
@@ -40,7 +40,7 @@ class Model:
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self.v = minimize(self._loss, np.zeros(len(self.tests)))
+        self.v = minimize(self._loss, np.zeros(len(self.tests)),options= dict(disp =True),method='BFGS')
 
         return
 
@@ -59,9 +59,10 @@ class Model:
 
         # translate to tags
         tag_ans = tokenized_ans  # TODO
+        assert isinstance(tag_ans,pd.DataFrame)
         return tag_ans
 
-        pass
+
 
     def confusion(self, x, y):
         """
@@ -73,7 +74,19 @@ class Model:
         :return:
         :rtype:
         """
-        pass
+        assert isinstance(x,pd.DataFrame)
+        assert isinstance(y,pd.DataFrame)
+        y_hat = self.predict(x)
+
+        roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+        roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+
+        most_reacuent_tags = pd.Series(
+            pd.value_counts(self.y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ',']).index[:10])
+        sc = Score(most_reacuent_tags)
+        sc.fit(roll_y,roll_y_hat)
+        return sc.matrix_confusion()
+
 
     def accuracy(self, x, y):
         """
@@ -85,7 +98,19 @@ class Model:
         :return:
         :rtype:
         """
-        pass
+        assert isinstance(x, pd.DataFrame)
+        assert isinstance(y, pd.DataFrame)
+        y_hat = self.predict(x)
+
+        roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+        roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+
+        most_reacuent_tags = pd.Series(
+            pd.value_counts(self.y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ',']).index[:10])
+        sc = Score(most_reacuent_tags)
+        sc.fit(roll_y, roll_y_hat)
+        return sc.over_all_acc()
+
 
     def model_function(self, next_tag, word_num, previous_tags, sentence):
         """
@@ -186,7 +211,7 @@ class Model:
         non_linear = self._calculate_nonlinear(v)
         penalty = 0.5 * np.linalg.norm(v)
 
-        return positive - non_linear + penalty
+        return  non_linear + penalty -positive
 
     def _calculate_positive(self, v):
         """
