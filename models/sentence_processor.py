@@ -1,6 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from models.features import Features
+
 
 class FinkMos:
 
@@ -12,11 +14,9 @@ class FinkMos:
         self.test_f = Features().get_tests()
         self.x = x
         self.y = y
-        self.f_matrix = np.empty(self.y.shape,dtype=np.ndarray)
+        self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
         self.f_matrix_y_1 = np.empty(self.y.shape,dtype=np.ndarray)
-        self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
-
-
+        self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)
 
     def fill_test(self):
         """
@@ -28,7 +28,7 @@ class FinkMos:
             self.run_line_tests(test)
         return self
 
-    def run_line_tests(self, test_name):
+    def run_line_tests(self, test_name):  # f(i,h_i)
 
         test = self.test_f[test_name]
         list_1 = [0, 0, 0]
@@ -43,6 +43,24 @@ class FinkMos:
             results.append(test(self.x,history_i, y, self.y[history_i-1], self.y[history_i-2]))
         return np.array([results])  # todo check if np.array is faster or list
 
+    def sentence_non_linear_loss_inner(self, v, history_word_index):
+        if self.f_matrix[history_word_index] is None:
+            results = []
+            for word in self.tag_corpus:
+                results.append(self.to_feature_space(history_word_index, word))
+            f_matrix = np.concatenate(results, axis=0)
+            self.f_matrix[history_word_index] = f_matrix  # A(i,j) = [i is the word in the curpus , j is the test done]
+
+        v_f = self.f_matrix[history_word_index] @ v
+        e_val = np.sum(np.exp(v_f))
+        return e_val
+
+    def sentence_non_lineard_loss(self, v):
+        values = []
+        for word in range(2, self.y.shape[0]):
+            values.append(self.sentence_non_linear_loss_inner(v, word))
+        sentence_normal = np.sum(np.log(np.array(values)))
+        return sentence_normal
 
     def to_feature_space2(self, history_i, y, y_1, y_2):
         results = []
@@ -64,25 +82,7 @@ class FinkMos:
         return e_val
 
 
-    def sentence_non_linear_loss_inner(self, v, history_word_index):
-        if self.f_matrix[history_word_index] is None:
-            results = []
-            for word in self.tag_corpus:
-                results.append(self.to_feature_space(history_word_index, word))
-            f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix[history_word_index] = f_matrix
 
-        v_f = self.f_matrix[history_word_index] @ v
-        e_val = np.sum(np.exp(v_f))
-        return e_val
-
-
-    def sentence_non_lineard_loss(self, v):
-        values = []
-        for word in range(2, self.y.shape[0]):
-            values.append(self.sentence_non_linear_loss_inner(v, word))
-        sentence_normal = np.sum(np.log(np.array(values)))
-        return sentence_normal
 
 
 

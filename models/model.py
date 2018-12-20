@@ -39,7 +39,7 @@ class Model:
         assert isinstance(y, pd.Series)
         self.x = x
         self.y = y
-        base_corpus=pd.Series(['*' , '<PAD>' , '<STOP>'])
+        base_corpus = pd.Series(['*', '<STOP>'])
         word_corpus = pd.Series(y.value_counts().drop(['*' , '<STOP>']).index)
         self.tag_corpus = base_corpus.append(word_corpus)
         self._translation()  # create dictionaries for tokenizing
@@ -137,7 +137,7 @@ class Model:
 
         f = sentence.to_feature_space2(word_num, y, y_1, y_2)
         linear = f @ self.v
-        non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
+        non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # TODO check this
         result = linear - non_linear
         return result
 
@@ -202,15 +202,10 @@ class Model:
 
     def _vectorize(self):
 
-        vectors = []
-        matrix = []
-
         a = FinkMos(self.x, self.y, tests=self.tests, tag_corpus=self.tag_corpus)
         a.fill_test()
-        matrix.append(a.f_x_y)
-        self.vector_x_y = a
+        self.vector_x_y = a  # TODO change names
         self.lin_loss_matrix_x_y = a.f_x_y
-        # is a sentence
 
     def _loss(self, v):
         positive = self._calculate_positive(v)
@@ -235,5 +230,4 @@ class Model:
 
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
-
         return np.sum(self.vector_x_y.sentence_non_lineard_loss(v))
