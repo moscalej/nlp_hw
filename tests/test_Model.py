@@ -52,8 +52,9 @@ class test_model(unittest.TestCase):
         tests = [f'f_10{x_}' for x_ in range(8)]
         model1 = Model(tests)
         model1.fit(x, y)
+        fm = FinkMos(x,x,model1.tests,model1.tag_corpus)
         data = PreprocessTags().load_data(r'..\data\test.wtag')
-        a = model1.model_function(1, 3, [2, 3], x)
+        a = model1.model_function(1, 3, [2, 3], fm)
         print("model function result")
         print(a)
     def test_viterbi(self):

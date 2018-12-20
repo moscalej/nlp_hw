@@ -128,14 +128,14 @@ class Model:
         :return: List of Probabilities of next_tag
         :rtype: List of Floats
         """
+        assert isinstance(sentence,FinkMos)
         y_1 = self.token2string[previous_tags[0]]
         y_2 = self.token2string[previous_tags[1]]
         y = self.token2string[next_tag]
 
-        fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
-        f = fm.to_feature_space2(word_num, y, y_1, y_2)
+        f = sentence.to_feature_space2(word_num, y, y_1, y_2)
         linear = f @ self.v
-        non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
+        non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
         result = linear - non_linear
         return result
 
@@ -149,6 +149,7 @@ class Model:
         :rtype: List
         """
         num_words = len(sentence)
+        sentence_fm = FinkMos(sentence,sentence,self.tests,self.tag_corpus)
         all_tags = self.tag_corpus
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
@@ -178,7 +179,7 @@ class Model:
                         print("t2 " +str(t2))
                         options += [p_table[k - 1, t_1, t1] * self.model_function(next_tag=t2, word_num=k,
                                                                                            previous_tags=[t_1, t1],
-                                                                                           sentence=sentence)]
+                                                                                           sentence=sentence_fm)]
                     print(options)
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
