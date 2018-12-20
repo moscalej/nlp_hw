@@ -32,6 +32,9 @@ class test_model(unittest.TestCase):
         data = PreprocessTags().load_data(
             r'..\data\test.wtag')
         a = model1.fit(data.x, data.y)
+        print(model1.vector_x_y)
+        print(model1.lin_loss_matrix_x_y)
+        print(model1.lin_loss_matrix_x_y.sum())
         print(a)
 
     def test_question1(self):
@@ -51,16 +54,20 @@ class test_model(unittest.TestCase):
         tests = Features().get_tests().keys()
         model1 = Model(tests)
         model1.fit(x, y)
-        fm = FinkMos(x,x,model1.tests,model1.tag_corpus)
+        fm = FinkMos(x, x, model1.tests, model1.tag_corpus)
         a = model1.model_function(1, 3, [2, 3], fm)
         print("model function result")
         print(a)
+
     def test_viterbi(self):
         x_thin = pd.Series(['*', '*', 'The', 'Treasury', 'is', '<STOP>'])
         y_thin = pd.Series(['*', '*', 'DT', 'NNP', 'VBZ', '<STOP>'])
-        tests = [f'f_10{x_}' for x_ in range(8)]
+        tests = [f'f_10{x_}' for x_ in range(8)] + [f'tri_00{x_}' for x_ in range(7)]
         model1 = Model(tests)
         model1.fit(x, y)
-        b = model1._viterbi(x_thin)
+        # print(model1.vector_x_y)
+        # print(model1.lin_loss_matrix_x_y)
+        b = model1._viterbi(x)
         print("viterbi result")
         print(b)
+        print([model1.token2string[token] for token in b])

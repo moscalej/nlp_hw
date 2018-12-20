@@ -66,7 +66,7 @@ class FinkMos:
         results = []
         for test in self.tests:
             test = self.test_f[test]
-            results.append(test(self.x,history_i, y, y_1, y_2))
+            results.append(test(self.x, history_i, y, y_1, y_2))
         return np.array([results])  # todo check if np.array is faster or list
 
 
