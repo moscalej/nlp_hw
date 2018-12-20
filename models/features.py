@@ -1,124 +1,140 @@
-import pandas as pd
-import numpy as np
+# IN_DT_NN        1825
+# NN_<STOP>_*     1752
+# DT_JJ_NN        1590
+# DT_NN_IN        1423
+# NN_IN_DT        1349
+# NNP_NNP_NNP     1192
+# *_*_DT          1134
+# *_*_NNP         1083
+# IN_DT_JJ        1018
+# NNS_<STOP>_*     990
+# JJ_NN_IN         886
+# NNP_NNP_,        879
+# NN_IN_NNP        810
+# IN_NNP_NNP       806
+# *_*_IN           665
+# *_NNP_NNP        663
+# NNS_IN_DT        663
+
+trigrams = dict(
+
+    tri_000=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'IN' and y_1 == 'DT' and y == 'NN' else 0,
+    tri_001=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'DT' and y_1 == 'JJ' and y == 'NN' else 0,
+    tri_002=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'DT' and y_1 == 'NN' and y == 'IN' else 0,
+    tri_003=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'NN' and y_1 == 'IN' and y == 'DT' else 0,
+    tri_004=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'NNP' and y_1 == 'NNP' and y == 'MNP' else 0,
+    tri_005=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'JJ' and y_1 == 'NN' and y == 'IN' else 0,
+    tri_006=lambda sentence, place, y, y_1, y_2:
+    1 if y_2 == 'NN' and y_1 == 'IN' and y == 'NP' else 0,
+
+)
+
+# <STOP> *      5000
+# DT NN         4934
+# NNP NNP       4636
+# NN IN         4224
+# IN DT         4162
+# JJ NN         3498
+# DT JJ         2370
+# NN NN         2158
+# IN NNP        2097
+# NNS IN        1912
+# NN ,          1847
+# JJ NNS        1841
+# NN <STOP>     1752
+# TO VB         1701
+# NNP ,         1642
+# IN NN         1352
+# NN NNS        1291
+
+biagrams = dict(
+    bi_000=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'DT' and y == 'NN' else 0,
+    bi_001=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'NNP' and y == 'NNP' else 0,
+    bi_002=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'NN' and y == 'IN' else 0,
+    bi_003=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'IN' and y == 'DT' else 0,
+    bi_004=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'NNP' and y == 'NNP' else 0,
+    bi_005=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'NN' and y == 'IN' else 0,
+    bi_006=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'JJ' and y == 'NN' else 0,
+)
+
+own_func = dict(
+
+    oun_000=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'the' and y == 'IN' else 0,
+
+    oun_001=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'about' and y == 'IN' else 0,
+
+    oun_002=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'IN' and y == 'JJ' else 0,
+
+    oun_003=lambda sentence, place, y, y_1, y_2:
+    1 if y_1 == 'IN' and y_2 == 'NNS' and y == 'JJ' else 0,
+
+    oun_004=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'the' and y == 'IN' else 0,
+
+    oun_005=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'the' and y == 'IN' else 0,
+)
 
 
-class FinkMos:
+class Features:
+    def get_tests(self):
+        functions = dict(
+            f_100=self.f_100,
+            f_101=self.f_101,
+            f_102=self.f_102,
+            f_103=self.f_103,
+            f_104=self.f_104,
+            f_105=self.f_105,
+            f_106=self.f_106,
+            f_107=self.f_107,
+        )
+        functions.update(trigrams)
+        functions.update(biagrams)
+        functions.update(own_func)
+        return functions
 
-    def __init__(self, x, y, tests, tag_corpus):
-        assert isinstance(x, pd.Series)
-        assert isinstance(y, pd.Series)
-        self.tag_corpus = tag_corpus
-        self.tests = tests
-        self.x = x
-        self.y = y
-        self.f_matrix = np.empty(self.y.shape,dtype=np.ndarray)
-        self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
+    def f_100(self, sentence, place, y, y_1, y_2):
+        return 1 if sentence[place] == 'base' and y == 'Vt' else 0
 
-    def f_100(self, place, y, y_1, y_2):
-        return 1 if self.x[place] == 'base' and y == 'Vt' else 0
-
-    def f_101(self, place, y, y_1, y_2):
-        if len(self.x[place]) < 4:
+    def f_101(self, sentence, place, y, y_1, y_2):
+        if len(sentence[place]) < 4:
             return 0
-        return 1 if self.x[place][-3:] == 'ing' and y == 'VBG' else 0
+        return 1 if sentence[place][-3:] == 'ing' and y == 'VBG' else 0
 
-    def f_102(self, place, y, y_1, y_2):
-        if len(self.x[place]) < 4:
+    def f_102(self, sentence, place, y, y_1, y_2):
+        if len(sentence[place]) < 4:
             return 0
-        return 1 if self.x[place][:3] == 'pre' and y == 'NN' else 0
+        return 1 if sentence[place][:3] == 'pre' and y == 'NN' else 0
 
-    def f_103(self, place, y, y_1, y_2):
+    def f_103(self, sentence, place, y, y_1, y_2):
         return 1 if y == 'Vt' and y_1 == 'JJ' and y_2 == 'DT' else 0
 
-    def f_104(self, place, y, y_1, y_2):
+    def f_104(self, sentence, place, y, y_1, y_2):
         return 1 if y == 'Vt' and y_1 == 'JJ' else 0
 
-    def f_105(self, place, y, y_1, y_2):
+    def f_105(self, sentence, place, y, y_1, y_2):
         return 1 if y == 'Vt' else 0
 
-    def f_106(self, place, y, y_1, y_2):
-        return 1 if self.x[place - 1] == 'the' and y == 'Vt' else 0
+    def f_106(self, sentence, place, y, y_1, y_2):
+        return 1 if sentence[place - 1] == 'the' and y == 'Vt' else 0
 
-    def f_107(self, place, y, y_1, y_2):
-        if place == self.x.size - 1:
+    def f_107(self, sentence, place, y, y_1, y_2):
+        if place == sentence.size - 1:
             return 0
-        return 1 if self.x[place + 1] == 'the' and y == 'Vt' else 0
-
-    def fill_test(self):
-        """
-
-        :param tests:
-        :return: Return vector where each value is the value of a test
-        """
-        for test in self.tests:
-            self.run_line_tests(test)
-        return self
-
-    def run_line_tests(self, test_name):
-
-        test = getattr(self, test_name)
-        list_1 = [0, 0, 0]
-        for i in range(3, self.x.size):
-            list_1.append(test(i, self.y[i], self.y[i-1], self.y[i-2]))
-        self.f_x_y.loc[:, test_name] = list_1
-
-    def to_feature_space(self, history_i, y):
-        results = []
-        for test_ in self.tests:
-            test = getattr(self, test_)
-            results.append(test(history_i, y, self.y[history_i-1], self.y[history_i-2]))
-        return np.array([results])  # todo check if np.array is faster or list
-
-
-    def to_feature_space2(self, history_i, y, y_1, y_2):
-        results = []
-        for test in self.tests:
-            test = getattr(self, test)
-            results.append(test(history_i, y, y_1, y_2))
-        return np.array([results])  # todo check if np.array is faster or list
-
-
-    def sentence_non_linear_loss_inner2(self, v, history_i, y, y_2):
-        # if self.f_matrix is None:
-        # if not any(self.f_matrix):
-        if self.f_matrix[history_i] is None:
-            results = []
-            for tag in self.tag_corpus:
-                results.append(self.to_feature_space2(history_i, y, tag, y_2))
-            f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix[history_i] = f_matrix
-        v_f = self.f_matrix[history_i] @ v
-        e_val = np.log(np.sum(np.exp(v_f)))
-        return e_val
-
-
-    def sentence_non_linear_loss_inner(self, v, history_word_index):
-        if self.f_matrix[history_word_index] is None:
-            results = []
-            for word in self.tag_corpus:
-                results.append(self.to_feature_space(history_word_index, word))
-            f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix[history_word_index] = f_matrix
-
-        v_f = self.f_matrix[history_word_index] @ v
-        e_val = np.sum(np.exp(v_f))
-        return e_val
-
-
-    def sentence_non_lineard_loss(self, v):
-        end = self.y[self.y == '<STOP>'].index[0]
-        values = []
-        for word in range(2, end):
-            values.append(self.sentence_non_linear_loss_inner(v, word))
-        sentence_normal = np.sum(np.log(np.array(values)))
-        return sentence_normal
-
-
-
-
-class CustomFeatures:
-    def __init__(self, x, y):
-        assert isinstance(x, pd.Series)
-        assert isinstance(y, pd.Series)
-        self.x = x
-        self.y = y
+        return 1 if sentence[place + 1] == 'the' and y == 'Vt' else 0

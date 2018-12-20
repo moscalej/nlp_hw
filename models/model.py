@@ -1,14 +1,15 @@
-import pandas as pd
 import numpy as np
-from models.features import FinkMos
-from models.score import Score
+import pandas as pd
 from scipy.optimize import minimize
+
+from models.score import Score
+from models.sentence_processor import FinkMos
 
 
 class Model:
     def __init__(self, tests):
         self.tests = tests
-        self.v = np.random.uniform(-0.5, 0.5, len(tests))  # TODO: init wisely ?
+        self.v = np.random.uniform(-0.5,0.5,len(tests))  # TODO: init wisely ?
         self.x = None
         self.y = None
         self.vector_x_y = None
@@ -34,14 +35,17 @@ class Model:
         :param y_val:[row = sentence tag , col = Word tag]
         :return: metrics dict {} $# TODO check witch metrics we need
         """
-        assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.DataFrame)
+        assert isinstance(x, pd.Series)
+        assert isinstance(y, pd.Series)
         self.x = x
         self.y = y
-        self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
+        base_corpus = pd.Series(['*', '<STOP>'])
+        word_corpus = pd.Series(y.value_counts().drop(['*' , '<STOP>']).index)
+        self.tag_corpus = base_corpus.append(word_corpus)
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self.v = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        opt_result = minimize(self._loss, np.ones(len(self.tests)),options= dict(disp =True),method='BFGS')
+        self.v = opt_result['x']
 
         return
 
@@ -60,8 +64,10 @@ class Model:
 
         # translate to tags
         tag_ans = tokenized_ans  # TODO
-        assert isinstance(tag_ans, pd.DataFrame)
+        assert isinstance(tag_ans,pd.DataFrame)
         return tag_ans
+
+
 
     def confusion(self, x, y):
         """
@@ -73,8 +79,8 @@ class Model:
         :return:
         :rtype:
         """
-        assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.DataFrame)
+        assert isinstance(x,pd.DataFrame)
+        assert isinstance(y,pd.DataFrame)
         y_hat = self.predict(x)
 
         roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
@@ -83,8 +89,9 @@ class Model:
         index = pd.value_counts(y.values.reshape(-1)).index
         most_reacuent_tags = pd.Series(index, index=index).drop(['<PAD>', '<STOP>', '*'])[:10]
         sc = Score(most_reacuent_tags)
-        sc.fit(roll_y, roll_y_hat)
+        sc.fit(roll_y,roll_y_hat)
         return sc.matrix_confusion()
+
 
     def accuracy(self, x, y):
         """
@@ -109,6 +116,7 @@ class Model:
         sc.fit(roll_y, roll_y_hat)
         return sc.over_all_acc()
 
+
     def model_function(self, next_tag, word_num, previous_tags, sentence):
         """
         :param next_tag: Next tag
@@ -122,13 +130,14 @@ class Model:
         :return: List of Probabilities of next_tag
         :rtype: List of Floats
         """
+        assert isinstance(sentence,FinkMos)
         y_1 = self.token2string[previous_tags[0]]
         y_2 = self.token2string[previous_tags[1]]
         y = self.token2string[next_tag]
-        fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
-        f = fm.to_feature_space2(word_num, y, y_1, y_2)  # gets string tags
+
+        f = sentence.to_feature_space2(word_num, y, y_1, y_2)
         linear = f @ self.v
-        non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # gets tags by token
+        non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # TODO check this
         result = linear - non_linear
         return result
 
@@ -142,6 +151,7 @@ class Model:
         :rtype: List
         """
         num_words = len(sentence)
+        sentence_fm = FinkMos(sentence,sentence,self.tests,self.tag_corpus)
         all_tags = self.tag_corpus
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
@@ -166,20 +176,13 @@ class Model:
                     options = []  # np.array([])
                     for t_1 in optional_tags:  # t_1 is previous tag
                         print("input_values")
-                        print("t_1 " + str(t_1))
-                        print("t1 " + str(t1))
-                        print("t2 " + str(t2))
-                        print("model_function output:")
-                        print(self.model_function(next_tag=t2, word_num=k,
-                                                  previous_tags=[t_1, t1],
-                                                  sentence=sentence))
+                        print("t_1 " +str(t_1))
+                        print("t1 " +str(t1))
+                        print("t2 " +str(t2))
                         options += [p_table[k - 1, t_1, t1] * self.model_function(next_tag=t2, word_num=k,
-                                                                                  previous_tags=[t_1, t1],
-                                                                                  sentence=sentence)]
-                    print("number of different elements:")
-                    num_elems = len(np.unique(options))
-                    print(num_elems)
-                    print(self.v)
+                                                                                           previous_tags=[t_1, t1],
+                                                                                           sentence=sentence_fm)]
+                    print(options)
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
@@ -192,29 +195,24 @@ class Model:
         return answer
 
     def _translation(self):
-        assert (self.tag_corpus[0] == '*')
+        # assert (self.tag_corpus[0] == '*')
         self.token2string = {key: value for key, value in
                              enumerate(self.tag_corpus)}  # TODO make sure that self.tag_corpus[0] is '*'
         self.string2token = {value: key for key, value in enumerate(self.tag_corpus)}
 
     def _vectorize(self):
 
-        vectors = []
-        matrix = []
-        for i in range(self.x.shape[0]):
-            a = FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, tag_corpus=self.tag_corpus)
-            vectors.append(a.fill_test())
-            matrix.append(a.f_x_y)
-        self.vector_x_y = np.array(vectors, dtype=FinkMos)
-        self.lin_loss_matrix_x_y = np.concatenate(matrix, axis=0)
-        # is a sentence
+        a = FinkMos(self.x, self.y, tests=self.tests, tag_corpus=self.tag_corpus)
+        a.fill_test()
+        self.vector_x_y = a  # TODO change names
+        self.lin_loss_matrix_x_y = a.f_x_y
 
     def _loss(self, v):
         positive = self._calculate_positive(v)
         non_linear = self._calculate_nonlinear(v)
         penalty = 0.5 * np.linalg.norm(v)
 
-        return non_linear + penalty - positive
+        return  non_linear + penalty -positive
 
     def _calculate_positive(self, v):
         """
@@ -232,8 +230,4 @@ class Model:
 
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
-        matrix = []
-        for mat in self.vector_x_y:
-            assert isinstance(mat, FinkMos)
-            matrix.append(mat.sentence_non_lineard_loss(v))
-        return np.sum(matrix)
+        return np.sum(self.vector_x_y.sentence_non_lineard_loss(v))

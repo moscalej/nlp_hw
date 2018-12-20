@@ -68,7 +68,7 @@ class test_Scode(unittest.TestCase):
         roll_y = pd.Series(y.values.reshape(-1))
         roll_y_hat = pd.Series(y_hat.values.reshape(-1))
         index = pd.value_counts(y.values.reshape(-1)).index
-        most_reacuent_tags = pd.Series(index, index=index).drop(['<PAD>','<STOP>','*'])[:10]
+        most_reacuent_tags = pd.Series(index, index=index).drop(['<STOP>','*'])[:10]
         sc = Score(most_reacuent_tags)
         sc.fit(roll_y, roll_y_hat)
         cm = sc.matrix_confusion()
