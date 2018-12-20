@@ -79,14 +79,15 @@ class FinkMos:
 
 
     def sentence_non_linear_loss_inner2(self, v, history_i, y, y_2):
-        if self.f_matrix is None:
+        # if self.f_matrix is None:
+        # if not any(self.f_matrix):
+        if self.f_matrix[history_i] is None:
             results = []
             for tag in self.tag_corpus:
                 results.append(self.to_feature_space2(history_i, y, tag, y_2))
             f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix = f_matrix
-
-        v_f = self.f_matrix @ v
+            self.f_matrix[history_i] = f_matrix
+        v_f = self.f_matrix[history_i] @ v
         e_val = np.log(np.sum(np.exp(v_f)))
         return e_val
 

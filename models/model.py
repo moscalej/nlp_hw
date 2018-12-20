@@ -4,10 +4,11 @@ from models.features import FinkMos
 from models.score import Score
 from scipy.optimize import minimize
 
+
 class Model:
     def __init__(self, tests):
         self.tests = tests
-        self.v = np.random.uniform(-0.5,0.5,len(tests))  # TODO: init wisely ?
+        self.v = np.random.uniform(-0.5, 0.5, len(tests))  # TODO: init wisely ?
         self.x = None
         self.y = None
         self.vector_x_y = None
@@ -40,7 +41,7 @@ class Model:
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self.v = minimize(self._loss, np.ones(len(self.tests)),options= dict(disp =True),method='BFGS')
+        self.v = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
 
         return
 
@@ -59,10 +60,8 @@ class Model:
 
         # translate to tags
         tag_ans = tokenized_ans  # TODO
-        assert isinstance(tag_ans,pd.DataFrame)
+        assert isinstance(tag_ans, pd.DataFrame)
         return tag_ans
-
-
 
     def confusion(self, x, y):
         """
@@ -74,8 +73,8 @@ class Model:
         :return:
         :rtype:
         """
-        assert isinstance(x,pd.DataFrame)
-        assert isinstance(y,pd.DataFrame)
+        assert isinstance(x, pd.DataFrame)
+        assert isinstance(y, pd.DataFrame)
         y_hat = self.predict(x)
 
         roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
@@ -84,9 +83,8 @@ class Model:
         index = pd.value_counts(y.values.reshape(-1)).index
         most_reacuent_tags = pd.Series(index, index=index).drop(['<PAD>', '<STOP>', '*'])[:10]
         sc = Score(most_reacuent_tags)
-        sc.fit(roll_y,roll_y_hat)
+        sc.fit(roll_y, roll_y_hat)
         return sc.matrix_confusion()
-
 
     def accuracy(self, x, y):
         """
@@ -111,7 +109,6 @@ class Model:
         sc.fit(roll_y, roll_y_hat)
         return sc.over_all_acc()
 
-
     def model_function(self, next_tag, word_num, previous_tags, sentence):
         """
         :param next_tag: Next tag
@@ -128,11 +125,10 @@ class Model:
         y_1 = self.token2string[previous_tags[0]]
         y_2 = self.token2string[previous_tags[1]]
         y = self.token2string[next_tag]
-
         fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
-        f = fm.to_feature_space2(word_num, y, y_1, y_2)
+        f = fm.to_feature_space2(word_num, y, y_1, y_2)  # gets string tags
         linear = f @ self.v
-        non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, next_tag, y_2)
+        non_linear = fm.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # gets tags by token
         result = linear - non_linear
         return result
 
@@ -170,13 +166,20 @@ class Model:
                     options = []  # np.array([])
                     for t_1 in optional_tags:  # t_1 is previous tag
                         print("input_values")
-                        print("t_1 " +str(t_1))
-                        print("t1 " +str(t1))
-                        print("t2 " +str(t2))
+                        print("t_1 " + str(t_1))
+                        print("t1 " + str(t1))
+                        print("t2 " + str(t2))
+                        print("model_function output:")
+                        print(self.model_function(next_tag=t2, word_num=k,
+                                                  previous_tags=[t_1, t1],
+                                                  sentence=sentence))
                         options += [p_table[k - 1, t_1, t1] * self.model_function(next_tag=t2, word_num=k,
-                                                                                           previous_tags=[t_1, t1],
-                                                                                           sentence=sentence)]
-                    print(options)
+                                                                                  previous_tags=[t_1, t1],
+                                                                                  sentence=sentence)]
+                    print("number of different elements:")
+                    num_elems = len(np.unique(options))
+                    print(num_elems)
+                    print(self.v)
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
@@ -211,7 +214,7 @@ class Model:
         non_linear = self._calculate_nonlinear(v)
         penalty = 0.5 * np.linalg.norm(v)
 
-        return  non_linear + penalty -positive
+        return non_linear + penalty - positive
 
     def _calculate_positive(self, v):
         """

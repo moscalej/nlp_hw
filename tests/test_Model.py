@@ -59,16 +59,17 @@ class test_model(unittest.TestCase):
                        'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                        'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                        '<STOP>'])
-        x_thin = pd.Series(['*', '*', 'The', 'Treasury', 'is', '<STOP>'])
-        y_thin = pd.Series(['*', '*', 'DT', 'NNP', 'VBZ', '<STOP>'])
+        x_thin = pd.Series(['*', '*', 'base', 'Treasury', 'is', '<STOP>'])
+        y_thin = pd.Series(['*', '*', 'Vt', 'NNP', 'VBZ', '<STOP>'])
 
         y_tags = y_thin.unique()
         tests = [f'f_10{x_}' for x_ in range(8)]
         model1 = Model(tests)
         model1.tag_corpus = y_tags
+        model1.tag_corpus = y_thin
         model1._translation()
         data = PreprocessTags().load_data(r'..\data\test.wtag')
-        a = model1.model_function(1, 3, [2, 3], x)
+        a = model1.model_function(1, 2, [1, 2], x)
         print("model function result")
         print(a)
         # self.assertAlmostEqual(float(a), -2.77, 2)
