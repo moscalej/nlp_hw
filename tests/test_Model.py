@@ -1,6 +1,6 @@
 import unittest
 from models.prerocesing import PreprocessTags
-from models.features import FinkMos
+from models.sentence_processor import FinkMos
 from models.model import Model
 import pandas as pd
 import numpy as np

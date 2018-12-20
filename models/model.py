@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from models.features import FinkMos
+from models.sentence_processor import FinkMos
 from models.score import Score
 from scipy.optimize import minimize
 
