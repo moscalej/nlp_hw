@@ -63,11 +63,29 @@ class test_model(unittest.TestCase):
         x_thin = pd.Series(['*', '*', 'The', 'Treasury', 'is', '<STOP>'])
         y_thin = pd.Series(['*', '*', 'DT', 'NNP', 'VBZ', '<STOP>'])
         tests = [f'f_10{x_}' for x_ in range(8)] + [f'tri_00{x_}' for x_ in range(7)]
+        data = PreprocessTags().load_data(
+            r'..\data\test.wtag')
         model1 = Model(tests)
-        model1.fit(x, y)
+
+        model1.x = x
+        model1.y = y
+        base_corpus = pd.Series(['*', '<STOP>'])
+        tag_corpus = pd.Series(y.value_counts().drop(['*', '<STOP>']).index)
+        model1.tag_corpus = base_corpus.append(tag_corpus)
+        model1.tag_corpus_tokenized = range(len(model1.tag_corpus))
+        model1._translation()  # create dictionaries for tokenizing
+        model1._vectorize()
+        #
+        # below result of fit on full data (model1.fit(data.x, data.y))
+        #
+        model1.v = [9.98440989e-04, 4.55460621e+00, 3.50976884e+00, 9.98440989e-04,
+                    9.98440989e-04, 9.98440989e-04, 9.98440989e-04, 9.98440989e-04,
+                    3.53744043e+00, 4.72940057e+00, 2.86124632e+00, 3.02403509e+00,
+                    9.98440989e-04, 2.75377462e+00, 9.98440989e-04]
         # print(model1.vector_x_y)
         # print(model1.lin_loss_matrix_x_y)
-        b = model1._viterbi(x)
+        b = model1.predict(x)
+        # b = model1._viterbi(x)
         print("viterbi result")
         print(b)
-        print([model1.token2string[token] for token in b])
+        # print([model1.token2string[token] for token in b])

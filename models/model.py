@@ -42,6 +42,7 @@ class Model:
         base_corpus = pd.Series(['*', '<STOP>'])
         tag_corpus = pd.Series(y.value_counts().drop(['*', '<STOP>']).index)
         self.tag_corpus = base_corpus.append(tag_corpus)
+        self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
@@ -60,11 +61,11 @@ class Model:
         # check x type
         # check sentence format
         #
-        tokenized_ans = self._viterbi(x, self.tag_corpus_tokenized)
+        tokenized_ans = self._viterbi(x)
 
         # translate to tags
-        tag_ans = tokenized_ans  # TODO
-        assert isinstance(tag_ans, pd.DataFrame)
+        tag_ans = [self.token2string[token] for token in tokenized_ans]
+        # assert isinstance(tag_ans, pd.DataFrame)
         return tag_ans
 
     def confusion(self, x, y):
@@ -133,9 +134,16 @@ class Model:
 
         f = sentence.to_feature_space2(word_num, y, y_1, y_2)
         linear = f @ self.v
+        # linear = -f @ self.v #TODO test
+
         non_linear = 0
         # non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # TODO check this
         result = linear - non_linear
+        # if word_num == 5:
+        #     print("linear")
+        #     print(linear)
+        #     print("result")
+        #     print(result)
         return result
 
     def _viterbi(self, sentence):
@@ -149,7 +157,7 @@ class Model:
         """
         num_words = len(sentence)  # includes '*','*' and <stop>
         sentence_fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
-        all_tags = self.tag_corpus
+        all_tags = self.tag_corpus_tokenized
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
         p_table = np.empty(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
@@ -160,33 +168,32 @@ class Model:
         bp_table = np.empty(dims, dtype=np.int8)
         answer = [None] * num_words
         for k in range(1, num_words):
+            print(str(k) + " out of " + str(num_words - 1))
             if k == 1:
                 tags1 = [0]
             else:
                 tags1 = all_tags
-            for t1 in range(len(tags1)):
-                for t2 in range(len(all_tags)):
+            for t1 in tags1:
+                for t2 in all_tags:
                     if k in [1, 2]:  # 0 -> '*' tag
                         optional_tags = [0]
                     else:
-                        optional_tags = range(len(all_tags))
+                        optional_tags = all_tags
                     options = []  # np.array([])
                     for t_1 in optional_tags:  # t_1 is previous tag
                         # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
                         options += [p_table[k - 1, t_1, t1] * self.model_function(next_tag=t2, word_num=k,
                                                                                   previous_tags=[t_1, t1],
                                                                                   sentence=sentence_fm)]
-                    print("num of options: " + str(len(np.unique(options))))
+                    # print("num of options: " + str(len(np.unique(options))))
                     bp_table[k, t1, t2] = np.argmax(options)
                     p_table[k, t1, t2] = options[bp_table[k, t1, t2]]
-        print(99)
-        answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words, :, :].argmax(),
-                                                                        bp_table[num_words, :, :].shape)  # argmax()
+        answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
+                                                                        bp_table[num_words - 1, :, :].shape)  # argmax()
+
         # returns index of flatten array, unravel() gives the original 2d indices
-        print(98)
         for k in reversed(range(num_words - 2)):
             answer[k] = bp_table[k + 2, answer[k + 1], answer[k + 2]]
-        print(97)
         return answer
 
     def _translation(self):
