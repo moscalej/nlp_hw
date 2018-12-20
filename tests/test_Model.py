@@ -62,10 +62,11 @@ class test_model(unittest.TestCase):
         x_thin = pd.Series(['*', '*', 'The', 'Treasury', 'is', '<STOP>'])
         y_thin = pd.Series(['*', '*', 'DT', 'NNP', 'VBZ', '<STOP>'])
 
-        y_tags = y_thin.unique()
+
         tests = [f'f_10{x_}' for x_ in range(8)]
         model1 = Model(tests)
-        model1.tag_corpus = y_tags
+        model1.fit(x,y)
+        # model1.tag_corpus = y_tags
         model1._translation()
         data = PreprocessTags().load_data(r'..\data\test.wtag')
         a = model1.model_function(1, 3, [2, 3], x)

@@ -12,6 +12,7 @@ class FinkMos:
         self.x = x
         self.y = y
         self.f_matrix = np.empty(self.y.shape,dtype=np.ndarray)
+        self.f_matrix_y_1 = np.empty(self.y.shape,dtype=np.ndarray)
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
 
     def f_100(self, place, y, y_1, y_2):
@@ -79,14 +80,14 @@ class FinkMos:
 
 
     def sentence_non_linear_loss_inner2(self, v, history_i, y, y_2):
-        if self.f_matrix is None:
+        if self.f_matrix_y_1[history_i] is None:
             results = []
             for tag in self.tag_corpus:
                 results.append(self.to_feature_space2(history_i, y, tag, y_2))
             f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix = f_matrix
+            self.f_matrix_y_1[history_i] = f_matrix
 
-        v_f = self.f_matrix @ v
+        v_f = self.f_matrix_y_1[history_i] @ v
         e_val = np.log(np.sum(np.exp(v_f)))
         return e_val
 
@@ -105,9 +106,8 @@ class FinkMos:
 
 
     def sentence_non_lineard_loss(self, v):
-        end = self.y[self.y == '<STOP>'].index[0]
         values = []
-        for word in range(2, end):
+        for word in range(2, self.y.shape[0]):
             values.append(self.sentence_non_linear_loss_inner(v, word))
         sentence_normal = np.sum(np.log(np.array(values)))
         return sentence_normal

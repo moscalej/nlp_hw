@@ -33,14 +33,17 @@ class Model:
         :param y_val:[row = sentence tag , col = Word tag]
         :return: metrics dict {} $# TODO check witch metrics we need
         """
-        assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.DataFrame)
+        assert isinstance(x, pd.Series)
+        assert isinstance(y, pd.Series)
         self.x = x
         self.y = y
-        self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
+        base_corpus=pd.Series(['*' , '<PAD>' , '<STOP>'])
+        word_corpus = pd.Series(y.value_counts().drop(['*' , '<STOP>']).index)
+        self.tag_corpus = base_corpus.append(word_corpus)
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self.v = minimize(self._loss, np.ones(len(self.tests)),options= dict(disp =True),method='BFGS')
+        opt_result = minimize(self._loss, np.ones(len(self.tests)),options= dict(disp =True),method='BFGS')
+        self.v = opt_result['x']
 
         return
 
@@ -189,7 +192,7 @@ class Model:
         return answer
 
     def _translation(self):
-        assert (self.tag_corpus[0] == '*')
+        # assert (self.tag_corpus[0] == '*')
         self.token2string = {key: value for key, value in
                              enumerate(self.tag_corpus)}  # TODO make sure that self.tag_corpus[0] is '*'
         self.string2token = {value: key for key, value in enumerate(self.tag_corpus)}
@@ -198,12 +201,12 @@ class Model:
 
         vectors = []
         matrix = []
-        for i in range(self.x.shape[0]):
-            a = FinkMos(self.x.loc[i, :], self.y.loc[i, :], tests=self.tests, tag_corpus=self.tag_corpus)
-            vectors.append(a.fill_test())
-            matrix.append(a.f_x_y)
-        self.vector_x_y = np.array(vectors, dtype=FinkMos)
-        self.lin_loss_matrix_x_y = np.concatenate(matrix, axis=0)
+
+        a = FinkMos(self.x, self.y, tests=self.tests, tag_corpus=self.tag_corpus)
+        a.fill_test()
+        matrix.append(a.f_x_y)
+        self.vector_x_y = a
+        self.lin_loss_matrix_x_y = a.f_x_y
         # is a sentence
 
     def _loss(self, v):
@@ -229,8 +232,5 @@ class Model:
 
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
-        matrix = []
-        for mat in self.vector_x_y:
-            assert isinstance(mat, FinkMos)
-            matrix.append(mat.sentence_non_lineard_loss(v))
-        return np.sum(matrix)
+
+        return np.sum(self.vector_x_y.sentence_non_lineard_loss(v))

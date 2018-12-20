@@ -15,12 +15,10 @@ class PreprocessTags:
             raw_file = fb.readlines()
         for line in raw_file:
             sentence, sentence_tag = self._create_sentence(line)
-            x.append(sentence)
-            y.append(sentence_tag)
-        self.x = pd.DataFrame(x)
-        self.y = pd.DataFrame(y)
-        self.x.fillna('<PAD>', inplace=True)
-        self.y.fillna('<PAD>', inplace=True)
+            x+=sentence
+            y+=sentence_tag
+        self.x = pd.Series(x)
+        self.y = pd.Series(y)
         return self
 
     def load_comp(self, path):
@@ -32,9 +30,8 @@ class PreprocessTags:
             sentence = ['*', '*'] + temp.split()
 
             sentence.append('<STOP>')
-            x.append(sentence)
-        self.x = pd.DataFrame(x)
-        self.x.fillna('<PAD>', inplace=True)
+            x.append(*sentence)
+        self.x = pd.Series(x)
         return self
 
     def _create_sentence(self, line):
