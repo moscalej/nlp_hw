@@ -11,7 +11,7 @@ class FinkMos:
         self.tests = tests
         self.x = x
         self.y = y
-        self.f_matrix = None
+        self.f_matrix = np.empty(self.y.shape,dtype=np.ndarray)
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)  # TODO change this sise
 
     def f_100(self, place, y, y_1, y_2):
@@ -64,8 +64,8 @@ class FinkMos:
 
     def to_feature_space(self, history_i, y):
         results = []
-        for test in self.tests:
-            test = getattr(self, test)
+        for test_ in self.tests:
+            test = getattr(self, test_)
             results.append(test(history_i, y, self.y[history_i-1], self.y[history_i-2]))
         return np.array([results])  # todo check if np.array is faster or list
 
@@ -92,14 +92,14 @@ class FinkMos:
 
 
     def sentence_non_linear_loss_inner(self, v, history_word_index):
-        if self.f_matrix is None:
+        if self.f_matrix[history_word_index] is None:
             results = []
             for word in self.tag_corpus:
                 results.append(self.to_feature_space(history_word_index, word))
             f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix = f_matrix
+            self.f_matrix[history_word_index] = f_matrix
 
-        v_f = self.f_matrix @ v
+        v_f = self.f_matrix[history_word_index] @ v
         e_val = np.sum(np.exp(v_f))
         return e_val
 

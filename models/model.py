@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 class Model:
     def __init__(self, tests):
         self.tests = tests
-        self.v = np.ones(len(tests))  # TODO: init wisely ?
+        self.v = np.random.uniform(-0.5,0.5,len(tests))  # TODO: init wisely ?
         self.x = None
         self.y = None
         self.vector_x_y = None
@@ -40,7 +40,7 @@ class Model:
         self.tag_corpus = pd.unique(y.values.ravel('K'))  # TODO remove '*' , '<PAD>' , '<STOP>"
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self.v = minimize(self._loss, np.zeros(len(self.tests)),options= dict(disp =True),method='BFGS')
+        self.v = minimize(self._loss, np.ones(len(self.tests)),options= dict(disp =True),method='BFGS')
 
         return
 
