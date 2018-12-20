@@ -40,8 +40,9 @@ class PreprocessTags:
         line = line.strip().strip('? ._.').split(' ')
         for word in line:
             temp = word.split('_')
-            sentence.append(temp[0])
-            sentence_tag.append(temp[1])
+            if len(temp) == 2:
+                sentence.append(temp[0])
+                sentence_tag.append(temp[1])
         sentence.append('<STOP>')
         sentence_tag.append('<STOP>')
         return sentence, sentence_tag

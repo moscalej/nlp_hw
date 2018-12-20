@@ -1,12 +1,11 @@
 import unittest
+
+import pandas as pd
+
+from models.features import Features
+from models.model import Model
 from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
-from models.model import Model
-import pandas as pd
-import numpy as np
-
-
-
 
 # y_tags = [ 'IN', 'NN', 'DT', 'PRP', 'CC', 'RB', 'NNS', 'JJ', '``', 'EX',
 #        'NNP', 'CD', 'VBG', 'UH', 'PRP$', 'WRB', 'WP', 'VBZ', 'RBR',
@@ -28,7 +27,7 @@ y_tags = y.unique()
 
 class test_model(unittest.TestCase):
     def test_fit(self):
-        tests = [f'f_10{x}' for x in range(8)]
+        tests = Features().get_tests().keys()
         model1 = Model(tests)
         data = PreprocessTags().load_data(
             r'..\data\test.wtag')
@@ -49,11 +48,10 @@ class test_model(unittest.TestCase):
         self.assertGreaterEqual(acc, 90, msg=f'current acc:{acc}')
 
     def test_model_function(self):
-        tests = [f'f_10{x_}' for x_ in range(8)]
+        tests = Features().get_tests().keys()
         model1 = Model(tests)
         model1.fit(x, y)
         fm = FinkMos(x,x,model1.tests,model1.tag_corpus)
-        data = PreprocessTags().load_data(r'..\data\test.wtag')
         a = model1.model_function(1, 3, [2, 3], fm)
         print("model function result")
         print(a)

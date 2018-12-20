@@ -1,8 +1,10 @@
-import pandas as pd
 import numpy as np
-from models.sentence_processor import FinkMos
-from models.score import Score
+import pandas as pd
 from scipy.optimize import minimize
+
+from models.score import Score
+from models.sentence_processor import FinkMos
+
 
 class Model:
     def __init__(self, tests):

@@ -1,5 +1,7 @@
 import unittest
+
 from models.prerocesing import PreprocessTags
+
 
 class test_PreprocessTags(unittest.TestCase):
     def test_Preprocess(self):
@@ -14,4 +16,4 @@ class test_PreprocessTags(unittest.TestCase):
         self.assertEqual(a._create_sentence(line), result)
 
     def test_load_data(self):
-        data = PreprocessTags().load_data(r'..\data\test.wtag')
+        data = PreprocessTags().load_data(r'..\data\train.wtag')
