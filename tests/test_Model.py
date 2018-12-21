@@ -32,22 +32,23 @@ class test_model(unittest.TestCase):
         with open(r"..\models\tests.YALM", 'r') as stream:
             data_loaded = yaml.load(stream)
         tests = data_loaded['tests']
-        tests = Features().get_tests().keys()
         model1 = Model(tests)
         data = PreprocessTags().load_data(
-            r'..\data\train.wtag')
+            r'..\data\test.wtag')
         a = model1.fit(data.x, data.y)
         results = dict(
             test_sum=model1.lin_loss_matrix_x_y.sum(),
-            optimizer=model1.opt_result
+            v=model1.v,
+            # compare = pd.DataFrame([tests,model1.v]).T
+
+
         )
-        print(model1.vector_x_y)
-        print(model1.lin_loss_matrix_x_y)
+        print(model1.v)
         print(model1.lin_loss_matrix_x_y.sum())
         print(a)
-        t = time.asctime()
-        with open(fr"..\training\report_{t}.YALM", 'w') as stream:
-            stream.write(yaml.dump(stream))
+        t = time.localtime()
+        with open(fr"..\training\report_{t.tm_hour}:{t.tm_min}_{t.tm_mday}/{t.tm_mon}.YALM", 'w') as stream:
+            stream.write(yaml.dump(results))
 
     def test_question1(self):
         """

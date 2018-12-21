@@ -84,11 +84,29 @@ own_func = dict(
     oun_003=lambda sentence, place, y, y_1, y_2:
     1 if y_1 == 'IN' and y_2 == 'NNS' and y == 'JJ' else 0,
 
-    oun_004=lambda sentence, place, y, y_1, y_2:
-    1 if sentence[place] == 'the' and y == 'IN' else 0,
+    oun_004=lambda sentence, place, y, y_1, y_2:  # rework
+    1 if sentence[place].lower() == 'the' and y == 'DT' else 0,
 
     oun_005=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'the' and y == 'IN' else 0,
+
+    oun_006=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'is' and y == 'VBS' else 0,
+
+    oun_007=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'of' and y == 'IN' else 0,
+
+    oun_009=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'to' and y == 'TO' else 0,
+    oun_010=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'a' and y == 'DT' else 0,
+    oun_011=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'and' and y == 'CC' else 0,
+
+    oun_012=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == "'s" and y == 'POS' else 0,
+    oun_013=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place] == 'is' and y == 'VBZ' else 0,
 )
 rapnapak = dict(
     f_100=lambda sentence, place, y, y_1, y_2: \
