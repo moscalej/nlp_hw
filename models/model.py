@@ -45,8 +45,8 @@ class Model:
         self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        self.v = opt_result['x']
+        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        self.v = self.opt_result['x']
 
         return
 
@@ -132,19 +132,9 @@ class Model:
         y_2 = self.token2string[previous_tags[1]]
         y = self.token2string[next_tag]
 
-        f = sentence.to_feature_space2(word_num, y, y_1, y_2)
-        linear = f @ self.v
-        # linear = -f @ self.v #TODO test
+        prop_q = sentence.prob_q(self.v, word_num, y, y_1, y_2)
 
-        non_linear = 0
-        # non_linear = sentence.sentence_non_linear_loss_inner2(self.v, word_num, y, y_2)  # TODO check this
-        result = linear - non_linear
-        # if word_num == 5:
-        #     print("linear")
-        #     print(linear)
-        #     print("result")
-        #     print(result)
-        return result
+        return prop_q
 
     def _viterbi(self, sentence):
         """

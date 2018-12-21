@@ -3,10 +3,11 @@ import pandas as pd
 
 class PreprocessTags:
 
-    def __init__(self):
+    def __init__(self, optimize=False):
         self.x = pd.DataFrame()
         self.y = pd.DataFrame()
         self.path = str()
+        self.optimize = optimize
 
     def load_data(self, path):
         x = []
@@ -19,6 +20,8 @@ class PreprocessTags:
             y+=sentence_tag
         self.x = pd.Series(x)
         self.y = pd.Series(y)
+        if self.optimize == True:
+            self._optimize()
         return self
 
     def load_comp(self, path):
@@ -47,7 +50,26 @@ class PreprocessTags:
         sentence_tag.append('<STOP>')
         return sentence, sentence_tag
 
+    def _optimize(self):
+        self.x = self.x.apply(self.optimizer)
+        t = self.x.value_counts(ascending=False)
+        a = pd.DataFrame([t.tolist(), t.index.tolist()]).T
+        b = a[a[0] < 5]
+        tt = {word: "<" for word in b[1]}
+        self.x = self.x.apply(lambda x: tt[x] if x in tt else x)
+
+    def optimizer(self, word):
+        if len(word) < 4:
+            return word
+        newword = "<"
+        if word[:3] == 'pre':
+            newword = "pre" + "<"
+        if word[:3] == 'ing':
+            newword += 'ing'
+        return newword
+
+
 
 if __name__ == '__main__':
-    a = PreprocessTags().load_comp(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\comp.words')
-    b = PreprocessTags().load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\test.wtag')
+    # a = PreprocessTags().load_comp(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\comp.words')
+    b = PreprocessTags(True).load_data(r'D:\Ale\Documents\Technion\nlp\nlp_hw\data\train.wtag')

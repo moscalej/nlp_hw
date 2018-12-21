@@ -17,6 +17,9 @@ class FinkMos:
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
         self.f_matrix_y_1 = np.empty(self.y.shape,dtype=np.ndarray)
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)
+        self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
+        tc = tag_corpus.shape[0]
+        self.fast_test = np.empty([len(self.word2number), tc, tc, tc, len(tests)], np.int8)
 
     def fill_test(self):
         """
@@ -65,21 +68,22 @@ class FinkMos:
     def to_feature_space2(self, history_i, y, y_1, y_2):
         results = []
         for test in self.tests:
-            test = self.test_f[test]
-            results.append(test(self.x, history_i, y, y_1, y_2))
-        return np.array([results])  # todo check if np.array is faster or list
+            results.append(self.test_f[test](self.x, history_i, y, y_1, y_2))
+        return np.array([results])
 
-
-    def sentence_non_linear_loss_inner2(self, v, history_i, y, y_2):
+    def softmax_denominator(self, v, history_i, y, y_1, y_2):
         results = []
         for tag in self.tag_corpus:
-            results.append(self.to_feature_space2(history_i, y, tag, y_2))
+            results.append(self.to_feature_space2(history_i, tag, y_1, y_2))
         f_matrix = np.concatenate(results, axis=0)
         self.f_matrix_y_1[history_i] = f_matrix
 
-        v_f = self.f_matrix_y_1[history_i] @ v
-        e_val = np.log(np.sum(np.exp(v_f)))
+        e_val = np.sum(np.exp(f_matrix @ v))
         return e_val
+
+    def prob_q(self, v, history_i, y, y_1, y_2):
+        return np.exp(self.to_feature_space2(history_i, y, y_1, y_2) @ v) / self.softmax_denominator(v, history_i, y,
+                                                                                                     y_1, y_2)
 
 
 
