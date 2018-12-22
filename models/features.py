@@ -162,7 +162,6 @@ rare_func = dict(
 
 # Rare features
 
-# Prefix (ing, pre, s, es, ed, ly, er, or, tion, sion, able, ible, al, ial)
 # contains a number
 # contains hyphen '-'
 
@@ -198,27 +197,64 @@ rapnapak = dict(
 
 def template_suffix(suffix_length, suffix):
     res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if sentence[place][0:0 + suffix_length].lower() == suffix else 0,
+                   1 if len(sentence[place]) > suffix_length and sentence[place][
+                                                                 (-suffix_length):].lower() == suffix else 0,
     return res_func
 
 
 def template_prefix(prefix_length, prefix):
     res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if sentence[place][0 + prefix_length:0].lower() == prefix else 0,
+                   1 if len(sentence[place]) > prefix_length and sentence[place][
+                                                                 0:prefix_length].lower() == prefix else 0,
     return res_func
 
 
-suffix_list = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
-               'sion', 'tion']
+def template_w_t(word, tag):  # <w, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place] == word and y == tag else 0,
+    return res_func
+
+
+#  take 25 most frequent words,
+# template_w_t = [(,), (,)]
+
+def template_t_1_t(tag_1, tag):  # <t_1, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if y_1 == tag_1 and y == tag else 0,
+    return res_func
+
+
+def template_t_2_t(tag_2, tag):  # <t_2, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if y_2 == tag_2 and y == tag else 0,
+    return res_func
+
+
+def template_w_2_w_1(word_2, word_1):  # <w_2, w_1>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place - 2] == word_2 and sentence[place - 1] == word_1 else 0,
+    return res_func
+
+
+def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place - 3] == word_3 and sentence[place - 2] == word_2 else 0,
+    return res_func
+
+
+template_w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
+
+suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
+                    'sion', 'tion']
 suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
 suffix_list_adj = ['able', 'ible', 'al', 'esque', 'ful', 'ic', 'ical', 'ious', 'ous', 'ish', 'ive', 'less', 'y']
 suffix_list_adverbs = ['ly', 'ward', 'wards', 'wise']
-all_suffix = suffix_list + suffix_list_adj + suffix_list_adverbs + suffix_list_verbs
+all_suffix = suffix_list_base + suffix_list_adj + suffix_list_adverbs + suffix_list_verbs
 prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', 'ex', 'extra', 'fore', 'homo', 'hype',
                'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
                'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
                'no', 'uni']
-suffix_funcs = {f"suffix_{suffix}": template_suffix(len(suffix), suffix) for ind, suffix in enumerate(all_suffix)}
+suffix_funcs = {f"suffix_{suffix}": template_suffix(len(suffix), suffix) for suffix in all_suffix}
 prefix_funcs = {f"prefix_{prefix}": template_prefix(len(prefix), prefix) for prefix in prefix_list}
 
 
