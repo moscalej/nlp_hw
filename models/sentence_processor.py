@@ -16,38 +16,46 @@ class FinkMos:
         self.y = y
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
         self.f_matrix_y_1 = np.empty(self.y.shape,dtype=np.ndarray)
-        self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)
+        self.linear_loss_done = None
         self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
         tc = tag_corpus.shape[0]
         self.fast_test = dict()
 
-    def fill_test(self):
+    def linear_loss(self, v):
         """
 
         :param tests:
         :return: Return vector where each value is the value of a test
         """
-
-        for i in range(3, self.x.size):
-            self.f_x_y.loc[i, :] = np.array(self.to_feature_space2(i, self.y[i], self.y[i - 1], self.y[i - 2])) * 0.1
-        return self
+        feaures = []
+        if self.linear_loss_done == None:
+            for i in range(3, self.x.size):
+                temp = self.to_feature_space2(i, self.y[i], self.y[i - 1], self.y[i - 2])
+                if len(temp) > 0:
+                    feaures.append(temp)
+            self.linear_loss_done = pd.Series(feaures)
+        loss = self.linear_loss_done.apply(lambda x: np.sum(v[x]))
+        return np.sum(loss)
 
     def sentence_non_linear_loss_inner(self, v, h_word_i):
         if self.f_matrix[h_word_i] is None:
             results = []
             for tag in self.tag_corpus:
-                results.append(self.to_feature_space2(h_word_i, tag, self.y[h_word_i - 1], self.y[h_word_i - 2]))
-            f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix[h_word_i] = f_matrix * 0.1  # A(i,j) = [i is the word in the curpus , j is the test done]
-        v_f = self.f_matrix[h_word_i] @ v
+                temp = self.to_feature_space2(h_word_i, tag, self.y[h_word_i - 1], self.y[h_word_i - 2])
+
+                results.append(temp)
+            f_matrix = pd.Series(results)
+            self.f_matrix[h_word_i] = f_matrix
+        v_f = self.f_matrix[h_word_i].apply(lambda x: np.sum(v[x]))
         e_val = np.sum(np.exp(v_f))
         return e_val
 
     def sentence_non_lineard_loss(self, v):
         values = []
-        for word in range(2, self.y.shape[0]):
+        for word in range(2, self.x.shape[0]):
             values.append(self.sentence_non_linear_loss_inner(v, word))
-        sentence_normal = np.sum(np.log(np.array(values)))
+        logvals = np.log(np.array(values))
+        sentence_normal = np.sum(logvals)
         return sentence_normal
 
     def to_feature_space2(self, history_i, y, y_1, y_2):
@@ -56,10 +64,11 @@ class FinkMos:
             results = self.fast_test[hash_name]
         else:
             results = []
-            for test in self.tests:
-                results.append(self.test_f[test](self.x, history_i, y, y_1, y_2))
-                self.fast_test[hash_name] = results
-        return np.array([results])
+            for index, test in enumerate(self.tests):
+                if self.test_f[test](self.x, history_i, y, y_1, y_2) == 1:
+                    results.append(index)
+            self.fast_test[hash_name] = results
+        return results
 
     def softmax_denominator(self, v, history_i, y, y_1, y_2):
         results = []
@@ -74,11 +83,6 @@ class FinkMos:
     def prob_q(self, v, history_i, y, y_1, y_2):
         return np.exp(self.to_feature_space2(history_i, y, y_1, y_2) @ v) / self.softmax_denominator(v, history_i, y,
                                                                                                      y_1, y_2)
-
-
-
-
-
 
 
 class CustomFeatures:

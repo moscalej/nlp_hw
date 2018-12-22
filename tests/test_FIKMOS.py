@@ -1,9 +1,9 @@
 import unittest
-from models.prerocesing import PreprocessTags
-from models.sentence_processor import FinkMos
-from models.model import Model
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
+from models.sentence_processor import FinkMos
 
 # y_tags = [ 'IN', 'NN', 'DT', 'PRP', 'CC', 'RB', 'NNS', 'JJ', '``', 'EX',
 #        'NNP', 'CD', 'VBG', 'UH', 'PRP$', 'WRB', 'WP', 'VBZ', 'RBR',
@@ -28,7 +28,7 @@ class test_rapnaparkhi(unittest.TestCase):
     def test_features(self):
         r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
         print()
-        print(r.fill_test())
+        print(r.linear_loss())
 
     def test_fs2(self):
         r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
