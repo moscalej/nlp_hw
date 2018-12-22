@@ -37,13 +37,12 @@ class test_model(unittest.TestCase):
             r'..\data\train2.wtag')
         a = model1.fit(data.x, data.y)
         results = dict(
-            test_sum=model1.lin_loss_matrix_x_y.sum().to_dict(),
+
             v=model1.v.tolist(),
-            compare={test: dict(v_val=v_val, sum=sum) for test, v_val, sum in
-                     zip(tests, model1.v.tolist(), model1.lin_loss_matrix_x_y.sum().tolist())}
+            compare={test: dict(v_val=v_val, sum=sum) for test, v_val in
+                     zip(tests, model1.v.tolist())}
         )
 
-        print(model1.lin_loss_matrix_x_y.sum())
         print(yaml.dump(results))
         t = time.localtime()
         with open(fr"../training/report_{t.tm_hour}+{t.tm_min}_{t.tm_mday}_{t.tm_mon}.YAML", 'w') as stream:
