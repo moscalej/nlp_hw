@@ -34,7 +34,7 @@ class test_model(unittest.TestCase):
         tests = data_loaded['tests']
         model1 = Model(tests)
         data = PreprocessTags(True).load_data(
-            r'..\data\train.wtag')
+            r'..\data\train2.wtag')
         a = model1.fit(data.x, data.y)
         results = dict(
             test_sum=model1.lin_loss_matrix_x_y.sum().to_dict(),
