@@ -34,7 +34,7 @@ class test_model(unittest.TestCase):
         tests = data_loaded['tests']
         model1 = Model(tests)
         data = PreprocessTags().load_data(
-            r'..\data\test.wtag')
+            r'..\data\train.wtag')
         a = model1.fit(data.x, data.y)
         results = dict(
             test_sum=model1.lin_loss_matrix_x_y.sum().to_dict(),
@@ -42,7 +42,7 @@ class test_model(unittest.TestCase):
             compare={test: dict(v_val=v_val, sum=sum) for test, v_val, sum in
                      zip(tests, model1.v.tolist(), model1.lin_loss_matrix_x_y.sum().tolist())}
         )
-        print(model1.v)
+
         print(model1.lin_loss_matrix_x_y.sum())
         print(yaml.dump(results))
         t = time.localtime()
