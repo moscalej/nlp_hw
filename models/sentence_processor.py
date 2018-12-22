@@ -19,7 +19,7 @@ class FinkMos:
         self.f_x_y = pd.DataFrame(np.zeros([self.x.shape[0], len(tests)]), columns=tests)
         self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
         tc = tag_corpus.shape[0]
-        self.fast_test = np.empty([len(self.word2number), tc, tc, tc, len(tests)], np.int8)
+        self.fast_test = np.empty([len(self.word2number), tc, tc, tc])
 
     def fill_test(self):
         """
@@ -27,17 +27,18 @@ class FinkMos:
         :param tests:
         :return: Return vector where each value is the value of a test
         """
-        for test in self.tests:
-            self.run_line_tests(test)
+        for i in range(3, self.x.size):
+            list_1 = []
+            for test_name in self.tests:
+                test = self.test_f[test_name]
+                list_1.append(test(self.x, i, self.y[i], self.y[i - 1], self.y[i - 2]))
+            self.f_x_y.loc[i, :] = np.array(list_1) * 0.1
         return self
 
     def run_line_tests(self, test_name):  # f(i,h_i)
 
-        test = self.test_f[test_name]
+
         list_1 = [0, 0, 0]
-        for i in range(3, self.x.size):
-            list_1.append(test(self.x,i, self.y[i], self.y[i-1], self.y[i-2]))
-        self.f_x_y.loc[:, test_name] = list_1
 
     def to_feature_space(self, history_i, y):
         results = []
@@ -52,7 +53,8 @@ class FinkMos:
             for word in self.tag_corpus:
                 results.append(self.to_feature_space(history_word_index, word))
             f_matrix = np.concatenate(results, axis=0)
-            self.f_matrix[history_word_index] = f_matrix  # A(i,j) = [i is the word in the curpus , j is the test done]
+            self.f_matrix[
+                history_word_index] = f_matrix * 0.1  # A(i,j) = [i is the word in the curpus , j is the test done]
 
         v_f = self.f_matrix[history_word_index] @ v
         e_val = np.sum(np.exp(v_f))
