@@ -72,6 +72,8 @@ class test_Scode(unittest.TestCase):
         sc = Score(most_reacuent_tags)
         sc.fit(roll_y, roll_y_hat)
         cm = sc.matrix_confusion()
+        acc_dict = sc.acc_per_tag(y, y_hat)
+        print(acc_dict)
         print(cm)
         # sc = Score(tags)
         # sc.fit(y, y_bad)
