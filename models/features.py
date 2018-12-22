@@ -72,42 +72,107 @@ biagrams = dict(
 
 own_func = dict(
 
-    oun_000=lambda sentence, place, y, y_1, y_2:
+    own_000=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'the' and y == 'IN' else 0,
 
-    oun_001=lambda sentence, place, y, y_1, y_2:
+    own_001=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'about' and y == 'IN' else 0,
 
-    oun_002=lambda sentence, place, y, y_1, y_2:
+    own_002=lambda sentence, place, y, y_1, y_2:
     1 if y_1 == 'IN' and y == 'JJ' else 0,
 
-    oun_003=lambda sentence, place, y, y_1, y_2:
+    own_003=lambda sentence, place, y, y_1, y_2:
     1 if y_1 == 'IN' and y_2 == 'NNS' and y == 'JJ' else 0,
 
-    oun_004=lambda sentence, place, y, y_1, y_2:  # rework
+    own_004=lambda sentence, place, y, y_1, y_2:  # rework
     1 if sentence[place].lower() == 'the' and y == 'DT' else 0,
 
-    oun_005=lambda sentence, place, y, y_1, y_2:
+    own_005=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'the' and y == 'IN' else 0,
 
-    oun_006=lambda sentence, place, y, y_1, y_2:
+    own_006=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'is' and y == 'VBS' else 0,
 
-    oun_007=lambda sentence, place, y, y_1, y_2:
+    own_007=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'of' and y == 'IN' else 0,
 
-    oun_009=lambda sentence, place, y, y_1, y_2:
+    own_009=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'to' and y == 'TO' else 0,
-    oun_010=lambda sentence, place, y, y_1, y_2:
+
+    own_010=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'a' and y == 'DT' else 0,
-    oun_011=lambda sentence, place, y, y_1, y_2:
+
+    own_011=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'and' and y == 'CC' else 0,
 
-    oun_012=lambda sentence, place, y, y_1, y_2:
+    own_012=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == "'s" and y == 'POS' else 0,
-    oun_013=lambda sentence, place, y, y_1, y_2:
+
+    own_013=lambda sentence, place, y, y_1, y_2:
     1 if sentence[place] == 'is' and y == 'VBZ' else 0,
+
+    # capital letter features:
+    own_014=lambda sentence, place, y, y_1, y_2:  # first letter is capital letter
+    1 if sentence[place][0] != sentence[place][0].lower else 0,
+
+    own_015=lambda sentence, place, y, y_1, y_2:  # capital letter not in the beginning
+    1 if sentence[place][1:-1] != sentence[place][1:-1].lower else 0,
+
 )
+
+rare_func = dict(
+    # Prefix (un, re, in, im, dis, dif, en, em, pre, mis, a)
+    rar_000=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 'un' else 0,
+
+    rar_001=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 're' else 0,
+
+    rar_002=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 'in' else 0,
+
+    rar_003=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 'im' else 0,
+
+    rar_004=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:2].lower() == 'dis' else 0,
+
+    rar_005=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:2].lower() == 'dif' else 0,
+
+    rar_006=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 'en' else 0,
+
+    rar_007=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:1].lower() == 'em' else 0,
+
+    rar_008=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:2].lower() == 'pre' else 0,
+
+    rar_009=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:2].lower() == 'mis' else 0,
+
+    rar_010=lambda sentence, place, y, y_1, y_2:
+    1 if sentence[place][0:0].lower() == 'a' else 0,
+)
+
+# 'to'
+# 'in' - (particle words)
+# 'can't'
+
+# Rare features
+
+# Prefix (ing, pre, s, es, ed, ly, er, or, tion, sion, able, ible, al, ial)
+# contains a number
+# contains hyphen '-'
+
+# Verb Forms
+# has\have\had been , ed
+
+# Particle verbs
+# in\on\up\to\ "sink", "hang"
+
+
 rapnapak = dict(
     f_100=lambda sentence, place, y, y_1, y_2: \
         1 if sentence[place] == 'base' and y == 'Vt' else 0,
@@ -139,4 +204,5 @@ class Features:
         functions.update(trigrams)
         functions.update(biagrams)
         functions.update(own_func)
+        functions.update(rare_func)
         return functions
