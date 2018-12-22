@@ -59,14 +59,18 @@ class PreprocessTags:
         self.x = self.x.apply(lambda x: tt[x] if x in tt else x)
 
     def optimizer(self, word):
+        change = False
+        newword = "<"
         if len(word) < 4:
             return word
-        newword = "<"
         if word[:3] == 'pre':
             newword = "pre" + "<"
-        if word[:3] == 'ing':
+            change = True
+        if word[-3:] == 'ing':
             newword += 'ing'
-        return newword
+            change = True
+
+        return newword if change else word
 
 
 

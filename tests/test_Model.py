@@ -33,7 +33,7 @@ class test_model(unittest.TestCase):
             data_loaded = yaml.load(stream)
         tests = data_loaded['tests']
         model1 = Model(tests)
-        data = PreprocessTags().load_data(
+        data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
         a = model1.fit(data.x, data.y)
         results = dict(
