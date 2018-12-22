@@ -28,7 +28,7 @@ class FinkMos:
         :return: Return vector where each value is the value of a test
         """
         feaures = []
-        if self.linear_loss_done == None:
+        if self.linear_loss_done is None:
             for i in range(3, self.x.size):
                 temp = self.to_feature_space2(i, self.y[i], self.y[i - 1], self.y[i - 2])
                 if len(temp) > 0:
@@ -38,16 +38,17 @@ class FinkMos:
         return np.sum(loss)
 
     def sentence_non_linear_loss_inner(self, v, h_word_i):
+        y_1, y_2 = self.y[h_word_i - 1], self.y[h_word_i - 2]
         if self.f_matrix[h_word_i] is None:
             results = []
             for tag in self.tag_corpus:
-                temp = self.to_feature_space2(h_word_i, tag, self.y[h_word_i - 1], self.y[h_word_i - 2])
-
-                results.append(temp)
+                temp = self.to_feature_space2(h_word_i, tag, y_1, y_2)
+                if len(temp) > 0:
+                    results.append(temp)
             f_matrix = pd.Series(results)
             self.f_matrix[h_word_i] = f_matrix
         v_f = self.f_matrix[h_word_i].apply(lambda x: np.sum(v[x]))
-        e_val = np.sum(np.exp(v_f))
+        e_val = np.sum(np.exp(v_f)) + self.tag_corpus.size - v_f.shape[0]
         return e_val
 
     def sentence_non_lineard_loss(self, v):
@@ -76,13 +77,13 @@ class FinkMos:
             results.append(self.to_feature_space2(history_i, tag, y_1, y_2))
         f_matrix = np.concatenate(results, axis=0)
         self.f_matrix_y_1[history_i] = f_matrix
-
         e_val = np.sum(np.exp(f_matrix @ v))
         return e_val
 
     def prob_q(self, v, history_i, y, y_1, y_2):
-        return np.exp(self.to_feature_space2(history_i, y, y_1, y_2) @ v) / self.softmax_denominator(v, history_i, y,
-                                                                                                     y_1, y_2)
+        features = self.to_feature_space2(history_i, y, y_1, y_2)
+        features_v = np.exp(np.sum(v[features]))
+        return features_v / self.softmax_denominator(v, history_i, y, y_1, y_2)
 
 
 class CustomFeatures:
