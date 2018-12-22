@@ -203,7 +203,7 @@ class Model:
     def _loss(self, v):
         positive = self._calculate_positive(v)
         non_linear = self._calculate_nonlinear(v)
-        penalty = 0.1 * np.linalg.norm(v)
+        penalty = 0.0 * np.linalg.norm(v)
 
         return non_linear + penalty - positive
 
