@@ -46,7 +46,7 @@ class test_model(unittest.TestCase):
         print(model1.lin_loss_matrix_x_y.sum())
         print(yaml.dump(results))
         t = time.localtime()
-        with open(fr"../training/report_{t.tm_hour}+{t.tm_min}_{t.tm_mday}_{t.tm_mon}.YALM", 'w') as stream:
+        with open(fr"../training/report_{t.tm_hour}+{t.tm_min}_{t.tm_mday}_{t.tm_mon}.YAML", 'w') as stream:
             yaml.dump(results, stream, default_flow_style=False)
 
     def test_question1(self):

@@ -33,13 +33,7 @@ class FinkMos:
                 test = self.test_f[test_name]
                 list_1.append(test(self.x, i, self.y[i], self.y[i - 1], self.y[i - 2]))
             self.f_x_y.loc[i, :] = np.array(list_1) * 0.1
-
         return self
-
-    def run_line_tests(self, test_name):  # f(i,h_i)
-
-
-        list_1 = [0, 0, 0]
 
     def to_feature_space(self, history_i, y):
         results = []
