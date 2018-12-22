@@ -170,7 +170,7 @@ rare_func = dict(
 # has\have\had been , ed
 
 # Particle verbs
-# in\on\up\to\ "sink", "hang"
+# in\on\up', 'o\ "sink", "hang"
 
 
 rapnapak = dict(
@@ -196,6 +196,32 @@ rapnapak = dict(
 )
 
 
+def template_suffix(suffix_length, suffix):
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place][0:0 + suffix_length].lower() == suffix else 0,
+    return res_func
+
+
+def template_prefix(prefix_length, prefix):
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place][0 + prefix_length:0].lower() == prefix else 0,
+    return res_func
+
+
+suffix_list = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
+               'sion', 'tion']
+suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
+suffix_list_adj = ['able', 'ible', 'al', 'esque', 'ful', 'ic', 'ical', 'ious', 'ous', 'ish', 'ive', 'less', 'y']
+suffix_list_adverbs = ['ly', 'ward', 'wards', 'wise']
+all_suffix = suffix_list + suffix_list_adj + suffix_list_adverbs + suffix_list_verbs
+prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', 'ex', 'extra', 'fore', 'homo', 'hype',
+               'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
+               'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
+               'no', 'uni']
+suffix_funcs = {f"suffix_{suffix}": template_suffix(len(suffix), suffix) for ind, suffix in enumerate(all_suffix)}
+prefix_funcs = {f"prefix_{prefix}": template_prefix(len(prefix), prefix) for prefix in prefix_list}
+
+
 class Features:
     def get_tests(self):
         functions = dict(
@@ -205,4 +231,6 @@ class Features:
         functions.update(biagrams)
         functions.update(own_func)
         functions.update(rare_func)
+        functions.update(suffix_funcs)
+        functions.update(prefix_funcs)
         return functions
