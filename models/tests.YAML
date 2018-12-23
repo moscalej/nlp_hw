@@ -21,99 +21,29 @@ tests: [
   bi_004,
   bi_005,
   bi_006,
-  #  oun_000,
-  #  oun_001,
-  oun_002,
-  oun_003,
-  oun_004,
-  #  oun_005,
-  #  oun_006,
-  oun_007,
-  oun_009,
-  oun_010,
-  oun_011,
-  oun_012,
-  oun_013,
-  suffix_acysuffix_al
-  suffix_ance
-  suffix_ence
-  suffix_dom
-  suffix_er
-  suffix_or
-  suffix_ism
-  suffix_ist
-  suffix_ity
-  suffix_ty
-  suffix_ment
-  suffix_ness
-  suffix_ship
-  suffix_sion
-  suffix_tion
-  suffix_able
-  suffix_ible
-  suffix_al
-  suffix_esque
-  suffix_ful
-  suffix_ic
-  suffix_ical
-  suffix_ious
-  suffix_ous
-  suffix_ish
-  suffix_ive
-  suffix_less
-  suffix_y
-  suffix_ly
-  suffix_ward
-  suffix_wards
-  suffix_wise
-  suffix_ate
-  suffix_en
-  suffix_ify
-  suffix_fy
-  suffix_ise
-  suffix_ize
-  prefix_ante	
-  prefix_ante
-  prefix_circum
-  prefix_co
-  prefix_de
-  prefix_dis
-  prefix_em
-  prefix_en
-  prefix_epi
-  prefix_ex
-  prefix_extra
-  prefix_fore
-  prefix_homo
-  prefix_hype
-  prefix_il
-  prefix_im
-  prefix_in
-  prefix_ir
-  prefix_im
-  prefix_in
-  prefix_infra
-  prefix_intra
-  prefix_inter
-  prefix_macro
-  prefix_micro
-  prefix_mid
-  prefix_mis
-  prefix_mono
-  prefix_non
-  prefix_omni
-  prefix_para
-  prefix_post
-  prefix_pre
-  prefix_re
-  prefix_ag
-  prefix_semi
-  prefix_sub
-  prefix_super
-  prefix_therm
-  prefix_trans
-  prefix_tri
-  prefix_un
-  prefix_no
-  prefix_uni
+  #  own_000,
+  #  own_001,
+  own_002,
+  own_003,
+  own_004,
+  #  own_005,
+  #  own_006,
+  own_007,
+  own_009,
+  own_010,
+  own_011,
+  own_012,
+  own_013,
+  rar_000,
+  rar_001,
+  rar_002,
+  rar_003,
+  rar_004,
+  rar_005,
+  rar_006,
+  rar_007,
+  rar_008,
+  rar_009,
+  rar_010
+
 ]
