@@ -215,7 +215,7 @@ def template_w_t(word, tag):  # <w, t>
     return res_func
 
 
-#  take 25 most frequent words,
+#  take 25 most frequent words, and 10 most frequent tags and iterate over all variations
 # template_w_t = [(,), (,)]
 
 def template_t_1_t(tag_1, tag):  # <t_1, t>
@@ -243,7 +243,7 @@ def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
 
 
 template_w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
-
+w_2_w_1_funcs = {f"suffix_{tup(0)}{tup(1)}": template_suffix(tup(0), tup(1)) for tup in template_w_2_w_1_list}
 suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
                     'sion', 'tion']
 suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
