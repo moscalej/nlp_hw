@@ -45,9 +45,10 @@ class Model:
         self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
+        self._loss(self.v)
         # TODO: consider adding a test removal mechanism (from self.tests)
-        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        self.v = self.opt_result['x']
+        # self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        # self.v = self.opt_result['x']
 
         return
 
@@ -196,9 +197,7 @@ class Model:
     def _vectorize(self):
 
         a = FinkMos(self.x, self.y, tests=self.tests, tag_corpus=self.tag_corpus)
-        a.fill_test()
         self.vector_x_y = a  # TODO change names
-        self.lin_loss_matrix_x_y = a.f_x_y
 
     def _loss(self, v):
         positive = self._calculate_positive(v)
@@ -218,9 +217,9 @@ class Model:
         """
         assert isinstance(v, np.ndarray)
 
-        dot_m = self.lin_loss_matrix_x_y @ v
-        return dot_m.sum()
+        dot_m = self.vector_x_y.linear_loss(v)
+        return dot_m
 
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
-        return np.sum(self.vector_x_y.sentence_non_lineard_loss(v))
+        return self.vector_x_y.sentence_non_lineard_loss(v)

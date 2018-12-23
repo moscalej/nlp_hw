@@ -162,7 +162,6 @@ rare_func = dict(
 
 # Rare features
 
-# Prefix (ing, pre, s, es, ed, ly, er, or, tion, sion, able, ible, al, ial)
 # contains a number
 # contains hyphen '-'
 
@@ -170,7 +169,7 @@ rare_func = dict(
 # has\have\had been , ed
 
 # Particle verbs
-# in\on\up\to\ "sink", "hang"
+# in\on\up', 'o\ "sink", "hang"
 
 
 rapnapak = dict(
@@ -196,6 +195,83 @@ rapnapak = dict(
 )
 
 
+########################################################################################################
+# Feature Templates
+def template_suffix(suffix_length, suffix, tag):
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if len(sentence[place]) > suffix_length and \
+                        sentence[place][(-suffix_length):].lower() == suffix and \
+                        y == tag else 0
+    return res_func
+
+
+def template_prefix(prefix_length, prefix, tag):
+    res_func = lambda sentence, place, y, y_1, y_2: \
+        1 if len(sentence[place]) > prefix_length and \
+             sentence[place][0:prefix_length].lower() == prefix and \
+             y == tag else 0
+    return res_func
+
+
+def template_w_t(word, tag):  # <w, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place] == word and y == tag else 0,
+    return res_func
+
+
+#  take 25 most frequent words, and 10 most frequent tags and iterate over all variations
+# template_w_t = [(,), (,)]
+
+def template_t_1_t(tag_1, tag):  # <t_1, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if y_1 == tag_1 and y == tag else 0,
+    return res_func
+
+
+def template_t_2_t(tag_2, tag):  # <t_2, t>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if y_2 == tag_2 and y == tag else 0,
+    return res_func
+
+
+def template_w_2_w_1(word_2, word_1):  # <w_2, w_1>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place - 2] == word_2 and sentence[place - 1] == word_1 else 0,
+    return res_func
+
+
+def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
+    res_func = lambda sentence, place, y, y_1, y_2: \
+                   1 if sentence[place - 3] == word_3 and sentence[place - 2] == word_2 else 0,
+    return res_func
+
+
+w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
+w_3_w_2_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
+suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
+                    'sion', 'tion']
+suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
+suffix_list_adj = ['able', 'ible', 'al', 'esque', 'ful', 'ic', 'ical', 'ious', 'ous', 'ish', 'ive', 'less', 'y']
+suffix_list_adverbs = ['ly', 'ward', 'wards', 'wise']
+all_suffix = suffix_list_base + suffix_list_adj + suffix_list_adverbs + suffix_list_verbs
+prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', 'ex', 'extra', 'fore', 'homo', 'hype',
+               'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
+               'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
+               'no', 'uni']
+frequent_tags = ["NN", "IN", "JJ", "DT", "NNS", "CC", "VBN", "RB", "VBD", "CD", "VBZ"]
+
+w_2_w_1_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_2_w_1(tup[0], tup[1]) for tup in w_2_w_1_list}
+w_3_w_2_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_3_w_2(tup[0], tup[1]) for tup in w_2_w_1_list}
+
+suffix_funcs_all = {}
+prefix_funcs_all = {}
+for tag in frequent_tags:
+    suffix_funcs = {f"suffix_{suffix}_{tag}": template_suffix(len(suffix), suffix, tag) for suffix in all_suffix}
+    suffix_funcs_all = {**suffix_funcs_all, **suffix_funcs}
+    prefix_funcs = {f"prefix_{prefix}_{tag}": template_prefix(len(prefix), prefix, tag) for prefix in prefix_list}
+    prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
+
+
 class Features:
     def get_tests(self):
         functions = dict(
@@ -205,4 +281,11 @@ class Features:
         functions.update(biagrams)
         functions.update(own_func)
         functions.update(rare_func)
+        functions.update(suffix_funcs)
+        functions.update(prefix_funcs)
         return functions
+
+
+feat = Features()
+feature_dict = feat.get_tests()
+print(feature_dict.keys())
