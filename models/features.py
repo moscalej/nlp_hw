@@ -193,19 +193,23 @@ rapnapak = dict(
     f_107=lambda sentence, place, y, y_1, y_2: \
         1 if place < sentence.size - 1 and sentence[place + 1] == 'the' and y == 'Vt' else 0,
 )
+
+
 ########################################################################################################
 # Feature Templates
-def template_suffix(suffix_length, suffix):
+def template_suffix(suffix_length, suffix, tag):
     res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if len(sentence[place]) > suffix_length and sentence[place][
-                                                                 (-suffix_length):].lower() == suffix else 0,
+       1 if len(sentence[place]) > suffix_length and \
+            sentence[place][(-suffix_length):].lower() == suffix and \
+            y == tag else 0,
     return res_func
 
 
-def template_prefix(prefix_length, prefix):
+def template_prefix(prefix_length, prefix, tag):
     res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if len(sentence[place]) > prefix_length and sentence[place][
-                                                                 0:prefix_length].lower() == prefix else 0,
+        1 if len(sentence[place]) > prefix_length and \
+             sentence[place][0:prefix_length].lower() == prefix and \
+             y == tag else 0
     return res_func
 
 
@@ -254,12 +258,19 @@ prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', '
                'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
                'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
                'no', 'uni']
-
+frequent_tags = ["NN", "IN", "JJ", "DT", "NNS", "CC", "VBN", "RB", "VBD", "CD", "VBZ"]
 
 w_2_w_1_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_2_w_1(tup[0], tup[1]) for tup in w_2_w_1_list}
 w_3_w_2_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_3_w_2(tup[0], tup[1]) for tup in w_2_w_1_list}
-suffix_funcs = {f"suffix_{suffix}": template_suffix(len(suffix), suffix) for suffix in all_suffix}
-prefix_funcs = {f"prefix_{prefix}": template_prefix(len(prefix), prefix) for prefix in prefix_list}
+
+suffix_funcs_all = {}
+prefix_funcs_all = {}
+for tag in frequent_tags:
+    suffix_funcs = {f"suffix_{suffix}_{tag}": template_suffix(len(suffix), suffix, tag) for suffix in all_suffix}
+    suffix_funcs_all = {**suffix_funcs_all, **suffix_funcs}
+    prefix_funcs = {f"prefix_{prefix}_{tag}": template_prefix(len(prefix), prefix, tag) for prefix in prefix_list}
+    prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
+
 
 
 class Features:
@@ -274,3 +285,7 @@ class Features:
         functions.update(suffix_funcs)
         functions.update(prefix_funcs)
         return functions
+
+feat = Features()
+feature_dict = feat.get_tests()
+print(feature_dict.keys())
