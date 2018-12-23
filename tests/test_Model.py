@@ -29,7 +29,7 @@ y_tags = y.unique()
 
 class test_model(unittest.TestCase):
     def test_fit(self):
-        with open(r"..\models\tests.YALM", 'r') as stream:
+        with open(r"..\models\tests.YAML", 'r') as stream:
             data_loaded = yaml.load(stream)
         tests = data_loaded['tests']
         model1 = Model(tests)

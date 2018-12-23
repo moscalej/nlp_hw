@@ -46,8 +46,8 @@ class Model:
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         # TODO: consider adding a test removal mechanism (from self.tests)
-        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        self.v = self.opt_result['x']
+        # self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        # self.v = self.opt_result['x']
 
         return
 

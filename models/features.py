@@ -193,8 +193,8 @@ rapnapak = dict(
     f_107=lambda sentence, place, y, y_1, y_2: \
         1 if place < sentence.size - 1 and sentence[place + 1] == 'the' and y == 'Vt' else 0,
 )
-
-
+########################################################################################################
+# Feature Templates
 def template_suffix(suffix_length, suffix):
     res_func = lambda sentence, place, y, y_1, y_2: \
                    1 if len(sentence[place]) > suffix_length and sentence[place][
@@ -242,8 +242,8 @@ def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
     return res_func
 
 
-template_w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
-w_2_w_1_funcs = {f"suffix_{tup(0)}{tup(1)}": template_suffix(tup(0), tup(1)) for tup in template_w_2_w_1_list}
+w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
+w_3_w_2_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
 suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
                     'sion', 'tion']
 suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
@@ -254,6 +254,10 @@ prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', '
                'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
                'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
                'no', 'uni']
+
+
+w_2_w_1_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_2_w_1(tup[0], tup[1]) for tup in w_2_w_1_list}
+w_3_w_2_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_3_w_2(tup[0], tup[1]) for tup in w_2_w_1_list}
 suffix_funcs = {f"suffix_{suffix}": template_suffix(len(suffix), suffix) for suffix in all_suffix}
 prefix_funcs = {f"prefix_{prefix}": template_prefix(len(prefix), prefix) for prefix in prefix_list}
 
