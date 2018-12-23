@@ -199,9 +199,9 @@ rapnapak = dict(
 # Feature Templates
 def template_suffix(suffix_length, suffix, tag):
     res_func = lambda sentence, place, y, y_1, y_2: \
-       1 if len(sentence[place]) > suffix_length and \
-            sentence[place][(-suffix_length):].lower() == suffix and \
-            y == tag else 0,
+                   1 if len(sentence[place]) > suffix_length and \
+                        sentence[place][(-suffix_length):].lower() == suffix and \
+                        y == tag else 0
     return res_func
 
 
@@ -272,7 +272,6 @@ for tag in frequent_tags:
     prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
 
 
-
 class Features:
     def get_tests(self):
         functions = dict(
@@ -285,6 +284,7 @@ class Features:
         functions.update(suffix_funcs)
         functions.update(prefix_funcs)
         return functions
+
 
 feat = Features()
 feature_dict = feat.get_tests()
