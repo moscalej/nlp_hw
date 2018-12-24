@@ -158,7 +158,7 @@ class Model:
         all_tags = self.tag_corpus_tokenized
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
-        p_table = np.zeros(dims, dtype=np.float)  # pi(k,u,v) - maximum probability of tag sequence
+        p_table = np.zeros(dims, dtype=np.float8)  # pi(k,u,v) - maximum probability of tag sequence
 
         # ending in tags u,v at position k
         # p_table[0, 0, 0] = 1  # init
