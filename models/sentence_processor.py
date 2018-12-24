@@ -20,6 +20,7 @@ class FinkMos:
         self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
         tc = tag_corpus.shape[0]
         self.fast_test = dict()
+        self.fast_predict = dict()
 
     def linear_loss(self, v):
         """
@@ -72,13 +73,22 @@ class FinkMos:
         return results
 
     def softmax_denominator(self, v, history_i, y, y_1, y_2):
-        results = []
-        for tag in self.tag_corpus:
-            results.append(self.to_feature_space2(history_i, tag, y_1, y_2))
-        f_matrix = np.concatenate(results, axis=0)
-        self.f_matrix_y_1[history_i] = f_matrix
-        e_val = np.sum(np.exp(f_matrix @ v))
+
+        hash_name = f"{self.x[history_i]}{y_1}{y_2}"
+        if hash_name in self.fast_predict:
+            e_val = self.fast_predict[hash_name]
+        else:
+            results = []
+            for tag in self.tag_corpus:
+                temp = self.to_feature_space2(history_i, tag, y_1, y_2)
+                if len(temp) > 0:
+                    results.append(temp)
+            f_matrix = pd.Series(results)
+            v_f = f_matrix.apply(lambda x: np.sum(v[x]))
+            e_val = np.sum(np.exp(v_f)) + self.tag_corpus.size - v_f.shape[0]
+            self.fast_predict[hash_name] = e_val
         return e_val
+
 
     def prob_q(self, v, history_i, y, y_1, y_2):
         features = self.to_feature_space2(history_i, y, y_1, y_2)

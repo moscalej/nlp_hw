@@ -1,7 +1,7 @@
 import yaml
 
 from model import *
-from prerocesing import *
+from models.prerocesing import *
 
 # Create features
 with open(r"..\models\tests.YAML", 'r') as stream:
@@ -11,7 +11,7 @@ tests = tests_dict['tests']
 # tests = pass
 # Load Data
 data = PreprocessTags(True).load_data(
-    r'..\data\train.wtag')
+    r'.\data\train.wtag')
 
 model1 = Model(tests)
 # create f_x_y "matrix" for any x,y save indices of non zero tests TODO decide

@@ -128,6 +128,7 @@ class test_model(unittest.TestCase):
                 acc=model1.accuracy(y_hat=y_hat, y=data.y),
                 acc_per_tag=model1.acc_per_tag(y_hat=y_hat, y=data.y)
             )
+
         except:
             results = dict(
                 v=model1.v.tolist(),
@@ -137,3 +138,6 @@ class test_model(unittest.TestCase):
         t = time.localtime()
         with open(fr"../training/report_{t.tm_hour}+{t.tm_min}_{t.tm_mday}_{t.tm_mon}.YAML", 'w') as stream:
             yaml.dump(results, stream, default_flow_style=False)
+
+    def test_predict(self):
+        pass

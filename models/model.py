@@ -47,13 +47,13 @@ class Model:
         self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
-        self._loss(self.v)
+        # self._loss(self.v)
 
-        with open('fast_test.p', 'wb') as pic:
-            pickle.dump(self.vector_x_y.fast_test, pic)
+        with open('fast_test.p', 'rb') as pic:
+            self.vector_x_y.fast_test= pickle.load( pic)
 
-        with open('f_matrix.p', 'wb') as pic2:
-            pickle.dump(self.vector_x_y.f_matrix, pic2)
+        with open('f_matrix.p', 'rb') as pic2:
+            self.vector_x_y.f_matrix =pickle.load(pic2)
 
         # TODO: consider adding a test removal mechanism (from self.tests)
         self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
@@ -207,7 +207,7 @@ class Model:
     def _loss(self, v):
         positive = self._calculate_positive(v)
         non_linear = self._calculate_nonlinear(v)
-        penalty = 0.0 * np.linalg.norm(v)
+        penalty = 0.1 * np.linalg.norm(v)
 
         return non_linear + penalty - positive
 
