@@ -187,9 +187,9 @@ class Model:
                         options.append(p_table[k - 1, t_2, prev1_tag_u] * self.model_function(next_tag=curr_tag_v, word_num=k,
                                                                                   previous_tags=[prev1_tag_u, t_2],
                                                                                   sentence=sentence_fm))
-                    # print("num of options: " + str(len(np.unique(options))))
-                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[np.argmax(options)]  # taking the relevant tag from optional list
-                    p_table[k, prev1_tag_u, curr_tag_v] = options[bp_table[k, prev1_tag_u, curr_tag_v]]
+                    ind_in_options = np.argmax(options)
+                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[ind_in_options]  # taking the relevant tag from optional list
+                    p_table[k, prev1_tag_u, curr_tag_v] = options[ind_in_options]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
                                                                         bp_table[num_words - 1, :, :].shape)  # argmax()
 
