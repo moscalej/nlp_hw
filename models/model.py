@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
@@ -46,9 +48,16 @@ class Model:
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         self._loss(self.v)
+
+        with open('fast_test.p', 'wb') as pic:
+            pickle.dump(self.vector_x_y.fast_test, pic)
+
+        with open('f_matrix.p', 'wb') as pic2:
+            pickle.dump(self.vector_x_y.f_matrix, pic2)
+
         # TODO: consider adding a test removal mechanism (from self.tests)
-        # self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        # self.v = self.opt_result['x']
+        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        self.v = self.opt_result['x']
 
         return
 
@@ -66,34 +75,32 @@ class Model:
         tokenized_ans = self._viterbi(x)
 
         # translate to tags
-        tag_ans = [self.token2string[token] for token in tokenized_ans]
+        tag_ans = pd.Series([self.token2string[token] for token in tokenized_ans])
         # assert isinstance(tag_ans, pd.DataFrame)
         return tag_ans
 
-    def confusion(self, x, y):
+    def confusion(self, y_hat, y):
         """
 
-        :param x:
-        :type x:
+        :param y_hat:
+        :type y_hat:
         :param y:
         :type y:
         :return:
         :rtype:
         """
-        assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.DataFrame)
-        y_hat = self.predict(x)
+        assert isinstance(y_hat, pd.Series)
+        assert isinstance(y, pd.Series)
 
         roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
         roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
 
-        index = pd.value_counts(y.values.reshape(-1)).index
-        most_reacuent_tags = pd.Series(index, index=index).drop(['<PAD>', '<STOP>', '*'])[:10]
+        most_reacuent_tags = self.tag_corpus[:10]
         sc = Score(most_reacuent_tags)
         sc.fit(roll_y, roll_y_hat)
         return sc.matrix_confusion()
 
-    def accuracy(self, x, y):
+    def accuracy(self, y_hat, y):
         """
 
         :param x:
@@ -103,15 +110,13 @@ class Model:
         :return:
         :rtype:
         """
-        assert isinstance(x, pd.DataFrame)
-        assert isinstance(y, pd.DataFrame)
-        y_hat = self.predict(x)
+        assert isinstance(y_hat, pd.Series)
+        assert isinstance(y, pd.Series)
 
         roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
         roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
 
-        index = pd.value_counts(y.values.reshape(-1)).index
-        most_reacuent_tags = pd.Series(index, index=index).drop(['<PAD>', '<STOP>', '*'])[:10]
+        most_reacuent_tags = self.tag_corpus[:10]
         sc = Score(most_reacuent_tags)
         sc.fit(roll_y, roll_y_hat)
         return sc.over_all_acc()
@@ -223,3 +228,15 @@ class Model:
     def _calculate_nonlinear(self, v):
         assert isinstance(v, np.ndarray)
         return self.vector_x_y.sentence_non_lineard_loss(v)
+
+    def acc_per_tag(self, y_hat, y):
+        assert isinstance(y_hat, pd.Series)
+        assert isinstance(y, pd.Series)
+
+        roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+        roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+
+        most_reacuent_tags = self.tag_corpus[:10]
+        sc = Score(most_reacuent_tags)
+        sc.fit(roll_y, roll_y_hat)
+        return sc.acc_per_tag(roll_y, roll_y_hat)

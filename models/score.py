@@ -27,8 +27,8 @@ class Score:
             temp = most_recurrent_tags.map(fs)
             self.cf[tag] = temp
         self.cf.fillna(0, inplace=True)
-        score = np.trace(self.cf) / np.sum(np.sum(self.cf))
-        return score
+        # score = np.trace(self.cf) / np.sum(np.sum(self.cf))
+        return self.cf
 
     def over_all_acc(self):
         return np.mean(self.y == self.y_hat)

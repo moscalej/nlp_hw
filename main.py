@@ -1,11 +1,7 @@
-from model import *
-from features import *
-from prerocesing import *
-from score import *
-from sentence_processor import *
-from sentence_processor import *
-
 import yaml
+
+from model import *
+from prerocesing import *
 
 # Create features
 with open(r"..\models\tests.YAML", 'r') as stream:
@@ -22,8 +18,8 @@ model1 = Model(tests)
 a = model1.fit(data.x, data.y)
 
 results = dict(
-    test_sum=model1.lin_loss_matrix_x_y.sum().to_dict(),
     v=model1.v.tolist(),
-    compare={test: dict(v_val=v_val, sum=sum) for test, v_val, sum in
-             zip(tests, model1.v.tolist(), model1.lin_loss_matrix_x_y.sum().tolist())}
+    compare={test: dict(v_val=v_val, sum=sum) for test, v_val in
+             zip(tests, model1.v.tolist())}
+
 )
