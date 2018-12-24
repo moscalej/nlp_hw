@@ -24,6 +24,8 @@ y = pd.Series(['*', '*',
                'CC', 'DT', 'JJ', 'NN', 'NNS', 'WDT',
                'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                '<STOP>'])
+x_thin = pd.Series(['*', '*', 'The', 'Treasury', 'is', '<STOP>'])
+y_thin = pd.Series(['*', '*', 'DT', 'NNP', 'VBZ', '<STOP>'])
 y_tags = y.unique()
 
 
@@ -155,8 +157,8 @@ class test_model(unittest.TestCase):
 
         data = PreprocessTags(True).load_data(
             r'..\data\test.wtag')
-        y_hat = model1.predict(x)
-        cm = model1.confusion(y_hat=y_hat, y=y)
+        y_hat = model1.predict(x_thin)
+        cm = model1.confusion(y_hat=y_hat, y=y_thin)
         cm.to_csv(r'../training/confusion_matrix.csv')
         results = dict(
             v=model1.v.tolist(),
