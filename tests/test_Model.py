@@ -140,4 +140,33 @@ class test_model(unittest.TestCase):
             yaml.dump(results, stream, default_flow_style=False)
 
     def test_predict(self):
-        pass
+        with open(r"..\models\tests.YAML", 'r') as stream:
+            tests_dict = yaml.load(stream)
+
+        tests = tests_dict['tests']
+        # tests = pass
+        # Load Data
+        data = PreprocessTags(True).load_data(
+            r'..\data\train.wtag')
+
+        model1 = Model(tests)
+        # create f_x_y "matrix" for any x,y save indices of non zero tests TODO decide
+        a = model1.fit(data.x, data.y)
+
+        data = PreprocessTags(True).load_data(
+            r'..\data\test.wtag')
+        y_hat = model1.predict(x)
+        cm = model1.confusion(y_hat=y_hat, y=y)
+        cm.to_csv(r'../training/confusion_matrix.csv')
+        results = dict(
+            v=model1.v.tolist(),
+            compare={test: dict(v_val=v_val, sum=sum) for test, v_val in
+                     zip(tests, model1.v.tolist())},
+            acc=model1.accuracy(y_hat=y_hat, y=y),
+            acc_per_tag=model1.acc_per_tag(y_hat=y_hat, y=y)
+        )
+
+
+        t = time.localtime()
+        with open(fr"../training/report_acc{t.tm_hour}+{t.tm_min}_{t.tm_mday}_{t.tm_mon}.YAML", 'w') as stream:
+            yaml.dump(results, stream, default_flow_style=False)
