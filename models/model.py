@@ -163,7 +163,7 @@ class Model:
         # ending in tags u,v at position k
         # p_table[0, 0, 0] = 1  # init
         p_table[0, :, :] = 1
-        bp_table = np.empty(dims, dtype=np.int8)
+        bp_table = np.ones(dims, dtype=np.int8)*-1  # -1 implies no update
         answer = [None] * num_words
         for k in range(1, num_words):
             print(str(k) + " out of " + str(num_words - 1))
