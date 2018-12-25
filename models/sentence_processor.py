@@ -15,12 +15,33 @@ class FinkMos:
         self.x = x
         self.y = y
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
-        self.f_matrix_y_1 = np.empty(self.y.shape,dtype=np.ndarray)
+        self.f_matrix_y_1 = np.empty(self.y.shape, dtype=np.ndarray)
         self.linear_loss_done = None
         self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
         tc = tag_corpus.shape[0]
         self.fast_test = dict()
         self.fast_predict = dict()
+
+    def create_tuples(self):
+        tx_0 = self.x.values
+        tx_1 = np.roll(tx_0, -1)
+        tx_2 = np.roll(tx_1, -1)
+        ty_0 = self.y.values
+        ty_1 = np.roll(ty_0, -1)
+        ty_2 = np.roll(ty_1, -1)
+        keys = ty_0 + "_" + ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
+        keys_s = pd.Series(keys)
+        keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2])
+        keys_2.drop_duplicates(inplace=True)
+
+        keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2]).T
+        keys_2.drop_duplicates(inplace=True)
+        values = keys_2.values
+        last_part = self.tag_corpus
+        c = np.dstack([values] * last_part.shape[0])
+        last_part = last_part.reshape([1, 46])
+        d = np.stack([last_part] * c.shape[0], axis=0)
+        t = np.concatenate((d, c), axis=1)
 
     def linear_loss(self, v):
         """
@@ -88,7 +109,6 @@ class FinkMos:
             e_val = np.sum(np.exp(v_f)) + self.tag_corpus.size - v_f.shape[0]
             self.fast_predict[hash_name] = e_val
         return e_val
-
 
     def prob_q(self, v, history_i, y, y_1, y_2):
         features = self.to_feature_space2(history_i, y, y_1, y_2)
