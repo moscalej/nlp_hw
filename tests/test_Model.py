@@ -60,7 +60,7 @@ class test_model(unittest.TestCase):
         :return:
         """
         acc = 90
-        print(acc)
+        print(acc)  #test
         self.assertGreaterEqual(acc, 90, msg=f'current acc:{acc}')
 
     def test_model_function(self):
