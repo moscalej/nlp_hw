@@ -34,14 +34,19 @@ class FinkMos:
         keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2])
         keys_2.drop_duplicates(inplace=True)
 
-        keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2]).T
-        keys_2.drop_duplicates(inplace=True)
         values = keys_2.values
         last_part = self.tag_corpus
         c = np.dstack([values] * last_part.shape[0])
         last_part = last_part.reshape([1, 46])
         d = np.stack([last_part] * c.shape[0], axis=0)
         t = np.concatenate((d, c), axis=1)
+
+    def create_feature_tensor(self, tuple_matrix):
+        dims = (tuple_matrix.shape[0], tuple_matrix.shape[0], len(self.tests))
+        result = np.empty(dims, np.float16)
+        for ind, test in enumerate(self.tests):
+            result[:, :, ind] = np.array(list(map(test, tuple_matrix)))
+        return result
 
     def linear_loss(self, v):
         """
