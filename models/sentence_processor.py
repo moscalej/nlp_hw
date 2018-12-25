@@ -6,12 +6,12 @@ from models.features import Features
 
 class FinkMos:
 
-    def __init__(self, x, y, tests, tag_corpus):
+    def __init__(self, x, y, tag_corpus):
         assert isinstance(x, pd.Series)
         assert isinstance(y, pd.Series)
         self.tag_corpus = tag_corpus
-        self.tests = tests
-        self.test_f = Features().get_tests()
+        # self.tests = tests
+        self.test_dict = Features(None, None).get_tests()
         self.x = x
         self.y = y
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
@@ -44,7 +44,7 @@ class FinkMos:
     def create_feature_tensor(self, tuple_matrix):
         dims = (tuple_matrix.shape[0], tuple_matrix.shape[0], len(self.tests))
         result = np.empty(dims, np.float16)
-        for ind, test in enumerate(self.tests):
+        for ind, test in enumerate(self.tests.values()):
             result[:, :, ind] = np.array(list(map(test, tuple_matrix)))
         return result
 

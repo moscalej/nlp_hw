@@ -26,16 +26,15 @@ class features(unittest.TestCase):
             r'..\data\train.wtag')
         feat_generator = Features(data.x, data.y)
         try:
-            with open(fr"../training/report_lambdas_dict.p", 'rb') as stream:
-                feat_generator.add_lambdas(pickle.load(stream))
+            feat_generator.get_tests()  # loads last version saved
         except:
             pass
-        for template in feat.templates_dict.values():
-            print(template)
-            feat_generator.generate_lambdas(template['func'], template['tuples'])
+        # for template in feat.templates_dict.values():
+        #     print(template)
+        #     feat_generator.generate_lambdas(template['func'], template['tuples'])
         # feat_generator.add_lambdas(feat.suffix_funcs_all)  # DONE
         # feat_generator.add_lambdas(feat.prefix_funcs_all)  # DONE
         result = feat_generator.lambdas
         print(len(result))
-        with open(fr"../training/report_lambdas_dict.p", 'wb') as stream:
-            pickle.dump(result, stream)
+        # with open(fr"../training/report_lambdas_dict.p", 'wb') as stream:
+        #     pickle.dump(result, stream)

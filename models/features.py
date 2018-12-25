@@ -1,5 +1,7 @@
 from models.prerocesing import PreprocessTags
 import yaml
+import pickle
+import dill as pickle
 import pandas as pd
 
 
@@ -36,6 +38,8 @@ class Features:
         #
 
     def generate_tuple_corpus(self, x, y):
+        if x is None:
+            return None
         tup_list = []
         for ind in range(len(x)):
             if ind in [0, 1]:
@@ -48,7 +52,11 @@ class Features:
         self.lambdas.update(lambdas_dict)
 
     def get_tests(self):
-        return self.lambdas
+        result = self.lambdas
+        if len(result) == 0:
+            with open(fr"../training/report_lambdas_dict.p", 'rb') as stream:
+                self.add_lambdas(pickle.load(stream))
+        return result
 
     def generate_lambdas(self, template, tuple_corpus=None):
         if tuple_corpus is None:
@@ -298,28 +306,28 @@ def template_w_w_1_w_2_t_t_1_t_2(input):  # <w, t>
 #  take 25 most frequent words, and 10 most frequent tags and iterate over all variations
 # template_w_t = [(,), (,)]
 
-def template_t_1_t(tag_1, tag):  # <t_1, t>
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if y_1 == tag_1 and y == tag else 0,
-    return res_func
-
-
-def template_t_2_t(tag_2, tag):  # <t_2, t>
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if y_2 == tag_2 and y == tag else 0,
-    return res_func
-
-
-def template_w_2_w_1(word_2, word_1):  # <w_2, w_1>
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if sentence[place - 2] == word_2 and sentence[place - 1] == word_1 else 0,
-    return res_func
-
-
-def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if sentence[place - 3] == word_3 and sentence[place - 2] == word_2 else 0,
-    return res_func
+# def template_t_1_t(tag_1, tag):  # <t_1, t>
+#     res_func = lambda sentence, place, y, y_1, y_2: \
+#                    1 if y_1 == tag_1 and y == tag else 0,
+#     return res_func
+#
+#
+# def template_t_2_t(tag_2, tag):  # <t_2, t>
+#     res_func = lambda sentence, place, y, y_1, y_2: \
+#                    1 if y_2 == tag_2 and y == tag else 0,
+#     return res_func
+#
+#
+# def template_w_2_w_1(word_2, word_1):  # <w_2, w_1>
+#     res_func = lambda sentence, place, y, y_1, y_2: \
+#                    1 if sentence[place - 2] == word_2 and sentence[place - 1] == word_1 else 0,
+#     return res_func
+#
+#
+# def template_w_3_w_2(word_3, word_2):  # <w_2, w_1>
+#     res_func = lambda sentence, place, y, y_1, y_2: \
+#                    1 if sentence[place - 3] == word_3 and sentence[place - 2] == word_2 else 0,
+#     return res_func
 
 
 w_2_w_1_list = [['have', 'been'], ['has', 'been'], ['had', 'been']]
@@ -336,24 +344,21 @@ prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', '
                'no', 'uni']
 frequent_tags = ["NN", "IN", "JJ", "DT", "NNS", "CC", "VBN", "RB", "VBD", "CD", "VBZ"]
 
-w_2_w_1_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_2_w_1(tup[0], tup[1]) for tup in w_2_w_1_list}
-w_3_w_2_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_3_w_2(tup[0], tup[1]) for tup in w_2_w_1_list}
-
-suffix_funcs_all = {}
-prefix_funcs_all = {}
-data = PreprocessTags(True).load_data(
-    r'..\data\train2.wtag')
-y_corpus = pd.Series(data.y).unique()
-
-for tag in y_corpus:
-    suffix_funcs = {f"suffix_{suffix}_{tag}": template_suffix(len(suffix), suffix, tag) for suffix in all_suffix}
-    suffix_funcs_all = {**suffix_funcs_all, **suffix_funcs}
-    prefix_funcs = {f"prefix_{prefix}_{tag}": template_prefix(len(prefix), prefix, tag) for prefix in prefix_list}
-    prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
+# suffix_funcs_all = {}
+# prefix_funcs_all = {}
+# data = PreprocessTags(True).load_data(
+#     r'..\data\train2.wtag')
+# y_corpus = pd.Series(data.y).unique()
+#
+# for tag in y_corpus:
+#     suffix_funcs = {f"suffix_{suffix}_{tag}": template_suffix(len(suffix), suffix, tag) for suffix in all_suffix}
+#     suffix_funcs_all = {**suffix_funcs_all, **suffix_funcs}
+#     prefix_funcs = {f"prefix_{prefix}_{tag}": template_prefix(len(prefix), prefix, tag) for prefix in prefix_list}
+#     prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
 
 templates_dict = dict({})
 # Format: {'template_w_t': {'template': template_w_t, 'tuples': None}}
 dict_entry_gen = lambda name, func, tuples=None: {name: {'func': func, 'tuples': tuples}}
-templates_dict.update(dict_entry_gen('template_w_t', template_w_t))  # DONE
-templates_dict.update(dict_entry_gen('template_w_w_1_t_t_1', template_w_w_1_t_t_1))
-templates_dict.update(dict_entry_gen('template_w_w_1_w_2_t_t_1_t_2', template_w_w_1_w_2_t_t_1_t_2))
+# templates_dict.update(dict_entry_gen('template_w_t', template_w_t))  # DONE
+# templates_dict.update(dict_entry_gen('template_w_w_1_t_t_1', template_w_w_1_t_t_1))  # DONE
+# templates_dict.update(dict_entry_gen('template_w_w_1_w_2_t_t_1_t_2', template_w_w_1_w_2_t_t_1_t_2))  # DONE

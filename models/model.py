@@ -9,11 +9,11 @@ from models.sentence_processor import FinkMos
 
 
 class Model:
-    def __init__(self, tests):
-        self.tests = tests
-        self.v = np.random.uniform(-0.5, 0.5, len(tests))  # TODO: init wisely ?
+    def __init__(self):
+        self.v = None  # TODO: init wisely ?
         self.x = None
         self.y = None
+        self.num_tests = None
         self.vector_x_y = None
         self.tag_corpus = None
         self.tag_corpus_tokenized = None
@@ -48,6 +48,7 @@ class Model:
         self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
+        self.v = np.random.uniform(-0.5, 0.5, self.num_tests)
         # self._loss(self.v)
 
         with open('fast_test.p', 'rb') as pic:
@@ -224,7 +225,8 @@ class Model:
 
     def _vectorize(self):
         self.create_word2tag_subspace()
-        a = FinkMos(self.x, self.y, tests=self.tests, tag_corpus=self.tag_corpus)
+        a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
+        self.num_tests = len(a.test_dict)
         self.vector_x_y = a  # TODO change names
 
     def _loss(self, v):
