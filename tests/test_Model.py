@@ -157,9 +157,9 @@ class test_model(unittest.TestCase):
 
         data = PreprocessTags(True).load_data(
             r'..\data\test.wtag')
-        y_hat = model1.predict(x_thin)
+        y_hat = model1.predict(x)
         print(y_hat)
-        cm = model1.confusion(y_hat=y_hat, y=y_thin)
+        cm = model1.confusion(y_hat=y_hat, y=y)
         cm.to_csv(r'../training/confusion_matrix.csv')
         results = dict(
             v=model1.v.tolist(),

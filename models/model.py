@@ -93,6 +93,10 @@ class Model:
         assert isinstance(y_hat, pd.Series)
         assert isinstance(y, pd.Series)
 
+        a = y.values.reshape(-1)
+        b = pd.Series(a)
+        c = b.drop(['<PAD>', '*', '<STOP>', ','])
+        print(c)
         roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
         roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
 
