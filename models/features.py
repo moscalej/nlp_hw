@@ -1,3 +1,8 @@
+from models.prerocesing import PreprocessTags
+import yaml
+import pandas as pd
+
+
 # IN_DT_NN        1825
 # NN_<STOP>_*     1752
 # DT_JJ_NN        1590
@@ -15,6 +20,44 @@
 # *_*_IN           665
 # *_NNP_NNP        663
 # NNS_IN_DT        663
+
+class Features:
+    def __init__(self, x, y):
+        self.corpus_size = len(x)
+        self.x = pd.Series(x)
+        self.y = pd.Series(y)
+        self.y_corpus = y.unique()
+        self.lambdas = dict({})
+        self.tuple_corpus = self.generate_tuple_corpus(x, y)
+
+        # if files exists load:
+        # lambdas
+        # full_list
+        #
+
+    def generate_tuple_corpus(self, x, y):
+        tup_list = []
+        for ind in range(len(x)):
+            if ind in [0, 1]:
+                continue
+            tup = (self.y[ind], self.y[ind - 1], self.y[ind - 2], self.x[ind], self.x[ind - 1], self.x[ind - 2])
+            tup_list.append(tup)
+        return tup_list
+
+    def add_lambdas(self, lambdas_dict):
+        self.lambdas.update(lambdas_dict)
+
+    def get_tests(self):
+        return self.lambdas
+
+    def generate_lambdas(self, template, tuple_corpus=None):
+        if tuple_corpus is None:
+            tuple_corpus = self.tuple_corpus
+        template_name = template.__name__
+        for tup in tuple_corpus:
+            lambda_dict = {f"{template_name}_{tup[0]}_{tup[1]}_{tup[2]}_{tup[3]}_{tup[4]}_{tup[5]}": template(tup)}
+            self.add_lambdas(lambda_dict)
+
 
 trigrams = dict(
 
@@ -198,25 +241,58 @@ rapnapak = dict(
 ########################################################################################################
 # Feature Templates
 def template_suffix(suffix_length, suffix, tag):
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if len(sentence[place]) > suffix_length and \
-                        sentence[place][(-suffix_length):].lower() == suffix and \
-                        y == tag else 0
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    res_func = lambda fov: \
+        1 if len(fov[3]) > suffix_length and \
+             fov[3][(-suffix_length):].lower() == suffix and \
+             fov[0] == tag else 0
     return res_func
 
 
 def template_prefix(prefix_length, prefix, tag):
-    res_func = lambda sentence, place, y, y_1, y_2: \
-        1 if len(sentence[place]) > prefix_length and \
-             sentence[place][0:prefix_length].lower() == prefix and \
-             y == tag else 0
+    res_func = lambda fov: \
+        1 if len(fov[3]) > prefix_length and \
+             fov[3][0:prefix_length].lower() == prefix and \
+             fov[0] == tag else 0
     return res_func
 
 
-def template_w_t(word, tag):  # <w, t>
-    res_func = lambda sentence, place, y, y_1, y_2: \
-                   1 if sentence[place] == word and y == tag else 0,
-    return res_func
+def template_w_t(input):  # <w, t>
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] else 0
+
+
+def template_w_w_1_t_t_1(input):  # <w, t>
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] and fov[4] == input[4] \
+                            and fov[1] == input[1] else 0
+
+
+def template_w_w_1_w_2_t_t_1_t_2(input):  # <w, t>
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] and \
+                            fov[4] == input[4] and fov[1] == input[1] and \
+                            fov[5] == input[5] and fov[2] == input[2] else 0
 
 
 #  take 25 most frequent words, and 10 most frequent tags and iterate over all variations
@@ -265,27 +341,19 @@ w_3_w_2_funcs = {f"suffix_{tup[0]}{tup[1]}": template_w_3_w_2(tup[0], tup[1]) fo
 
 suffix_funcs_all = {}
 prefix_funcs_all = {}
-for tag in frequent_tags:
+data = PreprocessTags(True).load_data(
+    r'..\data\train2.wtag')
+y_corpus = pd.Series(data.y).unique()
+
+for tag in y_corpus:
     suffix_funcs = {f"suffix_{suffix}_{tag}": template_suffix(len(suffix), suffix, tag) for suffix in all_suffix}
     suffix_funcs_all = {**suffix_funcs_all, **suffix_funcs}
     prefix_funcs = {f"prefix_{prefix}_{tag}": template_prefix(len(prefix), prefix, tag) for prefix in prefix_list}
     prefix_funcs_all = {**prefix_funcs_all, **prefix_funcs}
 
-
-class Features:
-    def get_tests(self):
-        functions = dict(
-        )
-        functions.update(rapnapak)
-        functions.update(trigrams)
-        functions.update(biagrams)
-        functions.update(own_func)
-        functions.update(rare_func)
-        functions.update(suffix_funcs)
-        functions.update(prefix_funcs)
-        return functions
-
-
-feat = Features()
-feature_dict = feat.get_tests()
-print(feature_dict.keys())
+templates_dict = dict({})
+# Format: {'template_w_t': {'template': template_w_t, 'tuples': None}}
+dict_entry_gen = lambda name, func, tuples=None: {name: {'func': func, 'tuples': tuples}}
+templates_dict.update(dict_entry_gen('template_w_t', template_w_t))  # DONE
+templates_dict.update(dict_entry_gen('template_w_w_1_t_t_1', template_w_w_1_t_t_1))
+templates_dict.update(dict_entry_gen('template_w_w_1_w_2_t_t_1_t_2', template_w_w_1_w_2_t_t_1_t_2))
