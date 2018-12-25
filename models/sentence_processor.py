@@ -30,11 +30,14 @@ class FinkMos:
         ty_1 = np.roll(ty_0, -1)
         ty_2 = np.roll(ty_1, -1)
         keys = ty_0 + "_" + ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
+        # count_mat = pd.DataFrame(index = )
         keys_s = pd.Series(keys)
-        keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2])
-        keys_2.drop_duplicates(inplace=True)
+        keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2]).T
+        keys_2.sort_values([0, 1, 2, 3, 4], inplace=True)
 
+        keys_2.drop_duplicates(inplace=True)
         values = keys_2.values
+        self.index = {"_".join(x): num for num, x in enumerate(values)}
         last_part = self.tag_corpus
         c = np.dstack([values] * last_part.shape[0])
         last_part = last_part.reshape([1, 46])
