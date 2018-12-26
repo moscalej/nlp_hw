@@ -59,6 +59,5 @@ class test_rapnaparkhi(unittest.TestCase):
         # print(tuple_mat.shape)
         # tuple_mat =
         result = fm.create_feature_tensor(tuple_mat, batch_size=10000)
-        result_1 = result[:250, :, :]
-        result_1.dump('250_tests.h5')
+
         print(result.shape())

@@ -2,7 +2,6 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 
 from models.score import Score
 from models.sentence_processor import FinkMos
@@ -226,6 +225,7 @@ class Model:
     def _vectorize(self):
         # self.create_word2tag_subspace()
         a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
+        self.fm = a
         self.num_tests = len(a.test_dict)
         # self.vector_x_y = a  # TODO change names
 
