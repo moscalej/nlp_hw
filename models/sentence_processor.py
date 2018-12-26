@@ -24,13 +24,17 @@ class FinkMos:
 
     def create_tuples(self):
         tx_0 = self.x.values
+        ty_0 = self.y.values
         tx_1 = np.roll(tx_0, -1)
         tx_2 = np.roll(tx_1, -1)
-        ty_0 = self.y.values
         ty_1 = np.roll(ty_0, -1)
         ty_2 = np.roll(ty_1, -1)
-        keys = ty_0 + "_" + ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
+        keys = ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
+        keys_s = pd.Series(keys)
+        keys_s.value_counts()
+        keys_s.value_counts()[keys_s.value_counts() > 1]
         # count_mat = pd.DataFrame(index = )
+        keys = ty_0 + "_" + ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
         keys_s = pd.Series(keys)
         keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2]).T
         keys_2.sort_values([0, 1, 2, 3, 4], inplace=True)
@@ -46,14 +50,20 @@ class FinkMos:
 
     def create_feature_tensor(self, tuple_matrix, batch_size):
         dims = (tuple_matrix.shape[0], tuple_matrix.shape[2], batch_size)
+
         # result = np.empty(dims, np.bool_, )
         result = []
-        for ind, test in enumerate(list(self.test_dict.values())[0:batch_size]):
+        for ind, key in enumerate(list(self.test_dict.items())[0:batch_size]):
+            if "pre" in key[0] or "suf" in key[0]:
+                continue
+
             # result[:, :, ind] = np.apply_along_axis(test, 1, tuple_matrix)
-            result.append(np.apply_along_axis(test, 1, tuple_matrix))
+            result.append(np.apply_along_axis(key[1], 1, tuple_matrix))
             # result[:, :, ind] = np.array(list(map(test, tuple_matrix)))
             # result[:, :, ind] = np.vectorize(test)(tuple_matrix)
-        return result
+            if ind % 50 == 0:
+                print(ind)
+        return np.array(result)
 
     def linear_loss(self, v):
         """

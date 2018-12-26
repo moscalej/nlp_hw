@@ -2,7 +2,6 @@ import unittest
 
 import numpy as np
 import pandas as pd
-import h5py
 
 from models.sentence_processor import FinkMos
 
@@ -55,10 +54,11 @@ class test_rapnaparkhi(unittest.TestCase):
     def test_tuples2tensor(self):
         fm = FinkMos(x, y, y_tags)
 
-        filename = r'..\training\alex.h5'
+        filename = r'alex_shor.h5'
         tuple_mat = np.load(filename)
         # print(tuple_mat.shape)
-        # # tuple_mat =
-        result = fm.create_feature_tensor(tuple_mat, batch_size=5)
-        result.dump('3000_tests.npz')
+        # tuple_mat =
+        result = fm.create_feature_tensor(tuple_mat, batch_size=10000)
+        result_1 = result[:250, :, :]
+        result_1.dump('250_tests.h5')
         print(result.shape())
