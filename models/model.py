@@ -224,10 +224,10 @@ class Model:
             return self.tag_corpus_tokenized
 
     def _vectorize(self):
-        self.create_word2tag_subspace()
+        # self.create_word2tag_subspace()
         a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
         self.num_tests = len(a.test_dict)
-        self.vector_x_y = a  # TODO change names
+        # self.vector_x_y = a  # TODO change names
 
     def _loss(self, v):
         positive = self._calculate_positive(v)

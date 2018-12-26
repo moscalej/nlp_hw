@@ -24,13 +24,13 @@ import pandas as pd
 # NNS_IN_DT        663
 
 class Features:
-    def __init__(self, x, y):
-        self.corpus_size = len(x)
-        self.x = pd.Series(x)
-        self.y = pd.Series(y)
-        self.y_corpus = y.unique()
+    def __init__(self):
+        # self.corpus_size = len(x)
+        # self.x = pd.Series(x)
+        # self.y = pd.Series(y)
+        # self.y_corpus = y.unique()
         self.lambdas = dict({})
-        self.tuple_corpus = self.generate_tuple_corpus(x, y)
+        self.tuple_corpus = None
 
         # if files exists load:
         # lambdas
@@ -44,9 +44,9 @@ class Features:
         for ind in range(len(x)):
             if ind in [0, 1]:
                 continue
-            tup = (self.y[ind], self.y[ind - 1], self.y[ind - 2], self.x[ind], self.x[ind - 1], self.x[ind - 2])
+            tup = (y[ind], y[ind - 1], y[ind - 2], x[ind], x[ind - 1], x[ind - 2])
             tup_list.append(tup)
-        return tup_list
+            self.tuple_corpus = tup_list
 
     def add_lambdas(self, lambdas_dict):
         self.lambdas.update(lambdas_dict)

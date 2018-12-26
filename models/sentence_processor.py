@@ -11,7 +11,7 @@ class FinkMos:
         assert isinstance(y, pd.Series)
         self.tag_corpus = tag_corpus
         # self.tests = tests
-        self.test_dict = Features(None, None).get_tests()
+        self.test_dict = Features().get_tests()
         self.x = x
         self.y = y
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
@@ -44,11 +44,15 @@ class FinkMos:
         d = np.stack([last_part] * c.shape[0], axis=0)
         t = np.concatenate((d, c), axis=1)
 
-    def create_feature_tensor(self, tuple_matrix):
-        dims = (tuple_matrix.shape[0], tuple_matrix.shape[0], len(self.tests))
-        result = np.empty(dims, np.float16)
-        for ind, test in enumerate(self.tests.values()):
-            result[:, :, ind] = np.array(list(map(test, tuple_matrix)))
+    def create_feature_tensor(self, tuple_matrix, batch_size):
+        dims = (tuple_matrix.shape[0], tuple_matrix.shape[2], batch_size)
+        # result = np.empty(dims, np.bool_, )
+        result = []
+        for ind, test in enumerate(list(self.test_dict.values())[0:batch_size]):
+            # result[:, :, ind] = np.apply_along_axis(test, 1, tuple_matrix)
+            result.append(np.apply_along_axis(test, 1, tuple_matrix))
+            # result[:, :, ind] = np.array(list(map(test, tuple_matrix)))
+            # result[:, :, ind] = np.vectorize(test)(tuple_matrix)
         return result
 
     def linear_loss(self, v):

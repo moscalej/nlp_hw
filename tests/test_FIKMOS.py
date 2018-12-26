@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+import h5py
 
 from models.sentence_processor import FinkMos
 
@@ -21,9 +22,9 @@ y = pd.Series(['*', '*',
                'VBP', 'DT', 'NN', 'IN', 'VBG', 'NN', 'Vt',
                '<STOP>'])
 y_tags = y.unique()
+
+
 class test_rapnaparkhi(unittest.TestCase):
-
-
 
     def test_features(self):
         r = FinkMos(x, y, tests=[f'f_10{x}' for x in range(8)], tag_corpus=y_tags)
@@ -51,3 +52,13 @@ class test_rapnaparkhi(unittest.TestCase):
         value = r.sentence_non_lineard_loss(np.zeros([8]))
         self.assertAlmostEqual(value, 72.0873, 3)
 
+    def test_tuples2tensor(self):
+        fm = FinkMos(x, y, y_tags)
+
+        filename = r'..\training\alex.h5'
+        tuple_mat = np.load(filename)
+        # print(tuple_mat.shape)
+        # # tuple_mat =
+        result = fm.create_feature_tensor(tuple_mat, batch_size=5)
+        result.dump('3000_tests.npz')
+        print(result.shape())
