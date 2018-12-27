@@ -29,7 +29,7 @@ class Features:
         # self.x = pd.Series(x)
         # self.y = pd.Series(y)
         # self.y_corpus = y.unique()
-        self.lambdas = dict({})
+        self.lambdas = dict()
         self.tuple_corpus = None
 
         # if files exists load:
@@ -51,10 +51,10 @@ class Features:
     def add_lambdas(self, lambdas_dict):
         self.lambdas.update(lambdas_dict)
 
-    def get_tests(self):
+    def get_tests(self, path=fr"../training/report_lambdas_dict.p"):
         result = self.lambdas
         if len(result) == 0:
-            with open(fr"../training/report_lambdas_dict.p", 'rb') as stream:
+            with open(path, 'rb') as stream:
                 self.add_lambdas(pickle.load(stream))
         return result
 
@@ -63,9 +63,12 @@ class Features:
             tuple_corpus = self.tuple_corpus
         template_name = template.__name__
         for tup in tuple_corpus:
-            lambda_dict = {f"{template_name}_{tup[0]}_{tup[1]}_{tup[2]}_{tup[3]}_{tup[4]}_{tup[5]}": template(tup)}
-
-            self.add_lambdas(lambda_dict)
+            name, func = template(tup)
+            if name in self.lambdas:
+                self.lambdas[name]['tup_list'].append(tup)
+            else:
+                lambda_dict = {name: {'func': template(tup), 'tup_list': [tup]}}
+                self.add_lambdas(lambda_dict)
 
 
 trigrams = dict(
@@ -270,10 +273,11 @@ def template_prefix(prefix_length, prefix, tag):
     # word_0 : input[3]  fov[3]
     # word_1 : input[4]  fov[4]
     # word_2 : input[5]  fov[5]
+    name = f'w_t-{input[0]}_^_^_{input[3]}_^_^'
     res_func = lambda fov: \
-        1 if len(fov[3]) > prefix_length and \
-             fov[3][0:prefix_length].lower() == prefix and \
-             fov[0] == tag else 0
+        len(fov[3]) > prefix_length and \
+        fov[3][0:prefix_length].lower() == prefix and \
+        fov[0] == tag
     return res_func
 
 
@@ -284,7 +288,9 @@ def template_w_t(input):  # <w, t>
     # word_0 : input[3]  fov[3]
     # word_1 : input[4]  fov[4]
     # word_2 : input[5]  fov[5]
-    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] else 0
+    name = f'w_t-{input[0]}_^_^_{input[3]}_^_^'
+    func = lambda fov: fov[3] == input[3] and fov[0] == input[0]
+    return name, func
 
 
 def test_feature_template(data_x, data_y):
@@ -301,8 +307,10 @@ def template_w_w_1_t_t_1(input):  # <w, t>
     # word_0 : input[3]  fov[3]
     # word_1 : input[4]  fov[4]
     # word_2 : input[5]  fov[5]
-    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] and fov[4] == input[4] \
-                            and fov[1] == input[1] else 0
+    name = f'w_w_1_t_t_1-{input[0]}_{input[1]}_^_{input[3]}_{input[4]}_^'
+    func = lambda fov: fov[3] == input[3] and fov[0] == input[0] and fov[4] == input[4] \
+                       and fov[1] == input[1]
+    return name, func
 
 
 def template_w_w_1_w_2_t_t_1_t_2(input):  # <w, t>
@@ -312,9 +320,11 @@ def template_w_w_1_w_2_t_t_1_t_2(input):  # <w, t>
     # word_0 : input[3]  fov[3]
     # word_1 : input[4]  fov[4]
     # word_2 : input[5]  fov[5]
-    return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] and \
-                            fov[4] == input[4] and fov[1] == input[1] and \
-                            fov[5] == input[5] and fov[2] == input[2] else 0
+    name = f'w_w_1_t_t_1-{input[0]}_{input[1]}_{input[2]}_{input[3]}_{input[4]}_{input[5]}'
+    func = lambda fov: fov[3] == input[3] and fov[0] == input[0] and \
+                       fov[4] == input[4] and fov[1] == input[1] and \
+                       fov[5] == input[5] and fov[2] == input[2]
+    return name, func
 
 
 #  take 25 most frequent words, and 10 most frequent tags and iterate over all variations
@@ -373,6 +383,6 @@ frequent_tags = ["NN", "IN", "JJ", "DT", "NNS", "CC", "VBN", "RB", "VBD", "CD", 
 templates_dict = dict({})
 # Format: {'template_w_t': {'template': template_w_t, 'tuples': None}}
 dict_entry_gen = lambda name, func, tuples=None: {name: {'func': func, 'tuples': tuples}}
-# templates_dict.update(dict_entry_gen('template_w_t', template_w_t))  # DONE
-# templates_dict.update(dict_entry_gen('template_w_w_1_t_t_1', template_w_w_1_t_t_1))  # DONE
-# templates_dict.update(dict_entry_gen('template_w_w_1_w_2_t_t_1_t_2', template_w_w_1_w_2_t_t_1_t_2))  # DONE
+templates_dict.update(dict_entry_gen('template_w_t', template_w_t))  # DONE
+templates_dict.update(dict_entry_gen('template_w_w_1_t_t_1', template_w_w_1_t_t_1))  # DONE
+templates_dict.update(dict_entry_gen('template_w_w_1_w_2_t_t_1_t_2', template_w_w_1_w_2_t_t_1_t_2))  # DONE

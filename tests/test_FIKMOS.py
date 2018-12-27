@@ -65,8 +65,14 @@ class test_rapnaparkhi(unittest.TestCase):
     def test_create_tuples(self):
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-        tag_corp = pd.Series(data.y).unique()
-        fm = FinkMos(data.x, data.y, tag_corp)
+        tag_corp = pd.Series(data.y[0:5000]).unique()
+        fm = FinkMos(data.x[0:5000], data.y[0:5000], tag_corp)
         # fm = FinkMos(x, y, y_tags)
         fm.create_tuples()
+        print("fm.weight_mat")
         print(fm.weight_mat)
+        print("fm.tuple_5_list")
+        print(fm.tuple_5_list)
+        fm.create_feature_sparse_list_v2()
+        print(len(fm.f_matrix_list))
+        print(fm.f_matrix_list[0].shape)
