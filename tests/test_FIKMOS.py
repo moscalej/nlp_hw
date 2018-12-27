@@ -1,5 +1,5 @@
 import unittest
-
+from models.prerocesing import PreprocessTags
 import numpy as np
 import pandas as pd
 
@@ -61,3 +61,12 @@ class test_rapnaparkhi(unittest.TestCase):
         result = fm.create_feature_tensor(tuple_mat, batch_size=10000)
 
         print(result.shape())
+
+    def test_create_tuples(self):
+        data = PreprocessTags(True).load_data(
+            r'..\data\train.wtag')
+        tag_corp = pd.Series(data.y).unique()
+        fm = FinkMos(data.x, data.y, tag_corp)
+        # fm = FinkMos(x, y, y_tags)
+        fm.create_tuples()
+        print(fm.weight_mat)

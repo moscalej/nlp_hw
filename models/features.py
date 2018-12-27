@@ -64,6 +64,7 @@ class Features:
         template_name = template.__name__
         for tup in tuple_corpus:
             lambda_dict = {f"{template_name}_{tup[0]}_{tup[1]}_{tup[2]}_{tup[3]}_{tup[4]}_{tup[5]}": template(tup)}
+
             self.add_lambdas(lambda_dict)
 
 
@@ -263,6 +264,12 @@ def template_suffix(suffix_length, suffix, tag):
 
 
 def template_prefix(prefix_length, prefix, tag):
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
     res_func = lambda fov: \
         1 if len(fov[3]) > prefix_length and \
              fov[3][0:prefix_length].lower() == prefix and \
@@ -278,6 +285,13 @@ def template_w_t(input):  # <w, t>
     # word_1 : input[4]  fov[4]
     # word_2 : input[5]  fov[5]
     return lambda fov: 1 if fov[3] == input[3] and fov[0] == input[0] else 0
+
+
+def test_feature_template(data_x, data_y):
+    # get tuples
+    # get test_list
+    #
+    pass
 
 
 def template_w_w_1_t_t_1(input):  # <w, t>

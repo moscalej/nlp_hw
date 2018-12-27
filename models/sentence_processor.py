@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy import sparse as spar
 
 from models.features import Features
 
@@ -16,10 +17,12 @@ class FinkMos:
         self.f_matrix = np.empty(self.y.shape, dtype=np.ndarray)  #
         self.f_matrix_y_1 = np.empty(self.y.shape, dtype=np.ndarray)
         self.linear_loss_done = None
-        self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
-        tc = tag_corpus.shape[0]
+        # self.word2number = {word: index for index, word in enumerate(x.value_counts().index)}
+        # tc = tag_corpus.shape[0]
         self.fast_test = dict()
         self.fast_predict = dict()
+        self.weight_mat = None
+        self.tuple_5_list = None
 
     def create_tuples(self):
         tx_0 = self.x.values
@@ -31,20 +34,31 @@ class FinkMos:
         keys = ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
         keys_s = pd.Series(keys)
         keys_s.value_counts()
-        keys_s.value_counts()[keys_s.value_counts() > 1]
-        # count_mat = pd.DataFrame(index = )
+        # keys_s.value_counts()[keys_s.value_counts() > 1]
         keys = ty_0 + "_" + ty_1 + "_" + ty_2 + "_" + tx_0 + "_" + tx_1 + "_" + tx_2
-        keys_s = pd.Series(keys)
+        keys_s = pd.Series(keys).value_counts()
         keys_2 = pd.DataFrame([ty_1, ty_2, tx_0, tx_1, tx_2]).T
+        self.tuple_5_list = list(map(list, zip(ty_1, ty_2, tx_0, tx_1, tx_2)))
         keys_2.sort_values([0, 1, 2, 3, 4], inplace=True)
-
         keys_2.drop_duplicates(inplace=True)
         values = keys_2.values
+        #  create wight mask
+        weight_mask = np.zeros([self.tag_corpus.shape[0], keys_2.shape[0]])
         self.index = {"_".join(x): num for num, x in enumerate(values)}
+        for tup, count in keys_s.items():
+            tup_0 = tup.split('_')[0]
+            tup_5 = '_'.join(tup.split('_')[1:])
+            ind_j = self.index[tup_5]
+            itemindex = np.where(self.tag_corpus == tup_0)
+            ind_i = itemindex[0]
+            weight_mask[ind_i, ind_j] = count
+        self.weight_mat = weight_mask
+
         last_part = self.tag_corpus
         c = np.dstack([values] * last_part.shape[0])
-        last_part = last_part.reshape([1, 46])
+        last_part = last_part.reshape([1, last_part.shape[0]])
         d = np.stack([last_part] * c.shape[0], axis=0)
+        self.tuple_5_list
         t = np.concatenate((d, c), axis=1)
 
     def create_feature_tensor(self, tuple_matrix, batch_size):
@@ -63,6 +77,39 @@ class FinkMos:
             if ind % 50 == 0:
                 print(ind)
         return np.array(result)
+
+    def create_feature_sparse_list_v1(self, tuple_matrix):
+        # return a list of sparse matrices, the ith matrix is the results of the ith test
+        result = []
+        for ind, key in enumerate(list(self.test_dict.items())):
+            if "pre" in key[0] or "suf" in key[0]:
+                continue
+            result.append(spar.csr_matrix(np.apply_along_axis(key[1], 1, tuple_matrix)))
+            if ind % 50 == 0:
+                print(ind)
+        return result
+
+    def create_feature_sparse_list_v2(self):
+        # return a list of sparse matrices, each matrix
+        tuple_5_list = [[elem] for elem in self.tuple_5_list]
+        tuple_5_size = self.tuple_5_list.shape[0]
+        tuple_0_list = [[elem] for elem in self.tag_corpus]  # [[elem1], [elem2], ...] ->
+        tuple_0_size = self.tag_corpus.shape[0]
+        result = []
+
+        for ind, tup_0 in enumerate(tuple_0_list):  # per test one vector per tuple
+            for ind, key in enumerate(list(self.test_dict.items())):  # mat per test
+                if "pre" in key[0] or "suf" in key[0]:  # TODO: relevant?
+                    continue
+                spar_mat = spar.csr_matrix(tuple_0_size, tuple_5_size, dtype=bool)
+                tup_list = tuple_5_list.copy()
+                list(map(lambda x: x.insert(0, tup_0), tup_list))  # create tuple list for tup0
+
+                spar_mat[:, ind] = spar.csr_matrix((list(map(key[1], tup_list))))
+                result.append(spar_mat)
+                if ind % 50 == 0:
+                    print(ind)
+        return result
 
     def linear_loss(self, v):
         """

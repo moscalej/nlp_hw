@@ -5,6 +5,7 @@ import pandas as pd
 
 from models.score import Score
 from models.sentence_processor import FinkMos
+from scipy.optimize import minimize
 
 
 class Model:
@@ -42,23 +43,18 @@ class Model:
         self.x = x
         self.y = y
         base_corpus = pd.Series(['*', '<STOP>'])
-        tag_corpus = pd.Series(y.value_counts().drop(['*', '<STOP>']).index)
+        tag_corpus = pd.Series(
+            y.value_counts().drop(['*', '<STOP>']).index)  # put * and Stop in the beginning of the corpus
         self.tag_corpus = base_corpus.append(tag_corpus)
         self.tag_corpus_tokenized = range(len(self.tag_corpus))
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         self.v = np.random.uniform(-0.5, 0.5, self.num_tests)
-        # self._loss(self.v)
-
-        with open('fast_test.p', 'rb') as pic:
-            self.vector_x_y.fast_test = pickle.load(pic)
-
-        with open('f_matrix.p', 'rb') as pic2:
-            self.vector_x_y.f_matrix = pickle.load(pic2)
+        self._loss(self.v)
 
         # TODO: consider adding a test removal mechanism (from self.tests)
-        # self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        # self.v = self.opt_result['x']
+        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
+        self.v = self.opt_result['x']
 
         return
 
@@ -167,7 +163,7 @@ class Model:
         # ending in tags u,v at position k
         # p_table[0, 0, 0] = 1  # init
         p_table[0, :, :] = 1
-        bp_table = np.ones(dims, dtype=np.int8)*-1  # -1 implies no update
+        bp_table = np.ones(dims, dtype=np.int8) * -1  # -1 implies no update
         answer = [None] * num_words
         for k in range(1, num_words):
             print(str(k) + " out of " + str(num_words - 1))
@@ -175,24 +171,26 @@ class Model:
             if k == 1:
                 prev1_tag_u_subspace = [0]
             else:
-                prev1_tag_u_subspace = self.word2tag_subspace(sentence[k-1])
+                prev1_tag_u_subspace = self.word2tag_subspace(sentence[k - 1])
             if k in [1, 2]:  # 0 -> '*' tag
                 optional_tags = [0]
             else:
-                optional_tags = self.word2tag_subspace(sentence[k-2])
+                optional_tags = self.word2tag_subspace(sentence[k - 2])
 
             for prev1_tag_u in prev1_tag_u_subspace:
 
-                for curr_tag_v in curr_tag_v_subspace:   # naming relative to model function enteries
+                for curr_tag_v in curr_tag_v_subspace:  # naming relative to model function enteries
 
                     options = []  # np.array([])
-                    for t_2 in optional_tags:  # t_1 is previous tag
+                    for t_2 in optional_tags:  # t_1 is previous tag  # TODO: minimize subspace (consider taking best 5, for others leave previous value)
                         # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
-                        options.append(p_table[k - 1, t_2, prev1_tag_u] * self.model_function(next_tag=curr_tag_v, word_num=k,
-                                                                                  previous_tags=[prev1_tag_u, t_2],
-                                                                                  sentence=sentence_fm))
+                        options.append(
+                            p_table[k - 1, t_2, prev1_tag_u] * self.model_function(next_tag=curr_tag_v, word_num=k,
+                                                                                   previous_tags=[prev1_tag_u, t_2],
+                                                                                   sentence=sentence_fm))
                     ind_in_options = np.argmax(options)
-                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[ind_in_options]  # taking the relevant tag from optional list
+                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[
+                        ind_in_options]  # taking the relevant tag from optional list
                     p_table[k, prev1_tag_u, curr_tag_v] = options[ind_in_options]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
                                                                         bp_table[num_words - 1, :, :].shape)  # argmax()
@@ -227,6 +225,8 @@ class Model:
         a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
         self.fm = a
         self.num_tests = len(a.test_dict)
+        self.fm.create_tuples()
+        self.fm.create_feature_sparse_list_v2()
         # self.vector_x_y = a  # TODO change names
 
     def _loss(self, v):
