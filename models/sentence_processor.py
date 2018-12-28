@@ -102,21 +102,17 @@ class FinkMos:
                 tup_0_ind = np.where(tup[0] == self.tag_corpus)[0][0]
                 tup_5_ind = self.tup5_2index['_'.join(tup[1:])]
                 result[tup_0_ind][test_ind, tup_5_ind] = True
-        # decode tuple to indices
-
-        # for ind, tup_0 in enumerate(tuple_0_list):  # per test one vector per tuple
-        #     for key, test in self.test_dict.items():  # mat per test
-        #         if "pre" in key[0] or "suf" in key[0]:  # TODO: relevant?
-        #             continue
-        #         spar_mat = spar.csr_matrix((num_test, tuple_5_size), dtype=bool)
-        #         tup_list = tuple_5_list.copy()
-        #         list(map(lambda x: x.insert(0, tup_0), tup_list))  # create tuple list for tup0
-        #         # spar_mat[ind, :] = spar.csr_matrix((list(map(test, tup_list))))
-        #
-        #         result.append(spar_mat)
-        #         if ind % 50 == 0:
-        #             print(ind)
         self.f_matrix_list = result
+
+    def linear_loss_v2(self, v):
+        dot_per_slice = lambda i: self.f_matrix_list[i].dot(v)
+        result = 0
+        for ind in self.tag_corpus.shape[0]:
+            self.dot_prods_vec_list[ind] = dot_per_slice(ind)
+            result += self.dot_prods_vec_list[ind].sum()
+        return result
+
+
 
     def linear_loss(self, v):
         """
@@ -167,7 +163,6 @@ class FinkMos:
                     results.append(index)
             self.fast_test[hash_name] = results
         return results
-
     def softmax_denominator(self, v, history_i, y, y_1, y_2):
 
         hash_name = f"{self.x[history_i]}{y_1}{y_2}"

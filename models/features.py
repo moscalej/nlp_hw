@@ -252,7 +252,7 @@ rapnapak = dict(
 
 ########################################################################################################
 # Feature Templates
-def template_suffix(suffix_length, suffix, tag):
+def template_template_suffix(suffix_length, suffix, tag):
     # tag0 : input[0] fov[0]
     # tag_1 : input[1] fov[1]
     # tag_2 : input[2] fov[2]
@@ -266,7 +266,7 @@ def template_suffix(suffix_length, suffix, tag):
     return res_func
 
 
-def template_prefix(prefix_length, prefix, tag):
+def template_template_prefix(prefix_length, prefix, tag):
     # tag0 : input[0] fov[0]
     # tag_1 : input[1] fov[1]
     # tag_2 : input[2] fov[2]
@@ -279,6 +279,57 @@ def template_prefix(prefix_length, prefix, tag):
         fov[3][0:prefix_length].lower() == prefix and \
         fov[0] == tag
     return res_func
+
+
+def template_generator_suffix2(suffix):
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    # name = f'w_t-{input[0]}_^_^_{input[3]}_^_^'
+    suffix_length = len(suffix)
+    template_func_name = f'template_prefix_{suffix}'
+
+    def template_func(input):
+        name = f'suffix_{suffix}-{input[0]}_^_^_^_^_^'
+        res_func = lambda fov: \
+                if len(fov[3]) > suffix_length and \
+                        fov[3][(-suffix_length):].lower() == suffix and \
+                        fov[0] == tag
+            return name, res_func
+
+    # template_func.__name__ = template_func_name
+    return template_func
+
+
+def template_generator_prefix2(prefix):
+    # tag0 : input[0] fov[0]
+    # tag_1 : input[1] fov[1]
+    # tag_2 : input[2] fov[2]
+    # word_0 : input[3]  fov[3]
+    # word_1 : input[4]  fov[4]
+    # word_2 : input[5]  fov[5]
+    # name = f'w_t-{input[0]}_^_^_{input[3]}_^_^'
+    prefix_length = len(prefix)
+    template_func_name = f'template_prefix_{prefix}'
+
+    def template_func(input):
+        name = f'prefix_{prefix}-{input[0]}_^_^_^_^_^'
+        res_func = lambda fov: \
+            len(fov[3]) > prefix_length and \
+            fov[3][0:prefix_length].lower() == prefix and \
+            fov[0] == input[0]
+        return name, res_func
+
+    # template_func.__name__ = template_func_name
+    return template_func
+
+
+# usage example:
+ing_template = template_generator_prefix2('ing')
+name, func = ing_template(input)
 
 
 def template_w_t(input):  # <w, t>

@@ -26,7 +26,7 @@ class features(unittest.TestCase):
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
         feat_generator = Features()
-        feat_generator.generate_tuple_corpus(data.x[0:5000], data.y[0:5000])
+        feat_generator.generate_tuple_corpus(data.x[0:50000], data.y[0:50000])
         try:
             # feat_generator.get_tests()  # loads last version saved
             pass
