@@ -27,7 +27,7 @@ class features(unittest.TestCase):
         data = PreprocessTags(True).load_data(
             r'..\data\toy_dataset.txt')
         feat_generator = Features()
-        feat_generator.generate_tuple_corpus(data.x[0:50000], data.y[0:50000])
+        feat_generator.generate_tuple_corpus(data.x[0:10000], data.y[0:10000])
         try:
             # feat_generator.get_tests()  # loads last version saved
             pass

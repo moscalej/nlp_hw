@@ -69,14 +69,14 @@ class FinkMos:
         tuple_0_size = self.tag_corpus.shape[0]
         num_test = len(self.test_dict)
         # returns a list of empty spars matrices
-        result = [spar.csr_matrix((num_test, tuple_5_size), dtype=bool) for _ in range(tuple_0_size)]
+        result = [spar.csr_matrix((tuple_5_size, num_test), dtype=bool) for _ in range(tuple_0_size)]
         # iterate list of test names
         for test_ind, (key, val) in enumerate(self.test_dict.items()):
             # iterate list of tuples per test
             for tup in set(val['tup_list']):
                 tup_0_ind = np.where(tup[0] == self.tag_corpus)[0][0]
                 tup_5_ind = self.tup5_2index['_'.join(tup[1:])]
-                result[tup_0_ind][test_ind, tup_5_ind] = True
+                result[tup_0_ind][tup_5_ind, test_ind] = True
         self.f_matrix_list = result
 
     def loss_function(self, v):
@@ -88,12 +88,12 @@ class FinkMos:
         repetitions = np.sum(self.weight_mat, axis=0)
         ln = np.log(exp_sum) * repetitions
         sum_ln = np.sum(ln)
-        return sum_ln - l_fv + np.linalg.norm(v)
+        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
     def dot(self, v):
         results = []
         for sparce_matrix in self.f_matrix_list:
-            t = sparce_matrix.T @ v
+            t = sparce_matrix @ v
             results.append(t)
         return np.array(results)
 

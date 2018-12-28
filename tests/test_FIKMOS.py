@@ -53,11 +53,11 @@ class test_rapnaparkhi(unittest.TestCase):
         self.assertAlmostEqual(value, 72.0873, 3)
 
     def test_create_tuples(self):
+        # %%
         data = PreprocessTags(True).load_data(
-            r'..\data\toy_dataset.txt')
-        tag_corp = pd.Series(data.y).unique()
-        fm = FinkMos(data.x, data.y, tag_corp)
-        # fm = FinkMos(x, y, y_tags)
+            r'..\data\train.wtag')
+        tag_corp = pd.Series(data.y[0:50000]).unique()
+        fm = FinkMos(data.x[0:50000], data.y[0:50000], tag_corp)
         fm.create_tuples()
         print("fm.weight_mat")
         print(fm.weight_mat)

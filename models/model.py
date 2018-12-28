@@ -1,11 +1,8 @@
-import pickle
-
 import numpy as np
 import pandas as pd
 
 from models.score import Score
 from models.sentence_processor import FinkMos
-from scipy.optimize import minimize
 
 
 class Model:
@@ -50,13 +47,8 @@ class Model:
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         self.v = np.random.uniform(-0.5, 0.5, self.num_tests)
-        self._loss(self.v)
-
-        # TODO: consider adding a test removal mechanism (from self.tests)
-        self.opt_result = minimize(self._loss, np.ones(len(self.tests)), options=dict(disp=True), method='BFGS')
-        self.v = self.opt_result['x']
-
-        return
+        self.fm.minimize_loss()
+        self.v = self.fm.v
 
     def predict(self, x):
         """
