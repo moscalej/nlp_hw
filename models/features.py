@@ -1,8 +1,6 @@
-from models.prerocesing import PreprocessTags
-import yaml
 import pickle
+
 import dill as pickle
-import pandas as pd
 
 
 # IN_DT_NN        1825
@@ -292,16 +290,16 @@ def template_generator_suffix2(suffix):
     suffix_length = len(suffix)
     template_func_name = f'template_prefix_{suffix}'
 
-    def template_func(input):
-        name = f'suffix_{suffix}-{input[0]}_^_^_^_^_^'
-        res_func = lambda fov: \
-                if len(fov[3]) > suffix_length and \
-                        fov[3][(-suffix_length):].lower() == suffix and \
-                        fov[0] == tag
-            return name, res_func
-
-    # template_func.__name__ = template_func_name
-    return template_func
+    # def template_func(input):
+    #     name = f'suffix_{suffix}-{input[0]}_^_^_^_^_^'
+    #     res_func = lambda fov: \
+    #             if len(fov[3]) > suffix_length and \
+    #                     fov[3][(-suffix_length):].lower() == suffix and \
+    #                     fov[0] == tag
+    #         return name, res_func
+    #
+    # # template_func.__name__ = template_func_name
+    # return template_func
 
 
 def template_generator_prefix2(prefix):
@@ -315,21 +313,21 @@ def template_generator_prefix2(prefix):
     prefix_length = len(prefix)
     template_func_name = f'template_prefix_{prefix}'
 
-    def template_func(input):
-        name = f'prefix_{prefix}-{input[0]}_^_^_^_^_^'
-        res_func = lambda fov: \
-            len(fov[3]) > prefix_length and \
-            fov[3][0:prefix_length].lower() == prefix and \
-            fov[0] == input[0]
-        return name, res_func
+    # def template_func(input):
+    #     name = f'prefix_{prefix}-{input[0]}_^_^_^_^_^'
+    #     res_func = lambda fov: \
+    #         len(fov[3]) > prefix_length and \
+    #         fov[3][0:prefix_length].lower() == prefix and \
+    #         fov[0] == input[0]
+    #     return name, res_func
+    #
+    # # template_func.__name__ = template_func_name
+    # return template_func
 
-    # template_func.__name__ = template_func_name
-    return template_func
 
-
-# usage example:
-ing_template = template_generator_prefix2('ing')
-name, func = ing_template(input)
+# # usage example:
+# ing_template = template_generator_prefix2('ing')
+# name, func = ing_template(input)
 
 
 def template_w_t(input):  # <w, t>

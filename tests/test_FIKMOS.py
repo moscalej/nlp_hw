@@ -2,7 +2,6 @@ import unittest
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 
 from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
@@ -67,8 +66,4 @@ class test_rapnaparkhi(unittest.TestCase):
         fm.create_feature_sparse_list_v2()
         print(len(fm.f_matrix_list))
         print(fm.f_matrix_list[0].shape)
-        oot = minimize(fm.loss_function,
-                       np.ones(len(fm.test_dict)),
-                       options=dict(disp=True),
-                       method='BFGS',
-                       callback=lambda x: print(fm.loss_function(x)))
+        fm.minimize_loss()

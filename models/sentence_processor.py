@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import sparse as spar
+from scipy.optimize import minimize
 
 from models.features import Features
 
@@ -23,6 +24,8 @@ class FinkMos:
         self.weight_mat = None
         self.tuple_5_list = None
         self.tup5_2index = dict()
+        self.opt = None
+        self.v = None
 
     def create_tuples(self):
         """
@@ -83,10 +86,9 @@ class FinkMos:
         exp_ = np.exp(f_v)
         exp_sum = np.sum(exp_, axis=0)
         repetitions = np.sum(self.weight_mat, axis=0)
-        sum_exp = exp_sum
-        ln = np.log(sum_exp) * repetitions
+        ln = np.log(exp_sum) * repetitions
         sum_ln = np.sum(ln)
-        return sum_ln - l_fv
+        return sum_ln - l_fv + np.linalg.norm(v)
 
     def dot(self, v):
         results = []
@@ -94,6 +96,18 @@ class FinkMos:
             t = sparce_matrix.T @ v
             results.append(t)
         return np.array(results)
+
+    def minimize_loss(self):
+        self.opt = minimize(self.loss_function,
+                            np.ones(len(self.test_dict)),
+                            options=dict(disp=True, maxiter=10),
+                            method='BFGS',
+                            callback=self.callback_cunf)
+        self.v = self.opt.x
+
+    def callback_cunf(self, x):
+        print(f'Current loss {self.loss_function(x)}')
+
 
     def softmax_denominator(self, v, history_i, y, y_1, y_2):
 
