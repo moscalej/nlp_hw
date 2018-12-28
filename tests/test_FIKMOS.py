@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import minimize
 
 from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
@@ -54,9 +55,9 @@ class test_rapnaparkhi(unittest.TestCase):
 
     def test_create_tuples(self):
         data = PreprocessTags(True).load_data(
-            r'..\data\train.wtag')
-        tag_corp = pd.Series(data.y[0:50000]).unique()
-        fm = FinkMos(data.x[0:50000], data.y[0:50000], tag_corp)
+            r'..\data\toy_dataset.txt')
+        tag_corp = pd.Series(data.y).unique()
+        fm = FinkMos(data.x, data.y, tag_corp)
         # fm = FinkMos(x, y, y_tags)
         fm.create_tuples()
         print("fm.weight_mat")
@@ -66,3 +67,8 @@ class test_rapnaparkhi(unittest.TestCase):
         fm.create_feature_sparse_list_v2()
         print(len(fm.f_matrix_list))
         print(fm.f_matrix_list[0].shape)
+        oot = minimize(fm.loss_function,
+                       np.ones(len(fm.test_dict)),
+                       options=dict(disp=True),
+                       method='BFGS',
+                       callback=lambda x: print(fm.loss_function(x)))

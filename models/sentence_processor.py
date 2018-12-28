@@ -78,18 +78,21 @@ class FinkMos:
 
     def loss_function(self, v):
         f_v = self.dot(v)  # add factor
-        f_v_mask = f_v * self.weight_mat
+        f_v_mask = np.multiply(f_v, self.weight_mat)
         l_fv = np.sum(np.sum(f_v_mask))  # * mask
         exp_ = np.exp(f_v)
-        sum_exp = np.sum(exp_, axis=0) * np.sum(self.weight_mat, axis=0)
-        ln = np.log(sum_exp)
+        exp_sum = np.sum(exp_, axis=0)
+        repetitions = np.sum(self.weight_mat, axis=0)
+        sum_exp = exp_sum
+        ln = np.log(sum_exp) * repetitions
         sum_ln = np.sum(ln)
-        return sum_ln - l_fv  # todo add regularization
+        return sum_ln - l_fv
 
-    def dot(self, matrix, v):
+    def dot(self, v):
         results = []
         for sparce_matrix in self.f_matrix_list:
-            results.append(sparce_matrix @ v)
+            t = sparce_matrix.T @ v
+            results.append(t)
         return np.array(results)
 
     def softmax_denominator(self, v, history_i, y, y_1, y_2):

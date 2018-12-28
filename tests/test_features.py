@@ -1,11 +1,12 @@
-from models.prerocesing import PreprocessTags
 import pickle
-import dill as pickle
 import unittest
-from models.sentence_processor import FinkMos
+
+import dill as pickle
 import pandas as pd
-from models.features import Features
+
 import features as feat
+from models.features import Features
+from models.prerocesing import PreprocessTags
 
 x = pd.Series(['*', '*', 'The', 'Treasury', 'is', 'still', 'working', 'out',
                'the', 'details', 'with', 'bank', 'trade', 'associations',
@@ -24,7 +25,7 @@ class features(unittest.TestCase):
 
     def test_feature_generator(self):
         data = PreprocessTags(True).load_data(
-            r'..\data\train.wtag')
+            r'..\data\toy_dataset.txt')
         feat_generator = Features()
         feat_generator.generate_tuple_corpus(data.x[0:50000], data.y[0:50000])
         try:
