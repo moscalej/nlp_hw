@@ -50,7 +50,7 @@ class FinkMos:
         self.tuple_5_list = list(map(lambda x: list(x[1]), tuple_5_df.iterrows()))  # make list of every row of the DF
 
         #  create wight mask
-        weight_mask = np.zeros([self.tag_corpus.shape[0], tuple_5_df.shape[0]])
+        weight_mask = spar.csr_matrix((self.tag_corpus.shape[0], tuple_5_df.shape[0]), dtype=int)
         self.tup5_2index = {"_".join(x): num for num, x in enumerate(tuple_5_df.values)}
         for tup, count in tuple_6_counts_series.items():
             tup_0 = tup.split('_')[0]
@@ -81,19 +81,54 @@ class FinkMos:
 
     def loss_function(self, v):
         f_v = self.dot(v)  # add factor
-        f_v_mask = np.multiply(f_v, self.weight_mat)
+        f_v_mask = self.weight_mat.multiply(f_v)
         l_fv = np.sum(np.sum(f_v_mask))  # * mask
         exp_ = np.exp(f_v)
         exp_sum = np.sum(exp_, axis=0)
-        repetitions = np.sum(self.weight_mat, axis=0)
+        repetitions = np.array(self.weight_mat.sum(axis=0))  # from here not sparse
         ln = np.log(exp_sum) * repetitions
         sum_ln = np.sum(ln)
         return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
+    def loss_function2(self, v):
+        # f_v = self.dot(v)  # add factor
+        regularization = 0.1 * np.linalg.norm(v)
+        loss_val = regularization
+        for tup5_ind, sparse_matrix in enumerate(self.f_matrix_list):
+            tuple_result_vec = sparse_matrix.dot(v)  # sum all tests per tup5 over all given tup0
+            weighted_tup5 = self.weight_mat[:, tup5_ind].multiply(tuple_result_vec)
+            curr_fv = weighted_tup5.sum()
+            curr_denom = np.sum(np.log(np.exp(tuple_result_vec) * np.sum(self.weight_mat[:, tup5_ind])))
+            loss_val += (curr_denom - curr_fv)
+        return loss_val
+
+        # f_v_mask = np.multiply(f_v, self.weight_mat)
+        # l_fv = np.sum(np.sum(f_v_mask))  # * mask
+        # exp_ = np.exp(f_v)
+        # exp_sum = np.sum(exp_, axis=0)
+        # repetitions = np.sum(self.weight_mat, axis=0)
+        # ln = np.log(exp_sum) * repetitions
+        # sum_ln = np.sum(ln)
+        # return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+
+    # def loss_gradient(self, v):
+    #     f_v = self.dot(v)  # add factor
+    #
+    #     f_v_mask = self.weight_mat.multiply(f_v)
+    #     l_fv = np.sum(np.sum(f_v_mask))  # * mask
+    #
+    #     exp_ = np.exp(f_v_mask)
+    #
+    #     exp_sum = np.sum(exp_, axis=0)
+    #     repetitions = np.sum(self.weight_mat, axis=0)
+    #     ln = np.log(exp_sum) * repetitions
+    #     sum_ln = np.sum(ln)
+    #     return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+
     def dot(self, v):
         results = []
         for sparce_matrix in self.f_matrix_list:
-            t = sparce_matrix @ v
+            t = sparce_matrix.dot(v)
             results.append(t)
         return np.array(results)
 

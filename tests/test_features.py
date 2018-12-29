@@ -34,7 +34,6 @@ class features(unittest.TestCase):
         except:
             pass
         for template in feat.templates_dict.values():
-            print(template)
             feat_generator.generate_lambdas(template['func'], template['tuples'])
         # feat_generator.add_lambdas(feat.suffix_funcs_all)  # DONE
         # feat_generator.add_lambdas(feat.prefix_funcs_all)  # DONE

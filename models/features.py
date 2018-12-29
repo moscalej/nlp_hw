@@ -58,17 +58,22 @@ class Features:
                 self.add_lambdas(pickle.load(stream))
         return result
 
+    def save_tests(self, path=fr"../training/report_lambdas_dict.p"):
+        with open(path, 'wb') as stream:
+            pickle.dump(self.lambdas, stream)
+
     def generate_lambdas(self, template, tuple_corpus=None):
         if tuple_corpus is None:
             tuple_corpus = self.tuple_corpus
         template_name = template.__name__
         for tup in tuple_corpus:
             name, func = template(tup)
-            if name in self.lambdas:
-                self.lambdas[name]['tup_list'].append(tup)
-            else:
-                lambda_dict = {name: {'func': template(tup), 'tup_list': [tup]}}
-                self.add_lambdas(lambda_dict)
+            if func(tup):
+                if name in self.lambdas:
+                    self.lambdas[name]['tup_list'].append(tup)
+                else:
+                    lambda_dict = {name: {'func': template(tup), 'tup_list': [tup]}}
+                    self.add_lambdas(lambda_dict)
 
 
 trigrams = dict(
@@ -327,8 +332,8 @@ def template_generator_prefix2(prefix):
 
 
 # usage example:
-ing_template = template_generator_prefix2('ing')
-name, func = ing_template(input)
+# ing_template = template_generator_prefix2('ing')
+# name, func = ing_template(input)
 
 
 def template_w_t(input):  # <w, t>
