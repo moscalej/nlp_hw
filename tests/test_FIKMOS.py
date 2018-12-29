@@ -1,8 +1,9 @@
 import unittest
-from models.prerocesing import PreprocessTags
+
 import numpy as np
 import pandas as pd
 
+from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
 
 # y_tags = [ 'IN', 'NN', 'DT', 'PRP', 'CC', 'RB', 'NNS', 'JJ', '``', 'EX',
@@ -51,23 +52,12 @@ class test_rapnaparkhi(unittest.TestCase):
         value = r.sentence_non_lineard_loss(np.zeros([8]))
         self.assertAlmostEqual(value, 72.0873, 3)
 
-    def test_tuples2tensor(self):
-        fm = FinkMos(x, y, y_tags)
-
-        filename = r'alex_shor.h5'
-        tuple_mat = np.load(filename)
-        # print(tuple_mat.shape)
-        # tuple_mat =
-        result = fm.create_feature_tensor(tuple_mat, batch_size=10000)
-
-        print(result.shape())
-
     def test_create_tuples(self):
+        # %%
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
         tag_corp = pd.Series(data.y[0:50000]).unique()
         fm = FinkMos(data.x[0:50000], data.y[0:50000], tag_corp)
-        # fm = FinkMos(x, y, y_tags)
         fm.create_tuples()
         print("fm.weight_mat")
         print(fm.weight_mat)
@@ -76,3 +66,4 @@ class test_rapnaparkhi(unittest.TestCase):
         fm.create_feature_sparse_list_v2()
         print(len(fm.f_matrix_list))
         print(fm.f_matrix_list[0].shape)
+        fm.minimize_loss()
