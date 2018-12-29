@@ -162,6 +162,7 @@ class FinkMos:
     def minimize_loss(self):
         self.opt = minimize(self.loss_function,
                             np.ones(len(self.test_dict)),
+                            jac=self.loss_gradient,
                             options=dict(disp=True, maxiter=10),
                             method='BFGS',
                             callback=self.callback_cunf)
