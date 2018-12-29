@@ -116,18 +116,22 @@ class FinkMos:
         # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
         e_f_v = np.exp(f_v)  # dims: tup0 x tup5
         z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
-        p = e_f_v / z  # dims: tup0 x tup5
+        p = (e_f_v.T / z).T  # dims: tup0 x tup5
         f_p_tup5_list = []  # sum over tuples list
         f_v_tup_0_tests = []
         for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
-            f_p = sparse_matrix.multiply(p[tup_0_ind, :])  # dims: tup5 x tests
+            spaear_t = sparse_matrix.T
+            f_p = spar.csr_matrix.multiply(spaear_t, p[tup_0_ind, :])  # dims: tup5 x tests
             f_v_tup_0_tests.append(sparse_matrix.sum(axis=0))
-            f_p_tup5 = f_p.multuply(self.weight_mat[tup_0_ind, :]).sum(axis=0)
-            f_p_tup5_list.append(f_p_tup5)
-        left = np.array(f_v_tup_0_tests).sum()  # dims 1 X dim(V)
-        f_p_tup5 = np.array(f_p_tup5_list)
-        right = f_p_tup5.sum(axis=0)
-        result = left - right
+            weight_vec = self.weight_mat[tup_0_ind, :]
+            f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
+            f_p_tup5_sum = f_p_tup5.sum(axis=1)
+            f_p_tup5_list.append(f_p_tup5_sum)
+        left = np.squeeze(np.array(f_v_tup_0_tests))  # dims 1 X dim(V)
+        left_sum = np.sum(left, axis=0)
+        f_p_tup5_arr = np.squeeze(np.array(f_p_tup5_list))
+        right = f_p_tup5_arr.sum(axis=0)
+        result = left_sum - right
         return result
 
         # tup_0_test_list.append(sparce_matrix.sum(axis=0))

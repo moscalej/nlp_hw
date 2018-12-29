@@ -3,11 +3,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
+import features as feat
+from models.features import Features
 from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
-from models.features import Features
-import features as feat
-
 
 # y_tags = [ 'IN', 'NN', 'DT', 'PRP', 'CC', 'RB', 'NNS', 'JJ', '``', 'EX',
 #        'NNP', 'CD', 'VBG', 'UH', 'PRP$', 'WRB', 'WP', 'VBZ', 'RBR',
@@ -61,13 +60,13 @@ class test_rapnaparkhi(unittest.TestCase):
             r'..\data\train.wtag')
         word_num = 50
         tag_corp = pd.Series(data.y[0:word_num]).unique()
-        ## generate tests - (comment out if file is updated)
+        # generate tests - (comment out if file is updated)
         feat_generator = Features()
         feat_generator.generate_tuple_corpus(data.x[0:word_num], data.y[0:word_num])
         for template in feat.templates_dict.values():
             feat_generator.generate_lambdas(template['func'], template['tuples'])
         feat_generator.save_tests()
-        # %%
+
         fm = FinkMos(data.x[0:word_num], data.y[0:word_num], tag_corp)
         fm.create_tuples()
         print("fm.weight_mat")
@@ -75,7 +74,8 @@ class test_rapnaparkhi(unittest.TestCase):
         print("fm.tuple_5_list")
         print(fm.tuple_5_list)
         fm.create_feature_sparse_list_v2()
-        print(len(fm.f_matrix_list))
+        # print(len(fm.f_matrix_list))
         print(fm.f_matrix_list[0].shape)
         # fm.minimize_loss()
-        fm.loss_gradient(fm.v)
+        v = np.ones([126])
+        fm.loss_gradient(v)
