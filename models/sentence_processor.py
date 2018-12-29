@@ -111,19 +111,38 @@ class FinkMos:
         # sum_ln = np.sum(ln)
         # return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
-    # def loss_gradient(self, v):
-    #     f_v = self.dot(v)  # add factor
-    #
-    #     f_v_mask = self.weight_mat.multiply(f_v)
-    #     l_fv = np.sum(np.sum(f_v_mask))  # * mask
-    #
-    #     exp_ = np.exp(f_v_mask)
-    #
-    #     exp_sum = np.sum(exp_, axis=0)
-    #     repetitions = np.sum(self.weight_mat, axis=0)
-    #     ln = np.log(exp_sum) * repetitions
-    #     sum_ln = np.sum(ln)
-    #     return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+    def loss_gradient(self, v):
+        f_v = self.dot(v)  # dims: tup_0 x tup5
+        # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
+        e_f_v = np.exp(f_v)  # dims: tup0 x tup5
+        z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
+        p = e_f_v / z  # dims: tup0 x tup5
+        f_p_tup5_list = []  # sum over tuples list
+        f_v_tup_0_tests = []
+        for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
+            f_p = sparse_matrix.multiply(p[tup_0_ind, :])  # dims: tup5 x tests
+            f_v_tup_0_tests.append(sparse_matrix.sum(axis=0))
+            f_p_tup5 = f_p.multuply(self.weight_mat[tup_0_ind, :]).sum(axis=0)
+            f_p_tup5_list.append(f_p_tup5)
+        left = np.array(f_v_tup_0_tests).sum()  # dims 1 X dim(V)
+        f_p_tup5 = np.array(f_p_tup5_list)
+        right = f_p_tup5.sum(axis=0)
+        result = left - right
+        return result
+
+        # tup_0_test_list.append(sparce_matrix.sum(axis=0))
+        # tup_0_tests = np.array(tup_0_test_list)
+
+        # f_v_mask = self.weight_mat.multiply(f_v)
+        # l_fv = np.sum(f_v_mask, axis=)  # * mask
+        #
+        # exp_ = np.exp(f_v_mask)
+        #
+        # exp_sum = np.sum(exp_, axis=0)
+        # repetitions = np.sum(self.weight_mat, axis=0)
+        # ln = np.log(exp_sum) * repetitions
+        # sum_ln = np.sum(ln)
+        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
     def dot(self, v):
         results = []
@@ -142,7 +161,6 @@ class FinkMos:
 
     def callback_cunf(self, x):
         print(f'Current loss {self.loss_function(x)}')
-
 
     def softmax_denominator(self, v, history_i, y, y_1, y_2):
 

@@ -59,7 +59,7 @@ class test_rapnaparkhi(unittest.TestCase):
         # %%
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-        word_num = 1000
+        word_num = 50
         tag_corp = pd.Series(data.y[0:word_num]).unique()
         ## generate tests - (comment out if file is updated)
         feat_generator = Features()
@@ -77,4 +77,5 @@ class test_rapnaparkhi(unittest.TestCase):
         fm.create_feature_sparse_list_v2()
         print(len(fm.f_matrix_list))
         print(fm.f_matrix_list[0].shape)
-        fm.minimize_loss()
+        # fm.minimize_loss()
+        fm.loss_gradient(fm.v)
