@@ -291,14 +291,13 @@ def template_generator_suffix2(suffix):
     # name = f'w_t-{input[0]}_^_^_{input[3]}_^_^'
     suffix_length = len(suffix)
     template_func_name = f'template_prefix_{suffix}'
-
     def template_func(input):
         name = f'suffix_{suffix}-{input[0]}_^_^_^_^_^'
         res_func = lambda fov: \
-                if len(fov[3]) > suffix_length and \
-                        fov[3][(-suffix_length):].lower() == suffix and \
-                        fov[0] == tag
-            return name, res_func
+            len(fov[3]) > suffix_length and \
+            fov[3][(-suffix_length):].lower() == suffix and \
+            fov[0] == input[0]
+        return name, res_func
 
     # template_func.__name__ = template_func_name
     return template_func
