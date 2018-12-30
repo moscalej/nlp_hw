@@ -55,7 +55,6 @@ class test_rapnaparkhi(unittest.TestCase):
         self.assertAlmostEqual(value, 72.0873, 3)
 
     def test_create_tuples(self):
-
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
         word_num = 150_000
@@ -70,12 +69,12 @@ class test_rapnaparkhi(unittest.TestCase):
         fm = FinkMos(data.x[0:word_num], data.y[0:word_num], tag_corp)
         fm.create_tuples()
         print("fm.weight_mat")
-        print(fm.weight_mat)
         print("fm.tuple_5_list")
-        print(fm.tuple_5_list)
         fm.create_feature_sparse_list_v2()
         # print(len(fm.f_matrix_list))
-        fm.loss_function(np.ones(len(fm.test_dict)),1024)
-        fm.loss_gradient(np.ones(len(fm.test_dict)),1024)
+        fm.loss_function(np.ones(len(fm.test_dict)), 4096)
+        print('loss one run')
+        fm.loss_gradient(np.ones(len(fm.test_dict)), 4096)
+        print('Gradient one Run')
         print(fm.f_matrix_list[0].shape)
         fm.minimize_loss()

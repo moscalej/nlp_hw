@@ -79,7 +79,7 @@ class FinkMos:
                 result[tup_0_ind][tup_5_ind, test_ind] = True
         self.f_matrix_list = result
 
-    def loss_function(self, v, batch_size=1024):
+    def loss_function(self, v, batch_size=4096):
         sum_ln_tot = 0
         l_fv_tot = 0
         for batch_low in range(0, self.weight_mat.shape[0], batch_size):
@@ -96,7 +96,7 @@ class FinkMos:
             l_fv_tot += l_fv
         return sum_ln_tot - l_fv_tot + 0.1 * np.linalg.norm(v)
 
-    def loss_gradient(self, v, batch_size=1024):
+    def loss_gradient(self, v, batch_size=4096):
         left_sum_tot = np.zeros([len(self.test_dict)])
         right_tot = np.zeros([len(self.test_dict)])
         for batch_low in range(0, self.weight_mat.shape[0], batch_size):
@@ -143,7 +143,7 @@ class FinkMos:
                             np.ones(len(self.test_dict)),
                             jac=self.loss_gradient,
                             options=dict(disp=True, maxiter=10),
-                            method='BFGS',
+                            method='CG',
                             callback=self.callback_cunf)
         self.v = self.opt.x
 
