@@ -4,6 +4,7 @@ import unittest
 import pandas as pd
 import yaml
 
+import features as feat
 from models.features import Features
 from models.model import Model
 from models.prerocesing import PreprocessTags
@@ -142,32 +143,33 @@ class test_model(unittest.TestCase):
             yaml.dump(results, stream, default_flow_style=False)
 
     def test_predict(self):
-        with open(r"..\models\tests.YAML", 'r') as stream:
-            tests_dict = yaml.load(stream)
-
-        tests = tests_dict['tests']
         # tests = pass
         # Load Data
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-
-        model1 = Model(tests)
-        # create f_x_y "matrix" for any x,y save indices of non zero tests TODO decide
-        a = model1.fit(data.x, data.y)
-
-        data = PreprocessTags(True).load_data(
-            r'..\data\test.wtag')
-        y_hat = model1.predict(x)
+        word_num = 100
+        x = data.x[0:word_num]
+        y = data.x[0:word_num]
+        # generate tests - (comment out if file is updated)
+        feat_generator = Features()
+        feat_generator.generate_tuple_corpus(x, y)
+        for template in feat.templates_dict.values():
+            feat_generator.generate_lambdas(template['func'], template['tuples'])
+        feat_generator.save_tests()
+        model1 = Model()
+        a = model1.fit(x, y)
+        x_test = x
+        y_hat = model1.predict(x_test)
         print(y_hat)
         cm = model1.confusion(y_hat=y_hat, y=y)
         cm.to_csv(r'../training/confusion_matrix.csv')
-        results = dict(
-            v=model1.v.tolist(),
-            compare={test: dict(v_val=v_val, sum=sum) for test, v_val in
-                     zip(tests, model1.v.tolist())},
-            acc=model1.accuracy(y_hat=y_hat, y=y),
-            acc_per_tag=model1.acc_per_tag(y_hat=y_hat, y=y)
-        )
+        # results = dict(
+        #     v=model1.v.tolist(),
+        #     compare={test: dict(v_val=v_val, sum=sum) for test, v_val in
+        #              zip(tests, model1.v.tolist())},
+        #     acc=model1.accuracy(y_hat=y_hat, y=y),
+        #     acc_per_tag=model1.acc_per_tag(y_hat=y_hat, y=y)
+        # )
 
 
         t = time.localtime()
