@@ -10,7 +10,7 @@ class FinkMos:
 
     def __init__(self, x, y, tag_corpus):
         assert isinstance(x, pd.Series)
-        # assert isinstance(y, pd.Series)
+        assert isinstance(y, pd.Series)
         self.tag_corpus = tag_corpus
         self.test_dict = Features().get_tests()
         self.x = x
@@ -96,83 +96,62 @@ class FinkMos:
                     result[tup_0_ind][tup_5_ind, test_ind] = True
         self.f_matrix_list = result
 
-    def loss_function(self, v):
-        f_v = self.dot(v)  # add factor
-        f_v_mask = self.weight_mat.multiply(f_v)
-        l_fv = np.sum(np.sum(f_v_mask))  # * mask
-        exp_ = np.exp(f_v)
-        exp_sum = np.sum(exp_, axis=0)
-        repetitions = np.array(self.weight_mat.sum(axis=0))  # from here not sparse
-        ln = np.log(exp_sum) * repetitions
-        sum_ln = np.sum(ln)
-        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+    def loss_function(self, v, batch_size=2048):
+        sum_ln_tot = 0
+        l_fv_tot = 0
+        for batch_low in range(0, self.weight_mat.shape[1], batch_size):
+            batch_high = batch_low + batch_size
+            f_v = self.dot(v, batch_low, batch_high)  # add factor
+            f_v_mask = self.weight_mat[:, batch_low:batch_high].multiply(f_v)
+            l_fv = np.sum(np.sum(f_v_mask))  # * mask
+            exp_ = np.exp(f_v)
+            exp_sum = np.sum(exp_, axis=0)
+            repetitions = np.array(self.weight_mat[:, batch_low:batch_high].sum(axis=0))  # from here not sparse
+            ln = np.log(exp_sum) * repetitions
+            sum_ln = np.sum(ln)
+            sum_ln_tot += sum_ln
+            l_fv_tot += l_fv
+        return sum_ln_tot - l_fv_tot + 0.1 * np.linalg.norm(v)
 
-    def loss_function2(self, v):
-        # f_v = self.dot(v)  # add factor
-        regularization = 0.1 * np.linalg.norm(v)
-        loss_val = regularization
-        for tup5_ind, sparse_matrix in enumerate(self.f_matrix_list):
-            tuple_result_vec = sparse_matrix.dot(v)  # sum all tests per tup5 over all given tup0
-            weighted_tup5 = self.weight_mat[:, tup5_ind].multiply(tuple_result_vec)
-            curr_fv = weighted_tup5.sum()
-            curr_denom = np.sum(np.log(np.exp(tuple_result_vec) * np.sum(self.weight_mat[:, tup5_ind])))
-            loss_val += (curr_denom - curr_fv)
-        return loss_val
+    def loss_gradient(self, v, batch_size=4096):
+        left_sum_tot = np.zeros([len(self.test_dict)])
+        right_tot = np.zeros([len(self.test_dict)])
+        for batch_low in range(0, self.weight_mat.shape[0], batch_size):
+            batch_high = batch_low + batch_size
 
-        # f_v_mask = np.multiply(f_v, self.weight_mat)
-        # l_fv = np.sum(np.sum(f_v_mask))  # * mask
-        # exp_ = np.exp(f_v)
-        # exp_sum = np.sum(exp_, axis=0)
-        # repetitions = np.sum(self.weight_mat, axis=0)
-        # ln = np.log(exp_sum) * repetitions
-        # sum_ln = np.sum(ln)
-        # return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
-
-    def loss_gradient(self, v):
-        f_v = self.dot(v)  # dims: tup_0 x tup5
-        # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
-        e_f_v = np.exp(f_v)  # dims: tup0 x tup5
-        z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
-        p = (e_f_v.T / z).T  # dims: tup0 x tup5
-        f_p_tup5_list = []  # sum over tuples list
-        f_v_tup_0_tests = []
-        for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
-            spar_t = sparse_matrix.T
-            f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
-            weight_vec = self.weight_mat[tup_0_ind, :]
-            weighted_slice = spar.csr_matrix.multiply(spar_t, weight_vec)
-            f_v_tests = weighted_slice.sum(axis=1)
-            f_v_tup_0_tests.append(f_v_tests)
-            f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
-            f_p_tup5_sum = f_p_tup5.sum(axis=1)
-            f_p_tup5_list.append(f_p_tup5_sum)
-        left = np.squeeze(np.array(f_v_tup_0_tests))  # dims 1 X dim(V)
-        left_sum = np.sum(left, axis=0)
-        f_p_tup5_arr = np.squeeze(np.array(f_p_tup5_list))
-        right = f_p_tup5_arr.sum(axis=0)
+            f_v = self.dot(v, batch_low, batch_high)  # add factor
+            # dims: tup_0 x tup5
+            # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
+            e_f_v = np.exp(f_v)  # dims: tup0 x tup5
+            z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
+            p = (e_f_v.T / z).T  # dims: tup0 x tup5
+            f_p_tup5_list = []  # sum over tuples list
+            f_v_tup_0_tests = []
+            for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
+                spar_t = sparse_matrix[batch_low:batch_high].T
+                f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
+                weight_vec = self.weight_mat[tup_0_ind, batch_low:batch_high]
+                weighted_slice = spar.csr_matrix.multiply(spar_t, weight_vec)
+                f_v_tests = weighted_slice.sum(axis=1)
+                f_v_tup_0_tests.append(f_v_tests)
+                f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
+                f_p_tup5_sum = f_p_tup5.sum(axis=1)
+                f_p_tup5_list.append(f_p_tup5_sum)
+            left = np.squeeze(np.array(f_v_tup_0_tests))  # dims 1 X dim(V)
+            left_sum = np.sum(left, axis=0)
+            f_p_tup5_arr = np.squeeze(np.array(f_p_tup5_list))
+            right = f_p_tup5_arr.sum(axis=0)
+            left_sum_tot += left_sum
+            right_tot += right
         regularization = 0.2 * v
-        result = left_sum - right - regularization
+        result = left_sum_tot - right_tot - regularization
         neg_result = -result  # for minimization
         return neg_result
 
-        # tup_0_test_list.append(sparce_matrix.sum(axis=0))
-        # tup_0_tests = np.array(tup_0_test_list)
-
-        # f_v_mask = self.weight_mat.multiply(f_v)
-        # l_fv = np.sum(f_v_mask, axis=)  # * mask
-        #
-        # exp_ = np.exp(f_v_mask)
-        #
-        # exp_sum = np.sum(exp_, axis=0)
-        # repetitions = np.sum(self.weight_mat, axis=0)
-        # ln = np.log(exp_sum) * repetitions
-        # sum_ln = np.sum(ln)
-        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
-
-    def dot(self, v):
+    def dot(self, v, batch_low, batch_high):
         results = []
         for sparce_matrix in self.f_matrix_list:
-            t = sparce_matrix.dot(v)
+            t = sparce_matrix[batch_low:batch_high, :].dot(v)
             results.append(t)
         return np.array(results)
 
@@ -181,7 +160,7 @@ class FinkMos:
                             np.ones(len(self.test_dict)),
                             jac=self.loss_gradient,
                             options=dict(disp=True, maxiter=10),
-                            method='BFGS',
+                            method='CG',
                             callback=self.callback_cunf)
         self.v = self.opt.x
         self.f_v_train = self.dot(self.v)
