@@ -10,7 +10,6 @@ class FinkMos:
 
     def __init__(self, x, y, tag_corpus):
         assert isinstance(x, pd.Series)
-        assert isinstance(y, pd.Series)
         self.tag_corpus = tag_corpus
         self.test_dict = Features().get_tests()
         self.x = x
