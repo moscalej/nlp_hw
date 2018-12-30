@@ -57,7 +57,7 @@ class test_rapnaparkhi(unittest.TestCase):
     def test_create_tuples(self):
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-        word_num = 150_000
+        word_num = 15_000
         tag_corp = pd.Series(data.y[0:word_num]).unique()
         # generate tests - (comment out if file is updated)
         feat_generator = Features()
