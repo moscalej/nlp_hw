@@ -96,70 +96,79 @@ class FinkMos:
                     result[tup_0_ind][tup_5_ind, test_ind] = True
         self.f_matrix_list = result
 
-    def loss_function(self, v, batch_size=2048):
-        sum_ln_tot = 0
-        l_fv_tot = 0
-        for batch_low in range(0, self.weight_mat.shape[1], batch_size):
-            batch_high = batch_low + batch_size
-            f_v = self.dot(v, batch_low, batch_high)  # add factor
-            f_v_mask = self.weight_mat[:, batch_low:batch_high].multiply(f_v)
-            l_fv = np.sum(np.sum(f_v_mask))  # * mask
-            exp_ = np.exp(f_v)
-            exp_sum = np.sum(exp_, axis=0)
-            repetitions = np.array(self.weight_mat[:, batch_low:batch_high].sum(axis=0))  # from here not sparse
-            ln = np.log(exp_sum) * repetitions
-            sum_ln = np.sum(ln)
-            sum_ln_tot += sum_ln
-            l_fv_tot += l_fv
-        return sum_ln_tot - l_fv_tot + 0.1 * np.linalg.norm(v)
+    def loss_function(self, v):
+        f_v = self.dot(v)  # add factor
+        f_v_mask = self.weight_mat.multiply(f_v)
+        l_fv = np.sum(np.sum(f_v_mask))  # * mask
+        exp_ = np.exp(f_v)
+        exp_sum = np.sum(exp_, axis=0)
+        repetitions = np.array(self.weight_mat.sum(axis=0))  # from here not sparse
+        ln = np.log(exp_sum) * repetitions
+        sum_ln = np.sum(ln)
+        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
-    def loss_gradient(self, v, batch_size=4096):
-        left_sum_tot = np.zeros([len(self.test_dict)])
-        right_tot = np.zeros([len(self.test_dict)])
-        for batch_low in range(0, self.weight_mat.shape[0], batch_size):
-            batch_high = batch_low + batch_size
+    def loss_gradient(self, v):
+        f_v = self.dot(v)  # dims: tup_0 x tup5
+        # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
+        e_f_v = np.exp(f_v)  # dims: tup0 x tup5
+        z = np.sum(e_f_v, axis=1) + 1e-11  # dims: tup0 x tup5
+        p = (e_f_v.T / z).T  # dims: tup0 x tup5
+        f_p_tup5_list = []  # sum over tuples list
+        f_v_tup_0_tests = []
+        for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
+            spar_t = sparse_matrix.T
+            # Left
+            weight_vec = self.weight_mat[tup_0_ind, :]
+            weighted_slice = spar.csr_matrix.multiply(spar_t, weight_vec)
+            f_v_tests = weighted_slice.sum(axis=1)
+            f_v_tup_0_tests.append(f_v_tests)
 
-            f_v = self.dot(v, batch_low, batch_high)  # add factor
-            # dims: tup_0 x tup5
-            # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
-            e_f_v = np.exp(f_v)  # dims: tup0 x tup5
-            z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
-            p = (e_f_v.T / z).T  # dims: tup0 x tup5
-            f_p_tup5_list = []  # sum over tuples list
-            f_v_tup_0_tests = []
-            for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
-                spar_t = sparse_matrix[batch_low:batch_high].T
-                f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
-                weight_vec = self.weight_mat[tup_0_ind, batch_low:batch_high]
-                weighted_slice = spar.csr_matrix.multiply(spar_t, weight_vec)
-                f_v_tests = weighted_slice.sum(axis=1)
-                f_v_tup_0_tests.append(f_v_tests)
-                f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
-                f_p_tup5_sum = f_p_tup5.sum(axis=1)
-                f_p_tup5_list.append(f_p_tup5_sum)
-            left = np.squeeze(np.array(f_v_tup_0_tests))  # dims 1 X dim(V)
-            left_sum = np.sum(left, axis=0)
-            f_p_tup5_arr = np.squeeze(np.array(f_p_tup5_list))
-            right = f_p_tup5_arr.sum(axis=0)
-            left_sum_tot += left_sum
-            right_tot += right
+            # Right
+            f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
+            # f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
+            # f_p_tup5_sum = f_p_tup5.sum(axis=1)
+            f_p_tup5_list.append(f_p)
+        sparce_list = sum(f_p_tup5_list)
+        sparce_list_w_weight = spar.csr_matrix.multiply( sparce_list , self.weight_mat.sum(axis=0))
+        right =np.squeeze( np.array(sparce_list_w_weight.sum(axis=1)))
+
+        left = np.array(f_v_tup_0_tests)  # dims 1 X dim(V)
+        left_sum = np.squeeze(np.array(np.sum(left, axis=0)))
         regularization = 0.2 * v
-        result = left_sum_tot - right_tot - regularization
+        result = left_sum - right - regularization
         neg_result = -result  # for minimization
         return neg_result
 
-    def dot(self, v, batch_low, batch_high):
+        # tup_0_test_list.append(sparce_matrix.sum(axis=0))
+        # tup_0_tests = np.array(tup_0_test_list)
+
+        # f_v_mask = self.weight_mat.multiply(f_v)
+        # l_fv = np.sum(f_v_mask, axis=)  # * mask
+        #
+        # exp_ = np.exp(f_v_mask)
+        #
+        # exp_sum = np.sum(exp_, axis=0)
+        # repetitions = np.sum(self.weight_mat, axis=0)
+        # ln = np.log(exp_sum) * repetitions
+        # sum_ln = np.sum(ln)
+        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+
+    def dot(self, v):
         results = []
         for sparce_matrix in self.f_matrix_list:
-            t = sparce_matrix[batch_low:batch_high, :].dot(v)
+            t = sparce_matrix.dot(v)
             results.append(t)
         return np.array(results)
 
     def minimize_loss(self):
         self.opt = minimize(self.loss_function,
                             np.ones(len(self.test_dict)),
-                            jac=self.loss_gradient,
-                            options=dict(disp=True, maxiter=10),
+                            # jac=self.loss_gradient,
+                            options=dict(disp=True,
+                                         maxiter=10,
+                                         # eps=1e-5,
+                                         # gtol= 1e-6
+                                         ),
                             method='CG',
                             callback=self.callback_cunf)
         self.v = self.opt.x
