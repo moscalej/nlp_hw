@@ -56,7 +56,7 @@ class Model:
         :param x: [sentences * words]
         :return: matrix [ sentence_tags * words]
         """
-        # TODO: decide about sentence format (['*','*'..])
+        # sentence format with (['*','*'..])
         # validity check
         # check x type
         # check sentence format
@@ -129,10 +129,19 @@ class Model:
         """
         assert isinstance(sentence, FinkMos)
         y_1 = self.token2string[previous_tags[0]]
-        y_2 = self.token2string[previous_tags[1]]
+        y_2_list = [self.token2string[tag] for tag in previous_tags[1]]
         y = self.token2string[next_tag]
+        tup_list = []
+        w_2 = str(sentence.x.iloc[word_num - 2])
+        w_1 = str(sentence.x.iloc[word_num - 1])
+        w = str(sentence.x.iloc[word_num])
 
-        prop_q = sentence.prob_q(self.v, word_num, y, y_1, y_2)
+        for y_2 in y_2_list:
+            tup = [y_1, y_2, w, w_1, w_2]
+            tup_list.append(tup)
+        sentence.tuple_5_list = tup_list
+        # prop_q = sentence.prob_q(self.v, word_num, y, y_1, y_2)
+        prop_q = sentence.prob_q2(self.v, next_tag, self.fm)
 
         return prop_q
 
@@ -145,8 +154,9 @@ class Model:
         :return: List of tags
         :rtype: List
         """
+        beam_width = 1
         num_words = len(sentence)  # includes '*','*' and <stop>
-        sentence_fm = FinkMos(sentence, sentence, self.tests, self.tag_corpus)
+        sentence_fm = FinkMos(sentence, None, self.tag_corpus)  # y should be None
         all_tags = self.tag_corpus_tokenized
         num_tags = len(all_tags)
         dims = (num_words, num_tags, num_tags)
@@ -154,32 +164,43 @@ class Model:
 
         # ending in tags u,v at position k
         # p_table[0, 0, 0] = 1  # init
-        p_table[0, :, :] = 1
+        p_table[1, :, :] = 0
         bp_table = np.ones(dims, dtype=np.int8) * -1  # -1 implies no update
         answer = [None] * num_words
-        for k in range(1, num_words):
+        for k in range(2, num_words):
             print(str(k) + " out of " + str(num_words - 1))
             curr_tag_v_subspace = self.word2tag_subspace(sentence[k])
-            if k == 1:
+            if k == 2:
                 prev1_tag_u_subspace = [0]
             else:
                 prev1_tag_u_subspace = self.word2tag_subspace(sentence[k - 1])
-            if k in [1, 2]:  # 0 -> '*' tag
+            if k in [2, 3]:  # 0 -> '*' tag
                 optional_tags = [0]
             else:
                 optional_tags = self.word2tag_subspace(sentence[k - 2])
-
+                if len(optional_tags) > beam_width:
+                    subset_inds = np.argpartition(p_table[k - 1, optional_tags, prev1_tag_u], -beam_width)[-beam_width:]
+                    optional_tags = [optional_tags[i] for i in subset_inds]
             for prev1_tag_u in prev1_tag_u_subspace:
 
                 for curr_tag_v in curr_tag_v_subspace:  # naming relative to model function enteries
 
                     options = []  # np.array([])
-                    for t_2 in optional_tags:  # t_1 is previous tag  # TODO: minimize subspace (consider taking best 5, for others leave previous value)
-                        # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
-                        options.append(
-                            p_table[k - 1, t_2, prev1_tag_u] * self.model_function(next_tag=curr_tag_v, word_num=k,
-                                                                                   previous_tags=[prev1_tag_u, t_2],
-                                                                                   sentence=sentence_fm))
+                    # for t_2 in optional_tags:  # t_1 is previous tag  # TODO: minimize subspace (consider taking best 5, for others leave previous value)
+                    #     # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
+                    a = p_table[k - 1, optional_tags, prev1_tag_u]
+                    b = np.log(
+                        self.model_function(next_tag=curr_tag_v, word_num=k, previous_tags=[prev1_tag_u, optional_tags],
+                                            sentence=sentence_fm))
+                    # b1 = [list_[:] for list_ in b]
+                    # b2 = b[0]
+                    options = a + b
+                    # options = p_table[k - 1, optional_tags, prev1_tag_u] * self.model_function(next_tag=curr_tag_v,
+                    #                                                                            word_num=k,
+                    #                                                                            previous_tags=[
+                    #                                                                                prev1_tag_u,
+                    #                                                                                optional_tags],
+                    #                                                                            sentence=sentence_fm)
                     ind_in_options = np.argmax(options)
                     bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[
                         ind_in_options]  # taking the relevant tag from optional list
@@ -213,7 +234,7 @@ class Model:
             return self.tag_corpus_tokenized
 
     def _vectorize(self):
-        # self.create_word2tag_subspace()
+        self.create_word2tag_subspace()
         a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
         self.fm = a
         self.num_tests = len(a.test_dict)

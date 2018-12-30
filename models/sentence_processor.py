@@ -26,6 +26,8 @@ class FinkMos:
         self.tup5_2index = dict()
         self.opt = None
         self.v = None
+        self.f_v_train = None
+        self.calc_from_mem = None
 
     def create_tuples(self):
         """
@@ -61,9 +63,10 @@ class FinkMos:
             weight_mask[ind_i, ind_j] = count
         self.weight_mat = weight_mask
 
-    def create_feature_sparse_list_v2(self):
+    def create_feature_sparse_list_v2(self, training_fm=None):
         # return a list of sparse matrices, each matrix
         # tuple_5_list = self.tuple_5_list
+
         tuple_5_size = len(self.tuple_5_list)
         # tuple_0_list = self.tag_corpus  # [[elem1], [elem2], ...] ->
         tuple_0_size = self.tag_corpus.shape[0]
@@ -71,12 +74,26 @@ class FinkMos:
         # returns a list of empty spars matrices
         result = [spar.csr_matrix((tuple_5_size, num_test), dtype=bool) for _ in range(tuple_0_size)]
         # iterate list of test names
-        for test_ind, (key, val) in enumerate(self.test_dict.items()):
-            # iterate list of tuples per test
-            for tup in set(val['tup_list']):
-                tup_0_ind = np.where(tup[0] == self.tag_corpus)[0][0]
-                tup_5_ind = self.tup5_2index['_'.join(tup[1:])]
-                result[tup_0_ind][tup_5_ind, test_ind] = True
+        if self.y is None:  # inference mode
+            calculated = spar.csr_matrix((tuple_5_size, tuple_0_size), dtype=int)
+            for tup_5_ind, tup5 in enumerate(self.tuple_5_list):
+                # if calculated before take value
+                tup_5_str = ('_').join(tup5)
+                if tup_5_str in training_fm.tup5_2index:
+                    ind_in_train = training_fm.tup5_2index[tup_5_str]
+                    calculated[tup_5_ind, :] = training_fm.f_v_train[:, ind_in_train]
+                    continue
+                for tup_0_ind, tup0 in enumerate(self.tag_corpus):
+                    for test_ind, (key, val) in enumerate(self.test_dict.items()):
+                        result[tup_0_ind][tup_5_ind, test_ind] = val['func'][1]((tup0,) + tuple(tup5))
+            self.calc_from_mem = calculated
+        else:
+            for test_ind, (key, val) in enumerate(self.test_dict.items()):
+                # iterate list of tuples per test
+                for tup in set(val['tup_list']):
+                    tup_0_ind = np.where(tup[0] == self.tag_corpus)[0][0]
+                    tup_5_ind = self.tup5_2index['_'.join(tup[1:])]
+                    result[tup_0_ind][tup_5_ind, test_ind] = True
         self.f_matrix_list = result
 
     def loss_function(self, v):
@@ -140,6 +157,7 @@ class FinkMos:
                             method='CG',
                             callback=self.callback_cunf)
         self.v = self.opt.x
+        self.f_v_train = self.dot(self.v)
 
     def callback_cunf(self, x):
         print(f'Current loss {self.loss_function(x)}')
@@ -165,3 +183,12 @@ class FinkMos:
         features = self.to_feature_space2(history_i, y, y_1, y_2)
         features_v = np.exp(np.sum(v[features]))
         return features_v / self.softmax_denominator(v, history_i, y, y_1, y_2)
+
+    def prob_q2(self, v, y_token, training_fm):
+        self.create_feature_sparse_list_v2(training_fm)  # creates f_matrix_list
+        f_v = self.dot(v) + self.calc_from_mem.T  # dims tup0 x tup5
+        y_nomin = f_v[y_token]  # dims tup5 x 1
+        exp_ = np.exp(f_v)
+        exp_sum = np.sum(exp_, axis=0)  # dims tup5 x 1
+        prob = np.array(y_nomin / exp_sum)[0]  # dims tup5 x 1
+        return prob
