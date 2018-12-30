@@ -147,9 +147,9 @@ class test_model(unittest.TestCase):
         # Load Data
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-        word_num = 100
+        word_num = 30
         x = data.x[0:word_num]
-        y = data.x[0:word_num]
+        y = data.y[0:word_num]
         # generate tests - (comment out if file is updated)
         feat_generator = Features()
         feat_generator.generate_tuple_corpus(x, y)

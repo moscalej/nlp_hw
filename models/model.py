@@ -137,13 +137,11 @@ class Model:
         w = str(sentence.x.iloc[word_num])
 
         for y_2 in y_2_list:
-            print(f"y_1, y_2, w, w_1, w_2")
-            print(f"{y_1}, {y_2}, {w}, {w_1}, {w_2}")
-            tup = ([y_1, y_2, w, w_1, w_2])
+            tup = [y_1, y_2, w, w_1, w_2]
             tup_list.append(tup)
         sentence.tuple_5_list = tup_list
         # prop_q = sentence.prob_q(self.v, word_num, y, y_1, y_2)
-        prop_q = sentence.prob_q2(self.v, y, self.fm)
+        prop_q = sentence.prob_q2(self.v, next_tag, self.fm)
 
         return prop_q
 
@@ -156,6 +154,7 @@ class Model:
         :return: List of tags
         :rtype: List
         """
+        beam_width = 1
         num_words = len(sentence)  # includes '*','*' and <stop>
         sentence_fm = FinkMos(sentence, None, self.tag_corpus)  # y should be None
         all_tags = self.tag_corpus_tokenized
@@ -165,7 +164,7 @@ class Model:
 
         # ending in tags u,v at position k
         # p_table[0, 0, 0] = 1  # init
-        p_table[0, :, :] = 1
+        p_table[1, :, :] = 0
         bp_table = np.ones(dims, dtype=np.int8) * -1  # -1 implies no update
         answer = [None] * num_words
         for k in range(2, num_words):
@@ -179,7 +178,9 @@ class Model:
                 optional_tags = [0]
             else:
                 optional_tags = self.word2tag_subspace(sentence[k - 2])
-
+                if len(optional_tags) > beam_width:
+                    subset_inds = np.argpartition(p_table[k - 1, optional_tags, prev1_tag_u], -beam_width)[-beam_width:]
+                    optional_tags = [optional_tags[i] for i in subset_inds]
             for prev1_tag_u in prev1_tag_u_subspace:
 
                 for curr_tag_v in curr_tag_v_subspace:  # naming relative to model function enteries
@@ -188,15 +189,18 @@ class Model:
                     # for t_2 in optional_tags:  # t_1 is previous tag  # TODO: minimize subspace (consider taking best 5, for others leave previous value)
                     #     # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
                     a = p_table[k - 1, optional_tags, prev1_tag_u]
-                    b = self.model_function(next_tag=curr_tag_v, word_num=k, previous_tags=[prev1_tag_u, optional_tags],
-                                            sentence=sentence_fm)
-                    ans = a * b
-                    options = p_table[k - 1, optional_tags, prev1_tag_u] * self.model_function(next_tag=curr_tag_v,
-                                                                                               word_num=k,
-                                                                                               previous_tags=[
-                                                                                                   prev1_tag_u,
-                                                                                                   optional_tags],
-                                                                                               sentence=sentence_fm)
+                    b = np.log(
+                        self.model_function(next_tag=curr_tag_v, word_num=k, previous_tags=[prev1_tag_u, optional_tags],
+                                            sentence=sentence_fm))
+                    # b1 = [list_[:] for list_ in b]
+                    # b2 = b[0]
+                    options = a + b
+                    # options = p_table[k - 1, optional_tags, prev1_tag_u] * self.model_function(next_tag=curr_tag_v,
+                    #                                                                            word_num=k,
+                    #                                                                            previous_tags=[
+                    #                                                                                prev1_tag_u,
+                    #                                                                                optional_tags],
+                    #                                                                            sentence=sentence_fm)
                     ind_in_options = np.argmax(options)
                     bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[
                         ind_in_options]  # taking the relevant tag from optional list
