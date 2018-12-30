@@ -115,14 +115,14 @@ class FinkMos:
         f_v = self.dot(v)  # dims: tup_0 x tup5
         # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
         e_f_v = np.exp(f_v)  # dims: tup0 x tup5
-        z = np.sum(e_f_v, axis=1)  # dims: tup0 x tup5
+        z = np.sum(e_f_v, axis=1) + 1e-8  # dims: tup0 x tup5
         p = (e_f_v.T / z).T  # dims: tup0 x tup5
         f_p_tup5_list = []  # sum over tuples list
         f_v_tup_0_tests = []
         for tup_0_ind, sparse_matrix in enumerate(self.f_matrix_list):
             spar_t = sparse_matrix.T
-            f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
             weight_vec = self.weight_mat[tup_0_ind, :]
+            f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
             weighted_slice = spar.csr_matrix.multiply(spar_t, weight_vec)
             f_v_tests = weighted_slice.sum(axis=1)
             f_v_tup_0_tests.append(f_v_tests)
@@ -162,9 +162,13 @@ class FinkMos:
     def minimize_loss(self):
         self.opt = minimize(self.loss_function,
                             np.ones(len(self.test_dict)),
-                            jac=self.loss_gradient,
-                            options=dict(disp=True, maxiter=10),
-                            method='BFGS',
+                            # jac=self.loss_gradient,
+                            options=dict(disp=True,
+                                         maxiter=10,
+                                         # eps=1e-5,
+                                         # gtol= 1e-6
+                                         ),
+                            method='CG',
                             callback=self.callback_cunf)
         self.v = self.opt.x
 
