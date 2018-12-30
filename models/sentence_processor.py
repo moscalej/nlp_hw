@@ -88,11 +88,10 @@ class FinkMos:
         repetitions = np.array(self.weight_mat.sum(axis=0))  # from here not sparse
         ln = np.log(exp_sum) * repetitions
         sum_ln = np.sum(ln)
-        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
+        return sum_ln - l_fv #+ 0.1 * np.linalg.norm(v)
 
     def loss_gradient(self, v):
         f_v = self.dot(v)  # dims: tup_0 x tup5
-        # (self.weight_mat.sum(axis=0) * tup_0_tests).sum(axis=0)
         e_f_v = np.exp(f_v)  # dims: tup0 x tup5
         z = np.sum(e_f_v, axis=1) + 1e-11  # dims: tup0 x tup5
         p = (e_f_v.T / z).T  # dims: tup0 x tup5
@@ -108,9 +107,8 @@ class FinkMos:
 
             # Right
             f_p = spar.csr_matrix.multiply(spar_t, p[tup_0_ind, :])  # dims: tup5 x tests
-            # f_p_tup5 = spar.csr_matrix.multiply(f_p, weight_vec)
-            # f_p_tup5_sum = f_p_tup5.sum(axis=1)
             f_p_tup5_list.append(f_p)
+
         sparce_list = sum(f_p_tup5_list)
         sparce_list_w_weight = spar.csr_matrix.multiply( sparce_list , self.weight_mat.sum(axis=0))
         right =np.squeeze( np.array(sparce_list_w_weight.sum(axis=1)))
@@ -118,23 +116,10 @@ class FinkMos:
         left = np.array(f_v_tup_0_tests)  # dims 1 X dim(V)
         left_sum = np.squeeze(np.array(np.sum(left, axis=0)))
         regularization = 0.2 * v
-        result = left_sum - right - regularization
-        neg_result = -result  # for minimization
+        result = left_sum - right# - regularization
+        neg_result = - result
         return neg_result
 
-        # tup_0_test_list.append(sparce_matrix.sum(axis=0))
-        # tup_0_tests = np.array(tup_0_test_list)
-
-        # f_v_mask = self.weight_mat.multiply(f_v)
-        # l_fv = np.sum(f_v_mask, axis=)  # * mask
-        #
-        # exp_ = np.exp(f_v_mask)
-        #
-        # exp_sum = np.sum(exp_, axis=0)
-        # repetitions = np.sum(self.weight_mat, axis=0)
-        # ln = np.log(exp_sum) * repetitions
-        # sum_ln = np.sum(ln)
-        return sum_ln - l_fv + 0.1 * np.linalg.norm(v)
 
     def dot(self, v):
         results = []
@@ -146,9 +131,9 @@ class FinkMos:
     def minimize_loss(self):
         self.opt = minimize(self.loss_function,
                             np.ones(len(self.test_dict)),
-                            # jac=self.loss_gradient,
+                            jac=self.loss_gradient,
                             options=dict(disp=True,
-                                         maxiter=10,
+                                         maxiter=20,
                                          # eps=1e-5,
                                          # gtol= 1e-6
                                          ),
