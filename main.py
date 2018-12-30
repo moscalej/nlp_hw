@@ -13,7 +13,7 @@ os.chdir(r'C:\Users\amoscoso\Documents\Technion\nlp\nlp_hw\tests')
 #%%
 data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-word_num = 500
+word_num = 5000
 # generate tests - (comment out if file is updated)
 feat_generator = Features()
 feat_generator.generate_tuple_corpus(data.x[0:word_num], data.y[0:word_num])
@@ -23,8 +23,8 @@ feat_generator.save_tests()
 test_data = PreprocessTags(True).load_data(
             r'..\data\test.wtag')
 #%%
-word_num = 500
-test_number = 50
+word_num = 5000
+test_number = 500
 model1 = Model()
 model1.fit(data.x[0:word_num], data.y[0:word_num])
 
