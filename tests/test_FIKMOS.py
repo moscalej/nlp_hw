@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-import features as feat
+import models.features as feat
 from models.features import Features
 from models.prerocesing import PreprocessTags
 from models.sentence_processor import FinkMos
@@ -58,7 +58,7 @@ class test_rapnaparkhi(unittest.TestCase):
 
         data = PreprocessTags(True).load_data(
             r'..\data\train.wtag')
-        word_num = 2000
+        word_num = 150_000
         tag_corp = pd.Series(data.y[0:word_num]).unique()
         # generate tests - (comment out if file is updated)
         feat_generator = Features()
@@ -75,5 +75,7 @@ class test_rapnaparkhi(unittest.TestCase):
         print(fm.tuple_5_list)
         fm.create_feature_sparse_list_v2()
         # print(len(fm.f_matrix_list))
+        fm.loss_function(np.ones(len(fm.test_dict)),1024)
+        fm.loss_gradient(np.ones(len(fm.test_dict)),1024)
         print(fm.f_matrix_list[0].shape)
         fm.minimize_loss()
