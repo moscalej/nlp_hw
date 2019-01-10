@@ -12,6 +12,7 @@ class FinkMos:
         assert isinstance(x, pd.Series)
         self.tag_corpus = tag_corpus
         self.test_dict = Features().get_tests()
+        self.test_vec = np.array([test['func'][1] for test in self.test_dict.values()])
         self.x = x
         self.y = y
         self.f_matrix_list = None  #
@@ -83,8 +84,8 @@ class FinkMos:
                     calculated[tup_5_ind, :] = training_fm.f_v_train[:, ind_in_train]
                     continue
                 for tup_0_ind, tup0 in enumerate(self.tag_corpus):
-                    for test_ind, (key, val) in enumerate(self.test_dict.items()):
-                        result[tup_0_ind][tup_5_ind, test_ind] = val['func'][1]((tup0,) + tuple(tup5))
+                    tup = (tup0,) + tuple(tup5)
+                    result[tup_0_ind][tup_5_ind, :] = np.array([test(tup) for test in self.test_vec])
             self.calc_from_mem = calculated
         else:
             for test_ind, (key, val) in enumerate(self.test_dict.items()):
@@ -147,7 +148,7 @@ class FinkMos:
                             np.ones(len(self.test_dict)),
                             jac=self.loss_gradient,
                             options=dict(disp=True,
-                                         maxiter=20,
+                                         maxiter=15,
                                          # eps=1e-5,
                                          # gtol= 1e-6
                                          ),
@@ -159,33 +160,13 @@ class FinkMos:
     def callback_cunf(self, x):
         print(f'Current loss {self.loss_function(x)}')
 
-    def softmax_denominator(self, v, history_i, y, y_1, y_2):
 
-        hash_name = f"{self.x[history_i]}{y_1}{y_2}"
-        if hash_name in self.fast_predict:
-            e_val = self.fast_predict[hash_name]
-        else:
-            results = []
-            for tag in self.tag_corpus:
-                temp = self.to_feature_space2(history_i, tag, y_1, y_2)
-                if len(temp) > 0:
-                    results.append(temp)
-            f_matrix = pd.Series(results)
-            v_f = f_matrix.apply(lambda x: np.sum(v[x]))
-            e_val = np.sum(np.exp(v_f)) + self.tag_corpus.size - v_f.shape[0]
-            self.fast_predict[hash_name] = e_val
-        return e_val
-
-    def prob_q(self, v, history_i, y, y_1, y_2):
-        features = self.to_feature_space2(history_i, y, y_1, y_2)
-        features_v = np.exp(np.sum(v[features]))
-        return features_v / self.softmax_denominator(v, history_i, y, y_1, y_2)
 
     def prob_q2(self, v, y_token, training_fm):
         self.create_feature_sparse_list_v2(training_fm)  # creates f_matrix_list
         f_v = self.dot(v) + self.calc_from_mem.T  # dims tup0 x tup5
-        y_nomin = f_v[y_token]  # dims tup5 x 1
-        exp_ = np.exp(f_v)
+        y_nomin = np.array(f_v[y_token])  # dims tup5 x 1
+        exp_ = np.array(np.exp(f_v)).squeeze()
         exp_sum = np.sum(exp_, axis=0)  # dims tup5 x 1
-        prob = np.array(y_nomin / exp_sum)[0]  # dims tup5 x 1
+        prob = np.array(y_nomin / (exp_sum+1e-10))[0]  # dims tup5 x 1
         return prob

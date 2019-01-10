@@ -47,6 +47,7 @@ class Model:
         self._translation()  # create dictionaries for tokenizing
         self._vectorize()
         self.v = np.random.uniform(-0.5, 0.5, self.num_tests)
+        print( 'Starting Minimize')
         self.fm.minimize_loss()
         self.v = self.fm.v
 
@@ -83,12 +84,12 @@ class Model:
 
         a = y.values.reshape(-1)
         b = pd.Series(a)
-        c = b.drop(['<PAD>', '*', '<STOP>', ','])
-        print(c)
-        roll_y = pd.Series(y.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
-        roll_y_hat = pd.Series(y_hat.values.reshape(-1)).drop(['<PAD>', '*', '<STOP>', ','])
+        # c = b.drop(['<PAD>', '*', '<STOP>', ','])
+        # print(c)
+        roll_y = pd.Series(y.values.reshape(-1))#.drop(['<PAD>', '*', '<STOP>', ','])
+        roll_y_hat = pd.Series(y_hat.values.reshape(-1))#.drop(['<PAD>', '*', '<STOP>', ','])
 
-        most_reacuent_tags = self.tag_corpus[:10]
+        most_reacuent_tags = self.tag_corpus[2:12]
         sc = Score(most_reacuent_tags)
         sc.fit(roll_y, roll_y_hat)
         return sc.matrix_confusion()
@@ -140,7 +141,6 @@ class Model:
             tup = [y_1, y_2, w, w_1, w_2]
             tup_list.append(tup)
         sentence.tuple_5_list = tup_list
-        # prop_q = sentence.prob_q(self.v, word_num, y, y_1, y_2)
         prop_q = sentence.prob_q2(self.v, next_tag, self.fm)
 
         return prop_q
@@ -183,27 +183,19 @@ class Model:
                     optional_tags = [optional_tags[i] for i in subset_inds]
             for prev1_tag_u in prev1_tag_u_subspace:
 
-                for curr_tag_v in curr_tag_v_subspace:  # naming relative to model function enteries
+                # naming relative to model function enteries
+                for curr_tag_v in curr_tag_v_subspace:
 
-                    options = []  # np.array([])
-                    # for t_2 in optional_tags:  # t_1 is previous tag  # TODO: minimize subspace (consider taking best 5, for others leave previous value)
-                    #     # print("input_values: " + "t_1: " + str(t_1) + " t1 :" + str(t1) + " t2: " + str(t2))
                     a = p_table[k - 1, optional_tags, prev1_tag_u]
                     b = np.log(
                         self.model_function(next_tag=curr_tag_v, word_num=k, previous_tags=[prev1_tag_u, optional_tags],
                                             sentence=sentence_fm))
-                    # b1 = [list_[:] for list_ in b]
-                    # b2 = b[0]
+
                     options = a + b
-                    # options = p_table[k - 1, optional_tags, prev1_tag_u] * self.model_function(next_tag=curr_tag_v,
-                    #                                                                            word_num=k,
-                    #                                                                            previous_tags=[
-                    #                                                                                prev1_tag_u,
-                    #                                                                                optional_tags],
-                    #                                                                            sentence=sentence_fm)
+
                     ind_in_options = np.argmax(options)
-                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[
-                        ind_in_options]  # taking the relevant tag from optional list
+                    # taking the relevant tag from optional list
+                    bp_table[k, prev1_tag_u, curr_tag_v] = optional_tags[ind_in_options]
                     p_table[k, prev1_tag_u, curr_tag_v] = options[ind_in_options]
         answer[num_words - 2], answer[num_words - 1] = np.unravel_index(bp_table[num_words - 1, :, :].argmax(),
                                                                         bp_table[num_words - 1, :, :].shape)  # argmax()
@@ -235,37 +227,11 @@ class Model:
 
     def _vectorize(self):
         self.create_word2tag_subspace()
-        a = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
-        self.fm = a
-        self.num_tests = len(a.test_dict)
+
+        self.fm = FinkMos(self.x, self.y, tag_corpus=self.tag_corpus)
+        self.num_tests = len(self.fm.test_dict)
         self.fm.create_tuples()
         self.fm.create_feature_sparse_list_v2()
-        # self.vector_x_y = a  # TODO change names
-
-    def _loss(self, v):
-        positive = self._calculate_positive(v)
-        non_linear = self._calculate_nonlinear(v)
-        penalty = 0.1 * np.linalg.norm(v)
-
-        return non_linear + penalty - positive
-
-    def _calculate_positive(self, v):
-        """
-        This method will solve the positive part of the loss Function
-        for all the sentence
-        sum (sum (v * f(h_i^(k),y_i), for i=0 to max sise word), for k =0 to last sentence)
-        = sum( F dot v ) where F is concatenate matrix for all the vectors f
-        :param v:
-        :return:
-        """
-        assert isinstance(v, np.ndarray)
-
-        dot_m = self.vector_x_y.linear_loss(v)
-        return dot_m
-
-    def _calculate_nonlinear(self, v):
-        assert isinstance(v, np.ndarray)
-        return self.vector_x_y.sentence_non_lineard_loss(v)
 
     def acc_per_tag(self, y_hat, y):
         assert isinstance(y_hat, pd.Series)
