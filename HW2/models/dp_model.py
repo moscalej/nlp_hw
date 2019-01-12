@@ -3,6 +3,8 @@ import numpy as np
 # import models.boot_camp as bc
 from models.data_object import DP_sentence
 from models.chu_liu import Digraph
+
+
 #
 
 
@@ -48,8 +50,8 @@ class DP_Model:
                 opt_graph = Digraph(full_graph,
                                     get_score=get_score).greedy().successors
 
-                if opt_graph != graph:  # TODO: currently only pseudo
-                    self.w = self.w + self.lr * (graph - opt_graph)  # TODO: see how to define this substraction
+                if opt_graph != graph:
+                    self.w = self.w + self.lr * (self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x))
 
     def create_full_graph(self, f_x):
         """
@@ -59,7 +61,7 @@ class DP_Model:
         :return: full_graph and weighted matrix
         :rtype:
         """
-        # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source = edge_target +1 [root])
+        # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source dim = edge_target dim but only in src 0 is valid [root])
         full_graph = {src: range(f_x[0].shape[0]) for src in range(len(f_x))}
         results = []
         for trgt_feat_slice in f_x:
@@ -67,3 +69,20 @@ class DP_Model:
             results.append(t)
         weight_mat = np.array(results)
         return full_graph, weight_mat
+
+    def graph2vec(self, graph, f_x):
+        """
+        returns a vector describing the contribution of each feature to the given graph weight
+        :param graph:
+        :type graph:
+        :param f_x:
+        :type f_x:
+        :return: vector each entry is the sum of all the edges given feature contribution
+        :rtype: np.array vector of w dims
+        """
+        test_weigh_vec = np.zeros(self.w.shape[0])
+        for key, vals in graph.items():
+            for val in vals:
+                # key is the source index of the edge and val is the target index
+                test_weigh_vec += f_x[key][val, :]
+        return test_weigh_vec
