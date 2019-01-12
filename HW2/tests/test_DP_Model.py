@@ -2,7 +2,15 @@ import time
 import unittest
 from scipy import sparse as spar
 from models.dp_model import DP_Model
+from models.data_object import DP_sentence
+from models.boot_camp import BootCamp
 import numpy as np
+from scipy.sparse import csr_matrix
+
+t_f_1 = csr_matrix([[1,0,0,1],[1,0,0,1],[1,0,0,1]])
+t_f = [t_f_1,t_f_1,t_f_1]
+ds = DP_sentence(['hola','tu','mama'],['tt','tt','tt'])
+ds.f = t_f
 
 
 class test_model(unittest.TestCase):
@@ -22,6 +30,18 @@ class test_model(unittest.TestCase):
         full_graph, weight_mat = dummy_model.create_full_graph(fake_tens)
         print(full_graph)
         print(weight_mat)
+
+    def test_predict(self):
+        model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
+        result = model.predict([ds,ds])
+        print(result)
+        self.assertAlmostEqual(result,[{0: [0, 1, 2], 1: [], 2: []}, {0: [0, 1, 2], 1: [], 2: []}])
+
+    def test_fit(self):
+        model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
+        result = model.fit([ds, ds],3)
+        print(result)
+
 
     def test_graph2vec(self):
         # shared baseline

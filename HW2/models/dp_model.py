@@ -3,8 +3,6 @@ import numpy as np
 # import models.boot_camp as bc
 from models.data_object import DP_sentence
 from models.chu_liu import Digraph
-
-
 #
 
 
