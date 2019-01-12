@@ -16,3 +16,4 @@ class BootCamp:
         :return:
         :rtype:
         """
+        pass
