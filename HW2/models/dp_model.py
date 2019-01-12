@@ -56,9 +56,9 @@ class DP_Model:
 
     def create_full_graph(self, f_x):
         """
-        Create full weighted graph for chu liu
-        :param f_x:
-        :type f_x: tensor
+        Create full graph and weighted matrix for chu liu
+        :param f_x: feature space of edges in sentence
+        :type f_x: list of sparse matrices
         :return: full_graph and weighted matrix
         :rtype:
         """
@@ -70,4 +70,3 @@ class DP_Model:
             results.append(t)
         weight_mat = np.array(results)
         return full_graph, weight_mat
-        pass
