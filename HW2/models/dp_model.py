@@ -65,8 +65,8 @@ class DP_Model:
         # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source = edge_target +1 [root])
         full_graph = {src: range(f_x[0].shape[0]) for src in range(len(f_x))}
         results = []
-        for src_feat_slice in f_x:
-            t = src_feat_slice.dot(self.w)  # sparse dot
+        for trgt_feat_slice in f_x:
+            t = trgt_feat_slice.dot(self.w)  # sparse dot
             results.append(t)
         weight_mat = np.array(results)
         return full_graph, weight_mat
