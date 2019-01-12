@@ -39,7 +39,7 @@ class test_model(unittest.TestCase):
 
     def test_fit(self):
         model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
-        result = model.fit([ds, ds],3)
+        result = model.fit([ds, ds], 3)
         print(result)
 
 

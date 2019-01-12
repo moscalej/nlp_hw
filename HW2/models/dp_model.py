@@ -29,9 +29,6 @@ class DP_Model:
         :return:
         :rtype:
         """
-        # obj_list = []
-        # for ind, sentence in enumerate(x):
-        #     obj_list.append(DP_sentence(sentence=sentence, tags=tags[ind]))
         self.bc.train_soldiers(obj_list)  # create f_x for each
         for obj in obj_list:
             full_graph, weight_dict = self.create_full_graph(obj.f)
@@ -60,7 +57,7 @@ class DP_Model:
         :rtype:
         """
         # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source dim = edge_target dim but only in src 0 is valid [root])
-        full_graph = {src: range(f_x[0].shape[0]) for src in range(len(f_x))}
+        full_graph = {src: range(1, f_x[0].shape[0]) for src in range(len(f_x))}  # TODO: save in dictionary
         results = []
         for trgt_feat_slice in f_x:
             t = trgt_feat_slice.dot(self.w)  # sparse dot
