@@ -8,13 +8,10 @@ from models.chu_liu import Digraph
 
 class DP_Model:
 
-    def __init__(self, num_features, boot_camp, tagger, w=None):
+    def __init__(self, num_features, boot_camp, w=None):
         self.w = np.zeros(num_features) if w is None else w
         self.bc = boot_camp  # defines feature space
-        self.tagger = tagger  # taging function
-        assert (num_features, w.shape[0])  # make sure w has right dims
         self.lr = 1  # TODO
-        pass
 
     def fit(self, obj_list, epochs):
         self.bc.train_soldiers(obj_list)  # create f_x for each
