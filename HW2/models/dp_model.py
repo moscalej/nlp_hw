@@ -62,14 +62,12 @@ class DP_Model:
         :return: full_graph and weighted matrix
         :rtype:
         """
-        # f_x dims: edge_source  x features x edge_target( edge source = edge_target +1 [root])
-        full_graph = {src: range(f_x.shape[2]) for src in range(f_x.shape[0])}
+        # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source = edge_target +1 [root])
+        full_graph = {src: range(f_x[0].shape[0]) for src in range(len(f_x))}
         results = []
         for src_feat_slice in f_x:
-            t = src_feat_slice.dot(self.w)
+            t = src_feat_slice.dot(self.w)  # sparse dot
             results.append(t)
         weight_mat = np.array(results)
-        # self.w
-        # dot product with self.w then we get a matrix describing the graphs weighted edges
-        return full_graph
+        return full_graph, weight_mat
         pass
