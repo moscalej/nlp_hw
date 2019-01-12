@@ -16,4 +16,6 @@ class BootCamp:
         :return:
         :rtype:
         """
-        pass
+        print("train_soldiers not working yet, need more money")
+        return soldier_list
+

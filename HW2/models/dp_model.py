@@ -3,6 +3,8 @@ import numpy as np
 # import models.boot_camp as bc
 from models.data_object import DP_sentence
 from models.chu_liu import Digraph
+
+
 #
 
 
@@ -46,7 +48,9 @@ class DP_Model:
                 full_graph, weight_dict = self.create_full_graph(f_x)
                 get_score = lambda i, j: weight_dict[i, j]
                 opt_graph = Digraph(full_graph,
-                                    get_score=get_score).greedy().successors
+                                    get_score=get_score) \
+                    .greedy() \
+                    .successors
 
                 if opt_graph != graph:  # TODO: currently only pseudo
                     self.w = self.w + self.lr * (graph - opt_graph)  # TODO: see how to define this substraction
