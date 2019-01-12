@@ -57,6 +57,9 @@ class PreProcess:
                            tags=tags,
                            graph=graph_dict)
 
+    def from_ds_to_file(self):
+        pass
+
 
 par = PreProcess(r'C:\technion\nlp_hw\HW2\data\test.labeled')
 soldiers = par.parser()
