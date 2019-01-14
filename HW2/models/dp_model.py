@@ -17,7 +17,7 @@ class DP_Model:
         self.bc.train_soldiers(obj_list)  # create f_x for each
         f_x = (obj.f for obj in obj_list)  # TODO: Generator
         # TODO: make sure passing an argument like this is really by pointer
-        y = (obj.graph for obj in obj_list)
+        y = (obj.graph_tag for obj in obj_list)
         #
         self.perceptron(f_x, y, epochs)
 
@@ -33,8 +33,8 @@ class DP_Model:
         for obj in obj_list:
             full_graph, weight_dict = self.create_full_graph(obj.f)
             get_score = lambda i, j: weight_dict[i, j]
-            obj.graph = Digraph(full_graph, get_score=get_score).greedy().successors
-        result = [obj.graph for obj in obj_list]
+            obj.graph_est = Digraph(full_graph, get_score=get_score).greedy().successors
+        result = [obj.graph_est for obj in obj_list]
         return result
 
     def perceptron(self, f_x_list, y, epochs):
@@ -69,7 +69,7 @@ class DP_Model:
         """
         returns a vector describing the contribution of each feature to the given graph weight
         :param graph:
-        :type graph:
+        :type graph: dict()
         :param f_x:
         :type f_x:
         :return: vector each entry is the sum of all the edges given feature contribution
@@ -79,5 +79,5 @@ class DP_Model:
         for key, vals in graph.items():
             for val in vals:
                 # key is the source index of the edge and val is the target index
-                test_weigh_vec += f_x[key][val, :]
+                test_weigh_vec += f_x[key][val, :]  # TODO: consider sum of sparse matrix
         return test_weigh_vec

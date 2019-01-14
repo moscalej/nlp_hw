@@ -60,6 +60,5 @@ class PreProcess:
     def from_ds_to_file(self):
         pass
 
-
-par = PreProcess(r'C:\technion\nlp_hw\HW2\data\test.labeled')
-soldiers = par.parser()
+# par = PreProcess(r'C:\technion\nlp_hw\HW2\data\test.labeled')
+# soldiers = par.parser()
