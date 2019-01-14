@@ -11,6 +11,7 @@ t_f_1 = csr_matrix([[1,0,0,1],[1,0,0,1],[1,0,0,1]])
 t_f = [t_f_1,t_f_1,t_f_1]
 ds = DP_sentence(['hola','tu','mama'],['tt','tt','tt'])
 ds.f = t_f
+ds.graph = {0: [0, 1, 2], 1: [], 2: []}
 
 
 class test_model(unittest.TestCase):
