@@ -1,5 +1,6 @@
 # imports
 from collections import defaultdict
+from heapq import nlargest
 
 #
 
@@ -23,8 +24,8 @@ for each edge create keys by templates and fill their values in the tensor
 
 class Features:
     def __init__(self):
-        features = defaultdict(int)
-        features['bias'] = 1
+        self.features = defaultdict(int)
+        self.features['bias'] = 1
         self.key2token = dict()
 
     def extract_features(self, data_obj):
@@ -42,41 +43,49 @@ class Features:
         for src_ind, trg_inds in graph.items():
             for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
                 # current
-                keys = self.get_keys(self, src_ind, trg_ind, context, tags)
+                keys = self.get_keys(src_ind, trg_ind, context, tags)
                 self._add_keys(keys)
 
-    def Truncate_features(self, n):
+    def tokenize(self):
+        self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
+
+    def truncate_features(self, n):
         """
-        Truncate n most freuquent features
+        Truncate n most frequent features
         :param n:
         :type n:
         :return:
         :rtype:
         """
-        self.features = dict(sorted(self.features, key=self.features.get, reverse=True)[:n])
-        self.key2token = dict(enumerate(self.features.keys()))
+        keys2keep = nlargest(n, self.features, key=self.features.get)
+        # sorted(self.features, key=self.features.get, reverse=True)
+        temp_dict = defaultdict(int)
+        for key in keys2keep:
+            temp_dict[key] = self.features[key]
+        self.features = temp_dict
+        self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
 
     def fill_tensor(self, data_obj):
         context = data_obj.sentence
         tags = data_obj.tags
         num_nodes = len(tags)
         # graph = get_full_graph(num_nodes)
-        graph = {src: range(1, num_nodes) for src in range(num_nodes)}
+        graph = {src: range(1, num_nodes) for src in range(num_nodes)}  # TODO optimize
         for src_ind, trg_inds in graph.items():
             for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
-                keys = self.get_keys(self, src_ind, trg_ind, context, tags)
+                keys = self.get_keys(src_ind, trg_ind, context, tags)
                 exist = self._check_keys(keys)
-                activ_feat_inds = self.key2token[exist]
-                data_obj[src_ind][trg_ind, activ_feat_inds] = 1
+                activ_feat_inds = [self.key2token[activ] for activ in exist]
+                data_obj.f[src_ind][trg_ind, activ_feat_inds] = 1
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]
         trg_word = context[trg_ind]
         keys = []
         # template list
-        keys.append(self._get_key(f'{i} tag_src', tags[src_ind]))
+        keys.append(self._get_key(f'{src_ind} tag_src', tags[src_ind]))
         keys.append(self._get_key(f'tag_src', tags[src_ind]))
-        keys.append(self._get_key(f'{j} tag_trg', tags[trg_ind]))
+        keys.append(self._get_key(f'{trg_ind} tag_trg', tags[trg_ind]))
         keys.append(self._get_key(f'tag_trg', tags[trg_ind]))
         #
         return keys
@@ -125,6 +134,13 @@ class BootCamp:
     def __init__(self, features):
         self.features = features
 
+    def investigate_soldiers(self, soldier_list):
+        for soldier in soldier_list:
+            self.features.extract_features(soldier)
+
+    def truncate_features(self, n):
+        self.features.truncate_features(n)
+
     def train_soldiers(self, soldier_list):
         """
         Create feature tensor for each object
@@ -133,10 +149,11 @@ class BootCamp:
         :return:
         :rtype:
         """
-        print("train_soldiers not working yet, need more money")
-        # TODO: decide if (1): each feature is applied to all edges, or (2): apply all features to each edge
-        # TODO: (1) in this implementation feature is a function that gets a list of tuples and returns a list of edges (i,j) that activate the feature
-        #  pros: ; cons:
-        # TODO: (2) in this implementation feature is a function that gets a tuple and returns True\False
-        # pros: ; cons:
-        return soldier_list
+        # if no truncation has been made, generate key2token
+        if len(list(self.features.key2token.keys())) == 0:
+            self.features.tokenize()
+        # fill tensor
+        for soldier in soldier_list:
+            self.features.fill_tensor(soldier)
+
+        # return soldier_list  # inplace
