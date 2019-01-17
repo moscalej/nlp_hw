@@ -1,6 +1,8 @@
 import time
 import unittest
 from scipy import sparse as spar
+
+from models.Preprocess import PreProcess
 from models.dp_model import DP_Model
 from models.data_object import DP_sentence
 from models.boot_camp import BootCamp, Features
@@ -33,16 +35,20 @@ class test_model(unittest.TestCase):
         print(weight_mat)
 
     def test_predict(self):
-        feat = Features()
-
-        model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
-        result = model.predict([ds,ds])
+        par = PreProcess(r'../data/toy.labeled')
+        bc = BootCamp(Features())
+        ds_list = par.parser()
+        model = DP_Model(num_features=4, boot_camp=bc)  # TODO do we need number of fatures
+        result = model.predict(ds_list)
         print(result)
-        self.assertAlmostEqual(result,[{0: [0, 1, 2], 1: [], 2: []}, {0: [0, 1, 2], 1: [], 2: []}])
+        # self.assertAlmostEqual(result,[{0: [0, 1, 2], 1: [], 2: []}, {0: [0, 1, 2], 1: [], 2: []}])
 
     def test_fit(self):
-        model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
-        result = model.fit([ds, ds], 3)
+        par = PreProcess(r'../data/toy.labeled')
+        bc = BootCamp(Features())
+        ds_list = par.parser()
+        model = DP_Model(num_features=4, boot_camp=bc)  # TODO do we need number of fatures
+        result = model.fit(ds_list, 3)
         print(result)
 
 
