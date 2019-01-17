@@ -12,6 +12,5 @@ class test_Preprocess(unittest.TestCase):
         PreProcess(
             r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled')
     def test_parce(self):
-        par = PreProcess(r'../data/test.labeled')
-        par = PreProcess(r'../data/test.labeled')
+        par = PreProcess(r'../data/toy.labeled')
         par.parser()

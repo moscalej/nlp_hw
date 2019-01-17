@@ -61,7 +61,7 @@ class PreProcess:
 
         pass
     def _so2df(self,so): # Sentence Object
-        assert isinstance(so,DP_sentence)
+        # assert isinstance(so,DP_sentence)
         tags = so.tags
         th = np.zeros(so.sentence.shape[0])
         tc = [x for x in range(1,so.sentence.shape[0]+1)]

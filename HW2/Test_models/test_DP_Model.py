@@ -3,7 +3,7 @@ import unittest
 from scipy import sparse as spar
 from models.dp_model import DP_Model
 from models.data_object import DP_sentence
-from models.boot_camp import BootCamp
+from models.boot_camp import BootCamp, Features
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -33,6 +33,8 @@ class test_model(unittest.TestCase):
         print(weight_mat)
 
     def test_predict(self):
+        feat = Features()
+
         model = DP_Model(num_features=4, boot_camp=BootCamp("hola"))
         result = model.predict([ds,ds])
         print(result)
