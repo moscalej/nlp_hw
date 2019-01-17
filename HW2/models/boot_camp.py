@@ -74,7 +74,7 @@ class Features:
         tags = data_obj.tags
         num_nodes = len(tags)
         # graph = get_full_graph(num_nodes)
-        data_obj.f = [spar.csr_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
+        data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
         # graph = {src: range(1, num_nodes) for src in range(num_nodes)}  # TODO optimize
         # for src_ind, trg_inds in graph.items():
         for src_ind in range(num_nodes):

@@ -48,7 +48,7 @@ class test_model(unittest.TestCase):
         bc = BootCamp(Features())
         ds_list = par.parser()
         model = DP_Model(boot_camp=bc)  # TODO do we need number of fatures
-        result = model.fit(ds_list, 5000, truncate=10)
+        result = model.fit([ds_list[0]], 5000, truncate=10)
         results = model.predict(ds_list)
         print(model.w)
         print(results)
