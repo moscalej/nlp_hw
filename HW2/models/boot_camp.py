@@ -1,6 +1,7 @@
 # imports
 from collections import defaultdict
 from heapq import nlargest
+from scipy import sparse as spar
 
 #
 
@@ -26,6 +27,7 @@ class Features:
     def __init__(self):
         self.features = defaultdict(int)
         self.features['bias'] = 1
+        self.num_features = 1
         self.key2token = dict()
 
     def extract_features(self, data_obj):
@@ -48,6 +50,7 @@ class Features:
 
     def tokenize(self):
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
+        self.num_features = len(list(self.features.keys()))
 
     def truncate_features(self, n):
         """
@@ -64,19 +67,23 @@ class Features:
             temp_dict[key] = self.features[key]
         self.features = temp_dict
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
+        self.num_features = len(list(self.features.keys()))
 
     def fill_tensor(self, data_obj):
         context = data_obj.sentence
         tags = data_obj.tags
         num_nodes = len(tags)
         # graph = get_full_graph(num_nodes)
-        graph = {src: range(1, num_nodes) for src in range(num_nodes)}  # TODO optimize
-        for src_ind, trg_inds in graph.items():
-            for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
+        data_obj.f = [spar.csr_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
+        # graph = {src: range(1, num_nodes) for src in range(num_nodes)}  # TODO optimize
+        # for src_ind, trg_inds in graph.items():
+        for src_ind in range(num_nodes):
+            #     for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
+            for trg_ind in range(1, num_nodes):  # edge in the graph (src_ind, trg_ind)
                 keys = self.get_keys(src_ind, trg_ind, context, tags)
                 exist = self._check_keys(keys)
                 activ_feat_inds = [self.key2token[activ] for activ in exist]
-                data_obj.f[src_ind][trg_ind, activ_feat_inds] = 1
+                data_obj.f[src_ind][trg_ind, activ_feat_inds] = True
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]
@@ -132,6 +139,7 @@ class Features:
 class BootCamp:
 
     def __init__(self, features):
+        assert isinstance(features, Features)
         self.features = features
 
     def investigate_soldiers(self, soldier_list):

@@ -11,9 +11,9 @@ from models.boot_camp import BootCamp
 
 class DP_Model:
 
-    def __init__(self, num_features, boot_camp, w=None):
+    def __init__(self, boot_camp, w=None):
         assert isinstance(boot_camp, BootCamp)
-        self.w = np.zeros(num_features) if w is None else w
+        self.w = w
         self.bc = boot_camp  # defines feature space
         self.lr = 1  # TODO
 
@@ -23,18 +23,20 @@ class DP_Model:
         :param obj_list:
         :param epochs:
         :param truncate:
-        :return: should this function return any stadistics
+        :return: should this function return any statistics
         """
         self.bc.investigate_soldiers(obj_list)
-        if truncate > 0:
+        if truncate > 0:  # TODO: review boot camp usage flow
             self.bc.truncate_features(truncate)
+        else:
+            self.bc.features.tokenize()
+        self.w = np.zeros(self.bc.features.num_features)
         self.bc.train_soldiers(obj_list)  # create f_x for each
         generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
         # TODO: make sure passing an argument like this is really by pointer
         generator_y = (obj.graph_tag for obj in obj_list)
         #
         self.perceptron(generator_f_x, generator_y, epochs)
-
 
     def predict(self, obj_list):
         """
@@ -48,7 +50,7 @@ class DP_Model:
         for obj in obj_list:
             full_graph, weight_dict = self.create_full_graph(obj.f)
             get_score = lambda i, j: weight_dict[i, j]
-            obj.graph_est = Digraph(full_graph, get_score=get_score).greedy().successors
+            obj.graph_est = Digraph(full_graph, get_score=get_score).mst().successors
         result = [obj.graph_est for obj in obj_list]
         return result
 
@@ -56,12 +58,13 @@ class DP_Model:
         for i in range(epochs):
             for (f_x, graph) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
-                get_score = lambda i, j: weight_dict[i, j]
-                opt_graph = Digraph(full_graph,
-                                    get_score=get_score).greedy().successors
-
+                get_score = lambda k, l: weight_dict[k, l]
+                opt_graph = Digraph(full_graph, get_score=get_score).mst().successors
                 if opt_graph != graph:
-                    self.w = self.w + self.lr * (self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x))
+                    self.w = self.w + self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
+                else:
+                    print("over - fit ")
+                    pass
 
     def create_full_graph(self, f_x):
         """
@@ -74,7 +77,11 @@ class DP_Model:
         # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source dim = edge_target dim but only in src 0 is valid [root])
         full_graph = {src: range(1, f_x[0].shape[0]) for src in range(len(f_x))}  # TODO: save in dictionary
         results = []
+        if self.w.min() == 0 and self.w.max() == 0:
+            return full_graph, np.zeros((len(f_x), len(f_x)))
         for trgt_feat_slice in f_x:
+            t_d = np.array(trgt_feat_slice.toarray())
+            t_d_w = t_d @ self.w
             t = trgt_feat_slice.dot(self.w)  # sparse dot
             results.append(t)
         weight_mat = np.array(results)
@@ -94,5 +101,5 @@ class DP_Model:
         for key, vals in graph.items():
             for val in vals:
                 # key is the source index of the edge and val is the target index
-                test_weigh_vec += f_x[key][val, :]  # TODO: consider sum of sparse matrix
+                test_weigh_vec += f_x[key].A[val, :]  # TODO: consider sum of sparse matrix
         return test_weigh_vec

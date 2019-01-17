@@ -48,8 +48,8 @@ class PreProcess:
     def _df2so(self, group):
         (number, df) = group
         # assert (isinstance(group,pd.DataFrame))
-        x = df['TOKEN'].values
-        tags = df['TP'].values
+        x = np.concatenate((['<ROOT>'], df['TOKEN'].values))
+        tags = np.concatenate((['<ROOT>'], df['TP'].values))
         graph_dict = {key: [] for key in df['TH'].unique()}
         for tc, th in zip(df['TC'], df['TH']):
             graph_dict[th].append(tc)
@@ -57,14 +57,15 @@ class PreProcess:
                            tags=tags,
                            graph=graph_dict)
 
-    def from_ds_to_file(self,iter_ds):
+    def from_ds_to_file(self, iter_ds):
 
         pass
-    def _so2df(self,so): # Sentence Object
+
+    def _so2df(self, so):  # Sentence Object
         # assert isinstance(so,DP_sentence)
         tags = so.tags
         th = np.zeros(so.sentence.shape[0])
-        tc = [x for x in range(1,so.sentence.shape[0]+1)]
+        tc = [x for x in range(1, so.sentence.shape[0] + 1)]
         for key, value in so.tags:
             th[value] = key
         results = pd.DataFrame(columns=['TC', 'TOKEN', 'n1', 'TP', 'n2', 'n3', 'TH', 'DL', 'n4', 'n5'])
@@ -74,9 +75,3 @@ class PreProcess:
         results['TH'] = th
         results.fillna('_')
         return results
-
-par = PreProcess(r'C:\technion\nlp_hw\HW2\data\test.labeled')
-soldiers = par.parser()
-
-# par = PreProcess(r'C:\technion\nlp_hw\HW2\data\test.labeled')
-# soldiers = par.parser()
