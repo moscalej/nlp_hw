@@ -2,6 +2,7 @@
 from HW2.models.data_object import DP_sentence
 from HW2.models.chu_liu import Digraph
 from HW2.models.boot_camp import BootCamp
+from numba import njit
 import numpy as np
 #
 
@@ -90,8 +91,9 @@ class DP_Model:
             for (f_x, graph) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
                 opt_graph = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
-                opt_graph = {key: value for key, value in opt_graph.items() if value}  # remove empty
-                if opt_graph != graph:
+                opt_graph = [(key, value) for key, value in opt_graph.items() if value]
+                graph_a = list(graph.items())  # remove empty
+                if compare_graph_fast(graph_a, opt_graph):
                     diff = self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
                     self.w = self.w + diff
                 else:
@@ -104,7 +106,9 @@ class DP_Model:
         corret = 0
         for obj in obj_list:
             isinstance(obj, DP_sentence)
-            corret += 1 if obj.graph_est == obj.graph_tag else 0
+
+            corret += 1 if compare_graph_fast(list(obj.graph_est.items()),
+                                              list(obj.graph_tag.items())) else 0
         return corret / total
 
     def create_full_graph(self, f_x):
@@ -146,3 +150,23 @@ class DP_Model:
                 # key is the source index of the edge and val is the target index
                 test_weigh_vec += f_x[key].A[val, :]  # TODO: consider sum of sparse matrix
         return test_weigh_vec
+
+
+# @njit()
+def compare_graph_fast(graph_a, graph_b):
+    """
+
+    :param graph_a:
+    :type graph_a: list
+    :param graph_b:
+    :type graph_b: list
+    :return:
+    """
+    graph_a.sort()
+    graph_b.sort()
+    for i in range(len(graph_a)):
+        if graph_a[i][0] != graph_b[i][0]:
+            return False
+        if graph_a[i][1] != set(graph_b[i][1]):
+            return False
+    return True

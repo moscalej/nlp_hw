@@ -13,7 +13,7 @@ import time
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-NUM_EPOCHS = [10, 50, 100, 200]
+NUM_EPOCHS = [50]
 MODELS = ['base', 'advance']
 NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
 DATA_PATH = r'C:\technion\nlp_hw\HW2\data\toy.labeled'
