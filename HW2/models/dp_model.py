@@ -52,10 +52,24 @@ class DP_Model:
         self.bc.train_soldiers(obj_list)  # create f_x for each
         for obj in obj_list:
             full_graph, weight_dict = self.create_full_graph(obj.f)
-            get_score = lambda i, j: weight_dict[i, j]
-            obj.graph_est = Digraph(full_graph, get_score=get_score).mst().successors
+            opt_graph = Digraph(full_graph, get_score=lambda i, j: weight_dict[i, j]).mst().successors
+            obj.graph_est = {key: value for key, value in opt_graph.items() if value}  # remove empty
         result = [obj.graph_est for obj in obj_list]
         return result
+
+
+    def perceptron(self, f_x_list, y, epochs):
+        for epo in range(epochs):
+            for (f_x, graph) in zip(f_x_list, y):
+                full_graph, weight_dict = self.create_full_graph(f_x)
+                opt_graph = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
+                opt_graph = {key: value for key, value in opt_graph.items() if value}  # remove empty
+                if opt_graph != graph:
+                    diff = self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
+                    self.w = self.w + diff
+                else:
+                    print(f"over - fit on {epo} index")
+                    pass
 
     def score(self, obj_list):
         self.predict(obj_list)
@@ -65,24 +79,6 @@ class DP_Model:
             isinstance(obj, DP_sentence)
             corret += 1 if obj.graph_est == obj.graph_tag else 0
         return corret / total
-
-    def perceptron(self, f_x_list, y, epochs):
-        for epo in range(epochs):
-            for (f_x, graph) in zip(f_x_list, y):
-                full_graph, weight_dict = self.create_full_graph(f_x)
-
-                # def get_score(k, l):
-                #     return weight_dict[k, l]
-
-                # get_score = lambda k, l: weight_dict[k, l]
-                opt_graph = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
-                opt_graph = {key: value for key, value in opt_graph.items() if value}  # remove empty
-                if opt_graph != graph:
-                    diff = self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
-                    self.w = self.w + diff
-                else:
-                    print(f"over - fit on {epo} index")
-                    pass
 
     def create_full_graph(self, f_x):
         """
