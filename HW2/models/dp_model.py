@@ -57,6 +57,15 @@ class DP_Model:
         result = [obj.graph_est for obj in obj_list]
         return result
 
+    def score(self, obj_list):
+        self.predict(obj_list)
+        total = len(obj_list)
+        corret = 0
+        for obj in obj_list:
+            isinstance(obj, DP_sentence)
+            corret += 1 if obj.graph_est == obj.graph_tag else 0
+        return corret / total
+
     def perceptron(self, f_x_list, y, epochs):
         for epo in range(epochs):
             for (f_x, graph) in zip(f_x_list, y):
