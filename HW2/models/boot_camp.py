@@ -24,7 +24,8 @@ for each edge create keys by templates and fill their values in the tensor
 
 
 class Features:
-    def __init__(self):
+    def __init__(self, model_type='base'):
+        self.model_type = model_type
         self.features = defaultdict(int)
         self.features['bias'] = 1
         self.num_features = 1
