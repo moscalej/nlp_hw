@@ -1,54 +1,73 @@
 # imports
+from HW2.models.data_object import DP_sentence
+from HW2.models.chu_liu import Digraph
+from HW2.models.boot_camp import BootCamp
 import numpy as np
-# import models.boot_camp as bc
-from models.data_object import DP_sentence
-from models.chu_liu import Digraph
-from models.boot_camp import BootCamp
-
-
 #
 
 
 class DP_Model:
+    """
+    Dp Model is a semantic parcing model, witch trains using the perceptron alghorith and
+    chu_liu maximon spaning tree
+    """
 
     def __init__(self, boot_camp, w=None):
-        # assert isinstance(boot_camp, BootCamp)
+        assert isinstance(boot_camp, BootCamp)
         self.w = w
         self.bc = boot_camp  # defines feature space
         self.lr = 1  # TODO
 
     def fit(self, obj_list, epochs, truncate=0):
         """
+        Trains the model using the [perceptron alghorith](https://en.wikipedia.org/wiki/Perceptron)
+        and chu liu.
 
-        :param obj_list:
-        :param epochs:
-        :param truncate:
+        Parameters
+        ----------
+        :param obj_list: list DP_MOdel
+        :type obj_list: DP_Model list
+
+        :param epochs: number of epochs to train the Model
+        :type epochs: int
+        :param truncate: max number of features to use
+        :type truncate: int
         :return: should this function return any statistics
+
+        Logic flow
+        ----------
+            - Create tests
+            - Pick the truncate most important tests
+            - Give each Sentence object a Tensor witch will be use to predict
+            - Use the perceptron Algorith to train the model
+
         """
+        # Create tests
         self.bc.investigate_soldiers(obj_list)
+        # Pick the truncate most important tests
         if truncate > 0:  # TODO: review boot camp usage flow
             self.bc.truncate_features(truncate)
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")
         self.w = np.zeros(self.bc.features.num_features)
-        # self.w = np.random.rand(self.bc.features.num_features)
+        # Give each Sentence object a Tensor witch will be use to predict
         self.bc.train_soldiers(obj_list)  # create f_x for each
-        generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
-        # generator_f_x = [obj.f for obj in obj_list]  # TODO: Generator
-        # TODO: make sure passing an argument like this is really by pointer
-        generator_y = (obj.graph_tag for obj in obj_list)
-        # generator_y = [obj.graph_tag for obj in obj_list]
-        #
+        generator_f_x = [obj.f for obj in obj_list]
+        generator_y = [obj.graph_tag for obj in obj_list]
+
         self.perceptron(generator_f_x, generator_y, epochs)
 
     def predict(self, obj_list):
         """
+        Given a list array of Dp sentence wiill fill the predicted graph to each object
 
-        :param x: iterable list of sentences
-        :type x:
-        :return:
-        :rtype:
+        Parameters
+        -----
+        :param x: iterable list of DP_sentence
+        :type x: list, array
+        :return: a list of dictionaries contanion graph relentions
+        :rtype: list (dict)
         """
         self.bc.train_soldiers(obj_list)  # create f_x for each
         for obj in obj_list:
@@ -58,8 +77,15 @@ class DP_Model:
         result = [obj.graph_est for obj in obj_list]
         return result
 
-
     def perceptron(self, f_x_list, y, epochs):
+        """
+        Same perceptron algorith from the Tirgul
+        :param f_x_list: List of tensors
+        :type f_x_list: list
+        :param y: list
+        :param epochs:
+        :return:
+        """
         for epo in range(epochs):
             for (f_x, graph) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
@@ -84,12 +110,14 @@ class DP_Model:
     def create_full_graph(self, f_x):
         """
         Create full graph and weighted matrix for chu liu
+
+        Parameters
+        -------
         :param f_x: feature space of edges in sentence
         :type f_x: list of sparse matrices
         :return: full_graph and weighted matrix
-        :rtype:
+        :rtype: dict, np.array
         """
-        # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source dim = edge_target dim but only in src 0 is valid [root])
         full_graph = {src: range(1, len(f_x)) for src in range(len(f_x))}  # TODO: save in dictionary
         results = []
         if self.w.min() == 0 and self.w.max() == 0:
