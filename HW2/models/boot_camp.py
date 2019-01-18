@@ -92,21 +92,52 @@ class Features:
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]
+        src_tag = tags[src_ind]
         trg_word = context[trg_ind]
+        trg_tag = tags[trg_ind]
         keys = []
-        # template list
-        keys.append(self._get_key(f'{src_ind} tag_src', tags[src_ind]))
-        keys.append(self._get_key(f'{src_ind} word_src', context[src_ind]))
-        # keys.append(self._get_key(f'tag_src', tags[src_ind]))
-        keys.append(self._get_key(f'{trg_ind} tag_trg', tags[trg_ind]))
-        keys.append(self._get_key(f'{trg_ind} word_trg', context[trg_ind]))
-        keys.append(self._get_key(f'{src_ind} to {trg_ind}', ''))
+        # basic template list
+        # uni-grams:
+        self._add_key(keys, True, f'word_src', src_word)
+        self._add_key(keys, True, f'tag_src', src_tag)
+        self._add_key(keys, True, f'word_tag_src', src_word, src_tag)
+        self._add_key(keys, True, f'word_trg', trg_word)
+        self._add_key(keys, True, f'tag_trg', trg_tag)
+        self._add_key(keys, True, f'word_tag_trg', trg_word, trg_tag)
+        # bi-grams:
+        self._add_key(keys, True, f'word_tag_src_word_tag_trg', src_word, src_tag, trg_word, trg_tag)
+        self._add_key(keys, True, f'tag_src_word_tag_trg', src_tag, trg_word, trg_tag)
+        self._add_key(keys, True, f'word_src_word_tag_trg', src_word, trg_word, trg_tag)
+        self._add_key(keys, True, f'word_tag_src_tag_trg', src_word, src_tag, trg_tag)
+        self._add_key(keys, True, f'word_tag_src_word_trg', src_word, src_tag, trg_word)
+        self._add_key(keys, True, f'word_src_word_trg', src_word, trg_word)
+        self._add_key(keys, True, f'tag_src_tag_trg', src_tag, trg_tag)
+
+        if self.model_type == 'base':
+            return keys
+        # extended template list
+        # keys.append(self._get_key(f'{src_ind} tag_src', src_tag))
+        self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
+        # keys.append(self._get_key(f'{src_ind} word_src', src_word))
+        self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
+        # keys.append(self._get_key(f'tag_src', src_tag))
+        self._add_key(keys, True, f'tag_src', src_tag)
+        # keys.append(self._get_key(f'{trg_ind} tag_trg', trg_tag))
+        self._add_key(keys, True, f'{trg_ind} tag_trg', trg_tag)
+        # keys.append(self._get_key(f'{trg_ind} word_trg', trg_word))
+        self._add_key(keys, True, f'{trg_ind} word_trg', trg_word)
         # keys.append(self._get_key(f'{src_ind} to {trg_ind}', ''))
-        if src_ind > 0:
-            keys.append(self._get_key(f'{src_ind-1} word', context[src_ind - 1]))
-        # keys.append(self._get_key(f'tag_trg', tags[trg_ind]))
+        self._add_key(keys, True, f'{src_ind} to {trg_ind}', '')
+        # if src_ind > 0:
+        #     keys.append(self._get_key(f'{src_ind-1} word', context[src_ind - 1]))
+        self._add_key(keys, src_ind > 0, f'{src_ind-1} word', context[src_ind - 1])
+        # keys.append(self._get_key(f'tag_trg', trg_tag))
         #
         return keys
+
+    def _add_key(self, key_container, valid, name, *args):
+        if valid:
+            key_container.append(self._get_key(name, *args))
 
     def _get_key(self, name, *args):
         return ' '.join((name,) + tuple(args))
@@ -131,10 +162,10 @@ class Features:
 # add('src suffix3', src_word[-3:])  # add len_from_end
 # add('src pref1', src_word[0])
 # add(f'{i} tag_src', tags[src_ind])
-# add(f'{j} tag_trg', tags[trg_ind])
+# add(f'{j} tag_trg', trg_tag)
 
 # add(f'{src_ind} pref2', src_word[0:1])
-# add('i-2 tag_trg', tags[trg_ind])
+# add('i-2 tag_trg', trg_tag)
 # add('i tag+i-2 tag', prev, prev2)
 # add('i word', context[i])
 # add('i-1 tag+i word', prev, context[i])

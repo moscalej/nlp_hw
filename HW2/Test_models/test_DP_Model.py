@@ -38,7 +38,7 @@ class test_model(unittest.TestCase):
         par = PreProcess(r'../data/toy.labeled')
         bc = BootCamp(Features())
         ds_list = par.parser()
-        model = DP_Model(boot_camp=bc)  # TODO do we need number of features
+        model = DP_Model(boot_camp=bc)
         result = model.predict(ds_list)
         print(result[0])
         # self.assertAlmostEqual(result,[{0: [0, 1, 2], 1: [], 2: []}, {0: [0, 1, 2], 1: [], 2: []}])
@@ -47,11 +47,12 @@ class test_model(unittest.TestCase):
         par = PreProcess(r'../data/toy.labeled')
         bc = BootCamp(Features())
         ds_list = par.parser()
-        model = DP_Model(boot_camp=bc)  # TODO do we need number of features
-        model.fit(ds_list, epochs=100, truncate=50)
+        model = DP_Model(boot_camp=bc)
+        model.fit(ds_list, epochs=50)
         results = model.predict(ds_list)
-        print(model.w)
-        print(f"Predicted: {results[0]}")
+        # print(model.w)
+        clean_est = {key: value for key, value in results[0].items() if value}  # remove empty
+        print(f"Predicted: {clean_est}")
         sorted_ground_truth = dict(sorted(ds_list[0].graph_tag.items()))
         print(f"Ground Truth: {sorted_ground_truth}")
 

@@ -12,7 +12,7 @@ from models.boot_camp import BootCamp
 class DP_Model:
 
     def __init__(self, boot_camp, w=None):
-        assert isinstance(boot_camp, BootCamp)
+        # assert isinstance(boot_camp, BootCamp)
         self.w = w
         self.bc = boot_camp  # defines feature space
         self.lr = 1  # TODO
@@ -30,14 +30,15 @@ class DP_Model:
             self.bc.truncate_features(truncate)
         else:
             self.bc.features.tokenize()
+        print(f"Training model with {self.bc.features.num_features} features")
         self.w = np.zeros(self.bc.features.num_features)
         # self.w = np.random.rand(self.bc.features.num_features)
         self.bc.train_soldiers(obj_list)  # create f_x for each
-        # generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
-        generator_f_x = [obj.f for obj in obj_list]  # TODO: Generator
+        generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
+        # generator_f_x = [obj.f for obj in obj_list]  # TODO: Generator
         # TODO: make sure passing an argument like this is really by pointer
-        # generator_y = (obj.graph_tag for obj in obj_list)
-        generator_y = [obj.graph_tag for obj in obj_list]
+        generator_y = (obj.graph_tag for obj in obj_list)
+        # generator_y = [obj.graph_tag for obj in obj_list]
         #
         self.perceptron(generator_f_x, generator_y, epochs)
 

@@ -19,7 +19,7 @@ class PreProcess:
         """
         all_data = pd.read_csv(self.path,
                                names=['TC', 'TOKEN', 'n1', 'TP', 'n2', 'n3', 'TH', 'DL', 'n4', 'n5'],
-                               delim_whitespace=True)
+                               delim_whitespace=True, engine='python')
         all_data = all_data.filter(items=['TC', 'TOKEN', 'TP', 'TH', 'DL'], axis=1)
         all_data['SN'] = self._sente_number(all_data['TC'])
         groups = all_data.groupby('SN')
