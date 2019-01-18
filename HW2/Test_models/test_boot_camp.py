@@ -43,6 +43,6 @@ class test_features(unittest.TestCase):
         bc = BootCamp(feat)
         soldiers = par.parser()
         bc.investigate_soldiers(soldiers)
-        bc.truncate_features(10)
+        # bc.truncate_features(10)
         bc.train_soldiers(soldiers)
 

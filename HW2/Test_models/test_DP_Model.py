@@ -9,9 +9,9 @@ from models.boot_camp import BootCamp, Features
 import numpy as np
 from scipy.sparse import csr_matrix
 
-t_f_1 = csr_matrix([[1,0,0,1],[1,0,0,1],[1,0,0,1]])
-t_f = [t_f_1,t_f_1,t_f_1]
-ds = DP_sentence(['hola','tu','mama'],['tt','tt','tt'])
+t_f_1 = csr_matrix([[1, 0, 0, 1], [1, 0, 0, 1], [1, 0, 0, 1]])
+t_f = [t_f_1, t_f_1, t_f_1]
+ds = DP_sentence(['hola', 'tu', 'mama'], ['tt', 'tt', 'tt'])
 ds.f = t_f
 ds.graph = {0: [0, 1, 2], 1: [], 2: []}
 
@@ -38,20 +38,22 @@ class test_model(unittest.TestCase):
         par = PreProcess(r'../data/toy.labeled')
         bc = BootCamp(Features())
         ds_list = par.parser()
-        model = DP_Model(num_features=4, boot_camp=bc)  # TODO do we need number of fatures
+        model = DP_Model(boot_camp=bc)  # TODO do we need number of features
         result = model.predict(ds_list)
-        print(result)
+        print(result[0])
         # self.assertAlmostEqual(result,[{0: [0, 1, 2], 1: [], 2: []}, {0: [0, 1, 2], 1: [], 2: []}])
 
     def test_fit(self):
         par = PreProcess(r'../data/toy.labeled')
         bc = BootCamp(Features())
         ds_list = par.parser()
-        model = DP_Model(boot_camp=bc)  # TODO do we need number of fatures
-        result = model.fit([ds_list[0]], 5000, truncate=10)
+        model = DP_Model(boot_camp=bc)  # TODO do we need number of features
+        model.fit(ds_list, epochs=100, truncate=50)
         results = model.predict(ds_list)
         print(model.w)
-        print(results)
+        print(f"Predicted: {results[0]}")
+        sorted_ground_truth = dict(sorted(ds_list[0].graph_tag.items()))
+        print(f"Ground Truth: {sorted_ground_truth}")
 
 
     def test_graph2vec(self):

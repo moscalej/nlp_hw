@@ -74,16 +74,20 @@ class Features:
         tags = data_obj.tags
         num_nodes = len(tags)
         # graph = get_full_graph(num_nodes)
-        data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
-        # graph = {src: range(1, num_nodes) for src in range(num_nodes)}  # TODO optimize
-        # for src_ind, trg_inds in graph.items():
+        # data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
+        data_obj.f = []
         for src_ind in range(num_nodes):
-            #     for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
+            rows, cols, data = [], [], []
             for trg_ind in range(1, num_nodes):  # edge in the graph (src_ind, trg_ind)
                 keys = self.get_keys(src_ind, trg_ind, context, tags)
                 exist = self._check_keys(keys)
                 activ_feat_inds = [self.key2token[activ] for activ in exist]
-                data_obj.f[src_ind][trg_ind, activ_feat_inds] = True
+                for activ_ind in activ_feat_inds:
+                    rows.append(trg_ind)
+                    cols.append(activ_ind)
+                    data.append(True)
+            data_obj.f.append(spar.coo_matrix((data, (rows, cols)), shape=(num_nodes, self.num_features), dtype=bool))
+            # data_obj.f[src_ind][trg_ind, activ_feat_inds] = True
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]
@@ -91,9 +95,15 @@ class Features:
         keys = []
         # template list
         keys.append(self._get_key(f'{src_ind} tag_src', tags[src_ind]))
-        keys.append(self._get_key(f'tag_src', tags[src_ind]))
+        keys.append(self._get_key(f'{src_ind} word_src', context[src_ind]))
+        # keys.append(self._get_key(f'tag_src', tags[src_ind]))
         keys.append(self._get_key(f'{trg_ind} tag_trg', tags[trg_ind]))
-        keys.append(self._get_key(f'tag_trg', tags[trg_ind]))
+        keys.append(self._get_key(f'{trg_ind} word_trg', context[trg_ind]))
+        keys.append(self._get_key(f'{src_ind} to {trg_ind}', ''))
+        # keys.append(self._get_key(f'{src_ind} to {trg_ind}', ''))
+        if src_ind > 0:
+            keys.append(self._get_key(f'{src_ind-1} word', context[src_ind - 1]))
+        # keys.append(self._get_key(f'tag_trg', tags[trg_ind]))
         #
         return keys
 

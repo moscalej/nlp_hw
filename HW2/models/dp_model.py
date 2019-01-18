@@ -31,10 +31,13 @@ class DP_Model:
         else:
             self.bc.features.tokenize()
         self.w = np.zeros(self.bc.features.num_features)
+        # self.w = np.random.rand(self.bc.features.num_features)
         self.bc.train_soldiers(obj_list)  # create f_x for each
-        generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
+        # generator_f_x = (obj.f for obj in obj_list)  # TODO: Generator
+        generator_f_x = [obj.f for obj in obj_list]  # TODO: Generator
         # TODO: make sure passing an argument like this is really by pointer
-        generator_y = (obj.graph_tag for obj in obj_list)
+        # generator_y = (obj.graph_tag for obj in obj_list)
+        generator_y = [obj.graph_tag for obj in obj_list]
         #
         self.perceptron(generator_f_x, generator_y, epochs)
 
@@ -55,15 +58,21 @@ class DP_Model:
         return result
 
     def perceptron(self, f_x_list, y, epochs):
-        for i in range(epochs):
+        for epo in range(epochs):
             for (f_x, graph) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
-                get_score = lambda k, l: weight_dict[k, l]
-                opt_graph = Digraph(full_graph, get_score=get_score).mst().successors
+
+                # def get_score(k, l):
+                #     return weight_dict[k, l]
+
+                # get_score = lambda k, l: weight_dict[k, l]
+                opt_graph = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
+                opt_graph = {key: value for key, value in opt_graph.items() if value}  # remove empty
                 if opt_graph != graph:
-                    self.w = self.w + self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
+                    diff = self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
+                    self.w = self.w + diff
                 else:
-                    print("over - fit ")
+                    print(f"over - fit on {epo} index")
                     pass
 
     def create_full_graph(self, f_x):
@@ -75,7 +84,7 @@ class DP_Model:
         :rtype:
         """
         # f_x dims: list of #{edge_source} slices of #{edge_target} x #{features} (edge source dim = edge_target dim but only in src 0 is valid [root])
-        full_graph = {src: range(1, f_x[0].shape[0]) for src in range(len(f_x))}  # TODO: save in dictionary
+        full_graph = {src: range(1, len(f_x)) for src in range(len(f_x))}  # TODO: save in dictionary
         results = []
         if self.w.min() == 0 and self.w.max() == 0:
             return full_graph, np.zeros((len(f_x), len(f_x)))
