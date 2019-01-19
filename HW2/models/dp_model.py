@@ -1,9 +1,13 @@
 # imports
+import time
+
 from HW2.models.data_object import DP_sentence
 from HW2.models.chu_liu import Digraph
-from models.boot_camp import BootCamp
+from HW2.models.boot_camp import BootCamp
 from numba import njit
 import numpy as np
+from pandas import DataFrame
+import pandas as pd
 #
 
 
@@ -20,7 +24,7 @@ class DP_Model:
         self.bc = boot_camp  # defines feature space
         self.lr = 1  # TODO
 
-    def fit(self, obj_list, epochs, truncate=0):
+    def fit(self, obj_list, epochs, truncate=0, validation=None):
         """
         Trains the model using the [perceptron alghorith](https://en.wikipedia.org/wiki/Perceptron)
         and chu liu.
@@ -58,7 +62,7 @@ class DP_Model:
         generator_f_x = [obj.f for obj in obj_list]
         generator_y = [obj.graph_tag for obj in obj_list]
 
-        self.perceptron(generator_f_x, generator_y, epochs)
+        return self.perceptron(generator_f_x, generator_y, epochs, validation=validation)
 
     def predict(self, obj_list):
         """
@@ -79,16 +83,22 @@ class DP_Model:
         result = [obj.graph_est for obj in obj_list]
         return result
 
-    def perceptron(self, f_x_list, y, epochs):
+    def perceptron(self, f_x_list, y, epochs, validation=None):
         """
         Same perceptron algorith from the Tirgul
         :param f_x_list: List of tensors
         :type f_x_list: list
         :param y: list
         :param epochs:
-        :return:
+        :return: Data frame with the results of the training
+        :rtype : DataFrame
         """
+        start_time = time.time()
+        results_all = []
+        test_acc = 0
+        total = len(f_x_list)
         for epo in range(epochs):
+            current = 0
             for (f_x, graph_tag) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
                 graph_est = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
@@ -97,8 +107,19 @@ class DP_Model:
                     diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                     self.w = self.w + diff
                 else:
-                    print(f"over - fit on {epo} index")
-                    pass
+                    current += 1
+
+            if validation is not None:
+                test_acc = self.score(validation)
+            train_acc = current / total
+            results_all.append([self.get_model(),
+                                time.time() - start_time,
+                                epo,
+                                train_acc,
+                                test_acc,
+                                self.bc.features.num_features])
+            print(f'Finish base model with {epo} epochs at {time.strftime("%X %x")} t_acc{train_acc}')
+        return pd.DataFrame(results_all, columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
 
     def score(self, obj_list):
         self.predict(obj_list)
@@ -106,9 +127,7 @@ class DP_Model:
         corret = 0
         for obj in obj_list:
             isinstance(obj, DP_sentence)
-
-            corret += 1 if compare_graph_fast(list(obj.graph_est.items()),
-                                              list(obj.graph_tag.items())) else 0
+            corret += 1 if compare_graph_fast(list(obj.graph_est.items()), list(obj.graph_tag.items())) else 0
         return corret / total
 
     def create_full_graph(self, f_x):
@@ -151,6 +170,9 @@ class DP_Model:
                 test_weigh_vec += f_x[key].A[val, :]  # TODO: consider sum of sparse matrix
         return test_weigh_vec
 
+    def get_model(self):
+        return self.bc.get_model()
+
 
 # @njit()
 def compare_graph_fast(graph_est, graph_tag):
@@ -167,6 +189,6 @@ def compare_graph_fast(graph_est, graph_tag):
     for i in range(len(graph_est)):
         if graph_est[i][0] != graph_tag[i][0]:
             return False
-        if graph_est[i][1] != set(graph_tag[i][1]):
+        if set(graph_est[i][1]) != set(graph_tag[i][1]):
             return False
     return True

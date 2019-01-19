@@ -1,0 +1,6 @@
+#paths
+toy_data : C:\technion\nlp_hw\HW2\data\toy.labeled
+test_data : C:\technion\nlp_hw\HW2\data\test.labeled
+train_data : C:\technion\nlp_hw\HW2\data\train.labeled
+unlable_data : C:\technion\nlp_hw\HW2\data\comp.unlabeled
+results_path: C:\technion\nlp_hw\HW2\tests

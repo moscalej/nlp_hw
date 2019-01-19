@@ -181,6 +181,7 @@ class Features:
 class BootCamp:
 
     def __init__(self, features):
+
         assert isinstance(features, Features)
         self.features = features
 
@@ -207,3 +208,6 @@ class BootCamp:
             self.features.fill_tensor(soldier)
 
         # return soldier_list  # inplace
+
+    def get_model(self):
+        return self.features.model_type
