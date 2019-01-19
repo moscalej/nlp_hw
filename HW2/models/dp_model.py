@@ -80,9 +80,8 @@ class DP_Model:
             # full_graph, weight_dict = self.create_full_graph(obj.f, obj)
             # initial_graph = self.create_init_graph(obj)
             edge_weights = self.create_edge_weights(obj.f)
-            initial_graph = self.keep_top_edges(obj,
-                                                edge_weights)  # TODO: add some additional edge cleaning from est_graph by edge_weights (keep top 5 for instance)
-            # initial_graph = obj.graph_est
+            # initial_graph = self.keep_top_edges(obj, edge_weights, n_top=10)
+            initial_graph = obj.graph_est
             graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
             obj.graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
         result = [obj.graph_est for obj in obj_list]
@@ -108,9 +107,8 @@ class DP_Model:
             current = 0
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
-                initial_graph = self.keep_top_edges(obj_list[ind],
-                                                    edge_weights)  # TODO: add some additional edge cleaning from est_graph by edge_weights (keep top 5 for instance)
-                # initial_graph = obj_list[ind].graph_est
+                # initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=10)
+                initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if
                              value}  # remove empty  #TODO used for debug
