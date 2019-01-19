@@ -15,14 +15,19 @@ from HW2.models.dp_model import DP_Model
 
 with open(r'local_paths.YAML') as f:
     paths = yaml.load(f)
-
+toy_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
+test_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled'
+train_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\train.labeled'
+unlable_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\comp.unlabeled'
+results_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\tests'
+weights = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\tests\weights'
 NUM_EPOCHS = [10]
 MODELS = ['base', 'advance']
 NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
-DATA_PATH = paths['train_data']
-TEST_PATH = paths['toy_data']
-RESULTS_PATH = paths['results_path']
-WEIGHTS_PATH = paths['weights']
+DATA_PATH = toy_data
+TEST_PATH = toy_data
+RESULTS_PATH = results_path
+WEIGHTS_PATH = results_path
 results_all = []
 
 data = PreProcess(DATA_PATH).parser()

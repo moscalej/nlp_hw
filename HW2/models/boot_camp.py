@@ -137,9 +137,9 @@ class Features:
 
     def _add_key(self, key_container, valid, name, *args):
         if valid:
-            key_container.append(self._get_key(name, *args))
+            key_container.append(self.get_key(name, *args))
 
-    def _get_key(self, name, *args):
+    def get_key(self, name, *args):
         return ' '.join((name,) + tuple(args))
 
     def _add_keys(self, keys):
