@@ -4,25 +4,25 @@
 # 
 """
 
-from HW2.models.boot_camp import BootCamp, Features
-from HW2.models.Preprocess import PreProcess
-from HW2.models.data_object import DP_sentence
-from HW2.models.dp_model import DP_Model
-import pandas as pd
 import time
-import matplotlib.pyplot as plt
-import seaborn as sns
+
+import pandas as pd
 import yaml
 
-with open(r'C:\technion\nlp_hw\HW2\local_paths.YAML') as f:
+from HW2.models.Preprocess import PreProcess
+from HW2.models.boot_camp import BootCamp, Features
+from HW2.models.dp_model import DP_Model
+
+with open(r'local_paths.YAML') as f:
     paths = yaml.load(f)
 
 NUM_EPOCHS = [10]
 MODELS = ['base', 'advance']
 NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
-DATA_PATH = paths['test_data']
+DATA_PATH = paths['train_data']
 TEST_PATH = paths['toy_data']
 RESULTS_PATH = paths['results_path']
+WEIGHTS_PATH = paths['weights']
 results_all = []
 
 data = PreProcess(DATA_PATH).parser()
@@ -32,7 +32,7 @@ bc = BootCamp(Features('base'))
 model = DP_Model(boot_camp=bc)
 for n_epochs in NUM_EPOCHS:
     start_time = time.time()
-    result = model.fit(data, epochs=n_epochs)
+    result = model.fit(data, epochs=n_epochs, truncate=100_000)
     results_all.append(result)
 #
 # # Advance
@@ -49,3 +49,4 @@ for n_epochs in NUM_EPOCHS:
 #
 df_results = pd.DataFrame(pd.concat(results_all))
 df_results.to_csv(f'{RESULTS_PATH}\\re_{time.strftime("%d_%b_%y_%S_%M_%H")}.csv')
+model.w.tofile(f'{WEIGHTS_PATH}\\w_{time.strftime("%d_%b_%y_%S_%M_%H")}.h5')
