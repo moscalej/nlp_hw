@@ -77,9 +77,13 @@ class Features:
         # graph = get_full_graph(num_nodes)
         # data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
         data_obj.f = []
-        for src_ind in range(num_nodes):
+        data_obj.graph_est = self.create_init_graph(data_obj)
+        for src_ind, trg_inds in data_obj.graph_est.items():
             rows, cols, data = [], [], []
-            for trg_ind in range(1, num_nodes):  # edge in the graph (src_ind, trg_ind)
+            for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
+                # for src_ind in range(num_nodes):
+                #     rows, cols, data = [], [], []
+                #     for trg_ind in range(1, num_nodes):  # edge in the graph (src_ind, trg_ind)
                 keys = self.get_keys(src_ind, trg_ind, context, tags)
                 exist = self._check_keys(keys)
                 activ_feat_inds = [self.key2token[activ] for activ in exist]
@@ -134,6 +138,19 @@ class Features:
         # keys.append(self._get_key(f'tag_trg', trg_tag))
         #
         return keys
+
+    def create_init_graph(self, obj):
+        full_graph = {}
+        sentence_len = len(obj.sentence)
+        # debug_count = 0  #TODO: remove after debug
+        for src in range(sentence_len):
+            full_graph[src] = []
+            for trg in range(sentence_len):
+                if self.features[self.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
+                    full_graph[src].append(trg)  # TODO: save in dictionary
+                    # debug_count += 1  #TODO: remove after debug
+        # print(f"Created {debug_count} edges instead of {sentence_len*sentence_len}")  #TODO: remove after debug
+        return full_graph
 
     def _add_key(self, key_container, valid, name, *args):
         if valid:

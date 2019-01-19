@@ -3,12 +3,12 @@ import time
 
 from HW2.models.data_object import DP_sentence
 from HW2.models.chu_liu import Digraph
-from models.boot_camp import BootCamp
+from HW2.models.boot_camp import BootCamp
 from numba import njit
 import numpy as np
 from pandas import DataFrame
 import pandas as pd
-
+from heapq import nlargest
 
 #
 
@@ -21,7 +21,7 @@ class DP_Model:
 
     def __init__(self, boot_camp, w=None):
         print(type(boot_camp))
-        assert isinstance(boot_camp, BootCamp)
+        # assert isinstance(boot_camp, BootCamp)
         self.w = w
         self.bc = boot_camp  # defines feature space
         self.lr = 1  # TODO
@@ -77,8 +77,13 @@ class DP_Model:
         """
         self.bc.train_soldiers(obj_list)  # create f_x for each
         for obj in obj_list:
-            full_graph, weight_dict = self.create_full_graph(obj.f, obj)
-            graph_est = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
+            # full_graph, weight_dict = self.create_full_graph(obj.f, obj)
+            # initial_graph = self.create_init_graph(obj)
+            edge_weights = self.create_edge_weights(obj.f)
+            initial_graph = self.keep_top_edges(obj,
+                                                edge_weights)  # TODO: add some additional edge cleaning from est_graph by edge_weights (keep top 5 for instance)
+            # initial_graph = obj.graph_est
+            graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
             obj.graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
         result = [obj.graph_est for obj in obj_list]
         return result
@@ -102,9 +107,13 @@ class DP_Model:
         for epo in range(epochs):
             current = 0
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
-                initial_graph, weight_dict = self.create_full_graph(f_x, obj_list[ind])
-                graph_est = Digraph(initial_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
-                graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
+                edge_weights = self.create_edge_weights(f_x)
+                initial_graph = self.keep_top_edges(obj_list[ind],
+                                                    edge_weights)  # TODO: add some additional edge cleaning from est_graph by edge_weights (keep top 5 for instance)
+                # initial_graph = obj_list[ind].graph_est
+                graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
+                graph_est = {key: value for key, value in graph_est.items() if
+                             value}  # remove empty  #TODO used for debug
                 if not compare_graph_fast(list(graph_est.items()), list(graph_tag.items())):
                     diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                     self.w = self.w + diff
@@ -120,19 +129,33 @@ class DP_Model:
                                 train_acc,
                                 test_acc,
                                 self.bc.features.num_features])
-            print(f'Finish base model with {epo} epochs at {time.strftime("%X %x")} t_acc{train_acc}')
+            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} t_acc{train_acc}')
         return pd.DataFrame(results_all, columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
 
     def score(self, obj_list):
         self.predict(obj_list)
         total = len(obj_list)
-        corret = 0
+        correct = 0
         for obj in obj_list:
             isinstance(obj, DP_sentence)
-            corret += 1 if compare_graph_fast(list(obj.graph_est.items()), list(obj.graph_tag.items())) else 0
-        return corret / total
+            correct += 1 if compare_graph_fast(list(obj.graph_est.items()), list(obj.graph_tag.items())) else 0
+        return correct / total
 
-    def create_full_graph(self, f_x, obj):
+    # def create_init_graph(self, obj):
+    #     feature_obj = self.bc.features
+    #     # full_graph = {src: range(1, len(f_x)) for src in range(len(f_x))}  # TODO: save in dictionary
+    #     full_graph = {}
+    #     debug_count = 0
+    #     for src in range(len(obj.f)):
+    #         full_graph[src] = []
+    #         for trg in range(len(obj.f)):
+    #             if feature_obj.features[feature_obj.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
+    #                 full_graph[src].append(trg)  # TODO: save in dictionary
+    #                 debug_count += 1
+    #     print(f"Created {debug_count} edges instead of {len(obj.f)*len(obj.f)}")
+    #     return full_graph
+
+    def create_edge_weights(self, f_x):
         """
         Create full graph and weighted matrix for chu liu
 
@@ -143,27 +166,22 @@ class DP_Model:
         :return: full_graph and weighted matrix
         :rtype: dict, np.array
         """
-        feature_obj = self.bc.features
-        # full_graph = {src: range(1, len(f_x)) for src in range(len(f_x))}  # TODO: save in dictionary
-        full_graph = {}
-        debug_count = 0
-        for src in range(len(f_x)):
-            full_graph[src] = []
-            for trg in range(len(f_x)):
-                if feature_obj.features[feature_obj.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
-                    full_graph[src].append(trg)  # TODO: save in dictionary
-                    debug_count += 1
-        print(f"Created {debug_count} edges instead of {len(f_x)*len(f_x)}")
+
         results = []
         if self.w.min() == 0 and self.w.max() == 0:
-            return full_graph, np.zeros((len(f_x), len(f_x)))
+            return np.zeros((len(f_x), len(f_x)))
         for trgt_feat_slice in f_x:
-            t_d = np.array(trgt_feat_slice.toarray())
-            t_d_w = t_d @ self.w
             t = trgt_feat_slice.dot(self.w)  # sparse dot
             results.append(t)
         weight_mat = np.array(results)
-        return full_graph, weight_mat
+        return weight_mat
+
+    def keep_top_edges(self, obj, edge_weights, n_top=5):
+        new_graph = {}
+        for src, trgs in obj.graph_est.items():
+            trgs = np.array(trgs)  # for multi-indexing
+            new_graph[src] = trgs[nlargest(n_top, range(len(trgs)), key=lambda j: edge_weights[src, j])]
+        return new_graph
 
     def graph2vec(self, graph, f_x):
         """
