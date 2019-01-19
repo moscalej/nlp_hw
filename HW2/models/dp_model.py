@@ -107,12 +107,12 @@ class DP_Model:
             current = 0
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
-                # initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=10)
-                initial_graph = obj_list[ind].graph_est
+                initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=15)
+                # initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if
                              value}  # remove empty  #TODO used for debug
-                if not compare_graph_fast(list(graph_est.items()), list(graph_tag.items())):
+                if not compare_graph_fast(graph_est, graph_tag):
                     diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                     self.w = self.w + diff
                 else:
@@ -174,11 +174,11 @@ class DP_Model:
         weight_mat = np.array(results)
         return weight_mat
 
-    def keep_top_edges(self, obj, edge_weights, n_top=5):
+    def keep_top_edges(self, obj, edge_weights, n_top=10):
         new_graph = {}
         for src, trgs in obj.graph_est.items():
-            trgs = np.array(trgs)  # for multi-indexing
-            new_graph[src] = trgs[nlargest(n_top, range(len(trgs)), key=lambda j: edge_weights[src, j])]
+            new_graph[src] = nlargest(n_top, trgs, key=lambda j: edge_weights[src, j])
+        # compare_graph_fast(new_graph, obj.graph_est)
         return new_graph
 
     def graph2vec(self, graph, f_x):
@@ -212,6 +212,8 @@ def compare_graph_fast(graph_est, graph_tag):
     :type graph_tag: list
     :return:
     """
+    graph_est = list(graph_est.items())
+    graph_tag = list(graph_tag.items())
     graph_est.sort()
     graph_tag.sort()
     for i in range(len(graph_est)):
