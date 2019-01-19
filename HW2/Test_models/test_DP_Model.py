@@ -8,7 +8,7 @@ from models.data_object import DP_sentence
 from models.boot_camp import BootCamp, Features
 import numpy as np
 from scipy.sparse import csr_matrix
-
+import pandas as pd
 t_f_1 = csr_matrix([[1, 0, 0, 1], [1, 0, 0, 1], [1, 0, 0, 1]])
 t_f = [t_f_1, t_f_1, t_f_1]
 ds = DP_sentence(['hola', 'tu', 'mama'], ['tt', 'tt', 'tt'])
@@ -49,7 +49,7 @@ class test_model(unittest.TestCase):
         ds_list = par.parser()
         model = DP_Model(boot_camp=bc)
         model.fit(ds_list, epochs=50)
-        results = model.predict(ds_list)
+        results = model.score(ds_list)
         # print(model.w)
         clean_est = {key: value for key, value in results[0].items() if value}  # remove empty
         print(f"Predicted: {clean_est}")
@@ -71,3 +71,29 @@ class test_model(unittest.TestCase):
         #
         graph_w = dummy_model.graph2vec(dummy_graph, fake_tens)
         print(graph_w)
+
+    def test_main(self):
+        NUM_EPOCHS = [50]
+        MODELS = ['base', 'advance']
+        NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
+        DATA_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
+        TEST_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
+        RESULTS_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\Test_models'
+        results_all = []
+
+        data = PreProcess(DATA_PATH).parser()
+        test = PreProcess(TEST_PATH).parser()
+        # BASE MODEL
+        bc = BootCamp(Features('base'))
+        model = DP_Model(boot_camp=bc)
+        for n_epochs in NUM_EPOCHS:
+            start_time = time.time()
+            model.fit(data, epochs=n_epochs)
+            train_acc = model.score(data)
+            test_acc = model.score(test)
+            results_all.append(
+                ['base', time.time() - start_time, n_epochs, train_acc, test_acc, bc.features.num_features])
+            print(f'Finish base model with {n_epochs} epochs at {time.strftime("%X %x")} t_acc{train_acc}')
+        df_results = pd.DataFrame(results_all,
+                                  columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
+        df_results.to_csv(f'{RESULTS_PATH}\\from_test_re_{time.localtime()}.csv')

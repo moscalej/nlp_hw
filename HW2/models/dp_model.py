@@ -1,7 +1,7 @@
 # imports
 from HW2.models.data_object import DP_sentence
 from HW2.models.chu_liu import Digraph
-from HW2.models.boot_camp import BootCamp
+from models.boot_camp import BootCamp
 from numba import njit
 import numpy as np
 #
@@ -14,6 +14,7 @@ class DP_Model:
     """
 
     def __init__(self, boot_camp, w=None):
+        print(type(boot_camp))
         assert isinstance(boot_camp, BootCamp)
         self.w = w
         self.bc = boot_camp  # defines feature space
@@ -73,8 +74,8 @@ class DP_Model:
         self.bc.train_soldiers(obj_list)  # create f_x for each
         for obj in obj_list:
             full_graph, weight_dict = self.create_full_graph(obj.f)
-            opt_graph = Digraph(full_graph, get_score=lambda i, j: weight_dict[i, j]).mst().successors
-            obj.graph_est = {key: value for key, value in opt_graph.items() if value}  # remove empty
+            graph_est = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
+            obj.graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
         result = [obj.graph_est for obj in obj_list]
         return result
 
@@ -88,13 +89,12 @@ class DP_Model:
         :return:
         """
         for epo in range(epochs):
-            for (f_x, graph) in zip(f_x_list, y):
+            for (f_x, graph_tag) in zip(f_x_list, y):
                 full_graph, weight_dict = self.create_full_graph(f_x)
-                opt_graph = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
-                opt_graph = [(key, value) for key, value in opt_graph.items() if value]
-                graph_a = list(graph.items())  # remove empty
-                if compare_graph_fast(graph_a, opt_graph):
-                    diff = self.graph2vec(graph, f_x) - self.graph2vec(opt_graph, f_x)
+                graph_est = Digraph(full_graph, get_score=lambda k, l: weight_dict[k, l]).mst().successors
+                graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
+                if not compare_graph_fast(list(graph_est.items()), list(graph_tag.items())):
+                    diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                     self.w = self.w + diff
                 else:
                     print(f"over - fit on {epo} index")
@@ -153,20 +153,20 @@ class DP_Model:
 
 
 # @njit()
-def compare_graph_fast(graph_a, graph_b):
+def compare_graph_fast(graph_est, graph_tag):
     """
 
-    :param graph_a:
-    :type graph_a: list
-    :param graph_b:
-    :type graph_b: list
+    :param graph_est:
+    :type graph_est: list
+    :param graph_tag:
+    :type graph_tag: list
     :return:
     """
-    graph_a.sort()
-    graph_b.sort()
-    for i in range(len(graph_a)):
-        if graph_a[i][0] != graph_b[i][0]:
+    graph_est.sort()
+    graph_tag.sort()
+    for i in range(len(graph_est)):
+        if graph_est[i][0] != graph_tag[i][0]:
             return False
-        if graph_a[i][1] != set(graph_b[i][1]):
+        if graph_est[i][1] != set(graph_tag[i][1]):
             return False
     return True

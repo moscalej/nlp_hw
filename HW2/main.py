@@ -16,18 +16,18 @@ import seaborn as sns
 NUM_EPOCHS = [50]
 MODELS = ['base', 'advance']
 NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
-DATA_PATH = r'C:\technion\nlp_hw\HW2\data\toy.labeled'
-TEST_PATH = r'C:\technion\nlp_hw\HW2\data\toy.labeled'
-RESULTS_PATH = r'C:\technion\nlp_hw\HW2\Test_models'
+DATA_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
+TEST_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
+RESULTS_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\Test_models'
 results_all = []
 
 data = PreProcess(DATA_PATH).parser()
 test = PreProcess(TEST_PATH).parser()
 # BASE MODEL
+bc = BootCamp(Features('base'))
+model = DP_Model(boot_camp=bc)
 for n_epochs in NUM_EPOCHS:
     start_time = time.time()
-    bc = BootCamp(Features('base'))
-    model = DP_Model(boot_camp=bc)
     model.fit(data, epochs=n_epochs)
     train_acc = model.score(data)
     test_acc = model.score(test)
