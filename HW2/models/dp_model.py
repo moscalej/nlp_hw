@@ -198,8 +198,6 @@ class DP_Model:
         new_graph = {}
         for src, trgs in obj.graph_est.items():
             new_graph[src] = nlargest(n_top, trgs, key=lambda j: edge_weights[src, j])
-        if not compare_graph_fast(new_graph, obj.graph_est):
-            pass
         return new_graph
 
     def graph2vec(self, graph, f_x):
@@ -213,11 +211,21 @@ class DP_Model:
         :rtype: np.array vector of w dims
         """
         test_weigh_vec = np.zeros(self.w.shape[0])
+        # test_weigh_vec = spar.csr_matrix((1, self.w.shape[0]), dtype=np.int64)
         for src, trgs in graph.items():
-            activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
-            # np.add.at(test_weigh_vec, activ_feat_inds, 1)
-            for feat_ind in activ_feat_inds:
-                test_weigh_vec[feat_ind] += 1
+            slice_indices = f_x[src].indices
+            slice_ptr = f_x[src].indptr
+            for trg in trgs:
+                activ_feat_inds = slice_indices[slice_ptr[trg]:slice_ptr[trg + 1]]
+                # activ_feat_inds = list(f_x[src].getrow(trg).indices)
+                for feat_ind in activ_feat_inds:
+                    test_weigh_vec[feat_ind] += 1
+                # np.add.at(test_weigh_vec, activ_feat_inds, 1)
+
+            # activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
+            # # np.add.at(test_weigh_vec, activ_feat_inds, 1)
+            # for feat_ind in activ_feat_inds:
+            #     test_weigh_vec[feat_ind] += 1
         return test_weigh_vec
 
     def get_model(self):
