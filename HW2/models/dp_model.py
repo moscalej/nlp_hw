@@ -112,25 +112,29 @@ class DP_Model:
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
                 if epo in [0, 1, 2]:
-                    initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=int(len(f_x) / 8))
+                    n_top = max(int(len(f_x) / 8), 3)
+                    initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=n_top)
                 else:
                     initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if value}
+                # TODO Debug Remove
                 # diff_pre = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                 # if not compare_graph_fast(graph_est, graph_tag):  # TODO: I think there is some bug here, I get better overfit without it
                 # if np.sum(diff_pre - diff):
                 #     pass
                 # if not compare_graph_fast(graph_est, graph_tag) != np.sum(diff):
                 #     pass
+                # if is_zero_diff != is_same_graphs and is_same_graphs is True:
+                #     print("Bug")
+                # TODO Debug Remove
+
                 diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                 is_zero_diff = bool(np.sum(diff) == 0)
-                is_same_graphs = compare_graph_fast(graph_est, graph_tag)
-                if is_zero_diff != is_same_graphs and is_same_graphs is True:
-                    print("Bug")
                 if not is_zero_diff:
                     self.w = self.w + diff
                 else:
+                    is_same_graphs = compare_graph_fast(graph_est, graph_tag)
                     if is_same_graphs:
                         current += 1
 
@@ -211,9 +215,9 @@ class DP_Model:
         test_weigh_vec = np.zeros(self.w.shape[0])
         for src, trgs in graph.items():
             activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
-            np.add.at(test_weigh_vec, activ_feat_inds, 1)
-            # for feat_ind in activ_feat_inds:
-            #     test_weigh_vec[feat_ind] += 1
+            # np.add.at(test_weigh_vec, activ_feat_inds, 1)
+            for feat_ind in activ_feat_inds:
+                test_weigh_vec[feat_ind] += 1
         return test_weigh_vec
 
     def get_model(self):
