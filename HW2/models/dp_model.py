@@ -112,7 +112,7 @@ class DP_Model:
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
                 if epo in [0, 1, 2]:
-                    initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=int(len(f_x) / 2))
+                    initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=int(len(f_x) / 8))
                 else:
                     initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
@@ -211,8 +211,9 @@ class DP_Model:
         test_weigh_vec = np.zeros(self.w.shape[0])
         for src, trgs in graph.items():
             activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
-            for feat_ind in activ_feat_inds:
-                test_weigh_vec[feat_ind] += 1
+            np.add.at(test_weigh_vec, activ_feat_inds, 1)
+            # for feat_ind in activ_feat_inds:
+            #     test_weigh_vec[feat_ind] += 1
         return test_weigh_vec
 
     def get_model(self):
