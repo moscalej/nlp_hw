@@ -94,7 +94,7 @@ class Features:
                     rows.append(trg_ind)
                     cols.append(activ_ind)
                     data.append(True)
-            data_obj.f.append(spar.coo_matrix((data, (rows, cols)), shape=(num_nodes, self.num_features), dtype=bool))
+            data_obj.f.append(spar.csr_matrix((data, (rows, cols)), shape=(num_nodes, self.num_features), dtype=bool))
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]

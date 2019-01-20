@@ -139,7 +139,7 @@ class DP_Model:
                         current += 1
 
             if validation is not None:
-                test_acc = self.score(validation.copy())
+                test_acc = self.score(validation)
             train_acc = current / total
             results_all.append([self.get_model(),
                                 time.time() - start_time,
