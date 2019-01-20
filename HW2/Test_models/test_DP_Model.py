@@ -73,15 +73,16 @@ class test_model(unittest.TestCase):
         print(graph_w)
 
     def test_main(self):
-        NUM_EPOCHS = [10]
+        NUM_EPOCHS = [20]
         MODELS = ['base', 'advance']
         NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
         toy_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
-        toy_10_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10.labeled'
+        toy_10__train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10_train.labeled'
+        toy_10_test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10_test.labeled'
         train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\train.labeled'
         test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled'
-        DATA_PATH = toy_10_path
-        TEST_PATH = toy_10_path
+        DATA_PATH = toy_10__train_path
+        TEST_PATH = toy_10_test_path
         RESULTS_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\Test_models'
         results_all = []
 
@@ -97,7 +98,8 @@ class test_model(unittest.TestCase):
             test_acc = model.score(test)
             results_all.append(
                 ['base', time.time() - start_time, n_epochs, train_acc, test_acc, bc.features.num_features])
-            print(f'Finish base model with {n_epochs} epochs at {time.strftime("%X %x")} t_acc{train_acc}')
+            print(
+                f'Finish base model with {n_epochs} epochs at {time.strftime("%X %x")} train_acc{train_acc} and test_acc{test_acc}')
         df_results = pd.DataFrame(results_all,
                                   columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
         df_results.to_csv(f'{RESULTS_PATH}\\from_test_re_{time.localtime()}.csv')

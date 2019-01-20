@@ -9,6 +9,8 @@ import numpy as np
 from pandas import DataFrame
 import pandas as pd
 from heapq import nlargest
+import scipy.sparse as spar
+
 
 #
 
@@ -22,9 +24,8 @@ class DP_Model:
     def __init__(self, boot_camp, w=None):
         print(type(boot_camp))
         # assert isinstance(boot_camp, BootCamp)
-        self.w = w
+        self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
-        self.lr = 1  # TODO
 
     def fit(self, obj_list, epochs, truncate=0, validation=None):
         """
@@ -58,7 +59,10 @@ class DP_Model:
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")
+        #  TODO: if w was loaded don't init w
         self.w = np.zeros(self.bc.features.num_features)
+        # self.w = spar.coo_matrix((self.bc.features.num_features, 1), dtype=np.float64)
+
         # Give each Sentence object a Tensor witch will be use to predict
         self.bc.train_soldiers(obj_list)  # create f_x for each
 
@@ -110,10 +114,15 @@ class DP_Model:
                 initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=15)
                 # initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
-                graph_est = {key: value for key, value in graph_est.items() if
-                             value}  # remove empty  #TODO used for debug
-                if not compare_graph_fast(graph_est, graph_tag):
-                    diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
+                graph_est = {key: value for key, value in graph_est.items() if value}
+                # diff_pre = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
+                # if not compare_graph_fast(graph_est, graph_tag):  # TODO: I think there is some bug here, I get better overfit without it
+                # if np.sum(diff_pre - diff):
+                #     pass
+                # if not compare_graph_fast(graph_est, graph_tag) != np.sum(diff):
+                #     pass
+                diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
+                if np.sum(diff):
                     self.w = self.w + diff
                 else:
                     current += 1
@@ -127,7 +136,7 @@ class DP_Model:
                                 train_acc,
                                 test_acc,
                                 self.bc.features.num_features])
-            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} t_acc{train_acc}')
+            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} train_acc{train_acc}')
         return pd.DataFrame(results_all, columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
 
     def score(self, obj_list):
@@ -136,7 +145,7 @@ class DP_Model:
         correct = 0
         for obj in obj_list:
             isinstance(obj, DP_sentence)
-            correct += 1 if compare_graph_fast(list(obj.graph_est.items()), list(obj.graph_tag.items())) else 0
+            correct += 1 if compare_graph_fast(obj.graph_est, obj.graph_tag) else 0
         return correct / total
 
     # def create_init_graph(self, obj):
@@ -178,7 +187,8 @@ class DP_Model:
         new_graph = {}
         for src, trgs in obj.graph_est.items():
             new_graph[src] = nlargest(n_top, trgs, key=lambda j: edge_weights[src, j])
-        # compare_graph_fast(new_graph, obj.graph_est)
+        if not compare_graph_fast(new_graph, obj.graph_est):
+            pass
         return new_graph
 
     def graph2vec(self, graph, f_x):
@@ -192,10 +202,10 @@ class DP_Model:
         :rtype: np.array vector of w dims
         """
         test_weigh_vec = np.zeros(self.w.shape[0])
-        for key, vals in graph.items():
-            for val in vals:
-                # key is the source index of the edge and val is the target index
-                test_weigh_vec += f_x[key].A[val, :]  # TODO: consider sum of sparse matrix
+        for src, trgs in graph.items():
+            activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
+            for feat_ind in activ_feat_inds:
+                test_weigh_vec[feat_ind] += 1
         return test_weigh_vec
 
     def get_model(self):
@@ -206,19 +216,22 @@ class DP_Model:
 def compare_graph_fast(graph_est, graph_tag):
     """
 
-    :param graph_est:
-    :type graph_est: list
-    :param graph_tag:
-    :type graph_tag: list
+    :param graph_est_:
+    :type graph_est_: list
+    :param graph_tag_:
+    :type graph_tag_: list
     :return:
     """
-    graph_est = list(graph_est.items())
-    graph_tag = list(graph_tag.items())
-    graph_est.sort()
-    graph_tag.sort()
-    for i in range(len(graph_est)):
-        if graph_est[i][0] != graph_tag[i][0]:
+    graph_est_ = list(graph_est.items())
+    graph_tag_ = list(graph_tag.items())
+    if len(graph_est_) != len(graph_tag_):
+        return False
+    graph_est_.sort()
+    graph_tag_.sort()
+    for i in range(len(graph_est_)):
+        if graph_est_[i][0] != graph_tag_[i][0]:
             return False
-        if set(graph_est[i][1]) != set(graph_tag[i][1]):
+        if set(graph_est_[i][1]) != set(graph_tag_[i][1]):
             return False
+
     return True
