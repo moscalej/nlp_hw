@@ -70,14 +70,17 @@ class Features:
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
-    def fill_tensor(self, data_obj):
+    def fill_tensor(self, data_obj, fast=True):
         context = data_obj.sentence
         tags = data_obj.tags
         num_nodes = len(tags)
         # graph = get_full_graph(num_nodes)
         # data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
         data_obj.f = []
-        data_obj.graph_est = self.create_init_graph(data_obj)
+        if fast:
+            data_obj.graph_est = self.create_init_graph(data_obj)
+        else:
+            data_obj.graph_est = {src: range(1, num_nodes) for src in range(num_nodes)}
         for src_ind, trg_inds in data_obj.graph_est.items():
             rows, cols, data = [], [], []
             for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
@@ -92,7 +95,6 @@ class Features:
                     cols.append(activ_ind)
                     data.append(True)
             data_obj.f.append(spar.coo_matrix((data, (rows, cols)), shape=(num_nodes, self.num_features), dtype=bool))
-            # data_obj.f[src_ind][trg_ind, activ_feat_inds] = True
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]
@@ -209,7 +211,7 @@ class BootCamp:
     def truncate_features(self, n):
         self.features.truncate_features(n)
 
-    def train_soldiers(self, soldier_list):
+    def train_soldiers(self, soldier_list, fast=True):
         """
         Create feature tensor for each object
         :param soldier_list:
@@ -222,7 +224,7 @@ class BootCamp:
             self.features.tokenize()
         # fill tensor
         for soldier in soldier_list:
-            self.features.fill_tensor(soldier)
+            self.features.fill_tensor(soldier, fast=fast)
 
         # return soldier_list  # inplace
 

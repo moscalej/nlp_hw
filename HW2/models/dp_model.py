@@ -27,7 +27,7 @@ class DP_Model:
         self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
 
-    def fit(self, obj_list, epochs, truncate=0, validation=None):
+    def fit(self, obj_list, epochs, truncate=0, validation=None, fast=False):
         """
         Trains the model using the [perceptron alghorith](https://en.wikipedia.org/wiki/Perceptron)
         and chu liu.
@@ -64,11 +64,11 @@ class DP_Model:
         # self.w = spar.coo_matrix((self.bc.features.num_features, 1), dtype=np.float64)
 
         # Give each Sentence object a Tensor witch will be use to predict
-        self.bc.train_soldiers(obj_list)  # create f_x for each
+        self.bc.train_soldiers(obj_list, fast=fast)  # create f_x for each
 
         return self.perceptron(obj_list, epochs, validation=validation)
 
-    def predict(self, obj_list):
+    def predict(self, obj_list, fast=False):
         """
         Given a list array of Dp sentence wiill fill the predicted graph to each object
 
@@ -79,7 +79,7 @@ class DP_Model:
         :return: a list of dictionaries contanion graph relentions
         :rtype: list (dict)
         """
-        self.bc.train_soldiers(obj_list)  # create f_x for each
+        self.bc.train_soldiers(obj_list, fast=fast)  # create f_x for each
         for obj in obj_list:
             # full_graph, weight_dict = self.create_full_graph(obj.f, obj)
             # initial_graph = self.create_init_graph(obj)
@@ -111,8 +111,10 @@ class DP_Model:
             current = 0
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
-                initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=15)
-                # initial_graph = obj_list[ind].graph_est
+                if epo in [0, 1, 2]:
+                    initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=int(len(f_x) / 2))
+                else:
+                    initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if value}
                 # diff_pre = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
@@ -122,13 +124,18 @@ class DP_Model:
                 # if not compare_graph_fast(graph_est, graph_tag) != np.sum(diff):
                 #     pass
                 diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
-                if np.sum(diff):
+                is_zero_diff = bool(np.sum(diff) == 0)
+                is_same_graphs = compare_graph_fast(graph_est, graph_tag)
+                if is_zero_diff != is_same_graphs and is_same_graphs is True:
+                    print("Bug")
+                if not is_zero_diff:
                     self.w = self.w + diff
                 else:
-                    current += 1
+                    if is_same_graphs:
+                        current += 1
 
             if validation is not None:
-                test_acc = self.score(validation)
+                test_acc = self.score(validation.copy())
             train_acc = current / total
             results_all.append([self.get_model(),
                                 time.time() - start_time,
