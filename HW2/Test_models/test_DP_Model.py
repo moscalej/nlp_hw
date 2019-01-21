@@ -73,15 +73,16 @@ class test_model(unittest.TestCase):
         print(graph_w)
 
     def test_main(self):
-        NUM_EPOCHS = [20]
+        NUM_EPOCHS = [50]
         MODELS = ['base', 'advance']
         NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
         toy_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
         toy_10__train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10_train.labeled'
+        toy_5__train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_5_train.labeled'
         toy_10_test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10_test.labeled'
         train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\train.labeled'
         test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled'
-        DATA_PATH = toy_10__train_path
+        DATA_PATH = toy_5__train_path
         TEST_PATH = toy_10_test_path
         RESULTS_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\Test_models'
         results_all = []

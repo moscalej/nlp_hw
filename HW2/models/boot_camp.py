@@ -2,6 +2,7 @@
 from collections import defaultdict
 from heapq import nlargest
 from scipy import sparse as spar
+import numpy as np
 
 #
 
@@ -74,27 +75,27 @@ class Features:
         context = data_obj.sentence
         tags = data_obj.tags
         num_nodes = len(tags)
-        # graph = get_full_graph(num_nodes)
-        # data_obj.f = [spar.csc_matrix((num_nodes, self.num_features), dtype=bool) for _ in range(num_nodes)]
         data_obj.f = []
         if fast:
             data_obj.graph_est = self.create_init_graph(data_obj)
         else:
             data_obj.graph_est = {src: range(1, num_nodes) for src in range(num_nodes)}
         for src_ind, trg_inds in data_obj.graph_est.items():
-            rows, cols, data = [], [], []
-            for trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
-                # for src_ind in range(num_nodes):
-                #     rows, cols, data = [], [], []
-                #     for trg_ind in range(1, num_nodes):  # edge in the graph (src_ind, trg_ind)
-                keys = self.get_keys(src_ind, trg_ind, context, tags)
-                exist = self._check_keys(keys)
-                activ_feat_inds = [self.key2token[activ] for activ in exist]
-                for activ_ind in activ_feat_inds:
-                    rows.append(trg_ind)
-                    cols.append(activ_ind)
-                    data.append(True)
-            data_obj.f.append(spar.csr_matrix((data, (rows, cols)), shape=(num_nodes, self.num_features), dtype=bool))
+            rows, cols, data, indptr = [], [], [], [0]
+            for trg_ind in range(0, num_nodes):
+                next_ptr = indptr[-1]
+                if trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
+                    keys = self.get_keys(src_ind, trg_ind, context, tags)
+                    exist = self._check_keys(keys)
+                    activ_feat_inds = [self.key2token[activ] for activ in exist]
+                    for activ_ind in activ_feat_inds:
+                        rows.append(trg_ind)
+                        cols.append(activ_ind)
+                        data.append(True)
+                    next_ptr = len(activ_feat_inds) + next_ptr
+                indptr.append(next_ptr)
+            indptr = np.array(indptr)
+            data_obj.f.append(spar.csr_matrix((data, cols, indptr), shape=(num_nodes, self.num_features), dtype=bool))
 
     def get_keys(self, src_ind, trg_ind, context, tags):
         src_word = context[src_ind]

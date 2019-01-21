@@ -22,7 +22,6 @@ class DP_Model:
     """
 
     def __init__(self, boot_camp, w=None):
-        print(type(boot_camp))
         # assert isinstance(boot_camp, BootCamp)
         self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
@@ -111,24 +110,14 @@ class DP_Model:
             current = 0
             for ind, (f_x, graph_tag) in enumerate(zip(f_x_list, y)):
                 edge_weights = self.create_edge_weights(f_x)
-                if epo in [0, 1, 2]:
-                    n_top = max(int(len(f_x) / 8), 3)
+                # if epo not in [0, 1, 2]:
+                if False:
+                    n_top = max(int(len(f_x) / 2), 4)
                     initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=n_top)
                 else:
                     initial_graph = obj_list[ind].graph_est
                 graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if value}
-                # TODO Debug Remove
-                # diff_pre = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
-                # if not compare_graph_fast(graph_est, graph_tag):  # TODO: I think there is some bug here, I get better overfit without it
-                # if np.sum(diff_pre - diff):
-                #     pass
-                # if not compare_graph_fast(graph_est, graph_tag) != np.sum(diff):
-                #     pass
-                # if is_zero_diff != is_same_graphs and is_same_graphs is True:
-                #     print("Bug")
-                # TODO Debug Remove
-
                 diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                 is_zero_diff = bool(np.sum(diff) == 0)
                 if not is_zero_diff:
@@ -211,21 +200,13 @@ class DP_Model:
         :rtype: np.array vector of w dims
         """
         test_weigh_vec = np.zeros(self.w.shape[0])
-        # test_weigh_vec = spar.csr_matrix((1, self.w.shape[0]), dtype=np.int64)
         for src, trgs in graph.items():
             slice_indices = f_x[src].indices
             slice_ptr = f_x[src].indptr
             for trg in trgs:
                 activ_feat_inds = slice_indices[slice_ptr[trg]:slice_ptr[trg + 1]]
-                # activ_feat_inds = list(f_x[src].getrow(trg).indices)
                 for feat_ind in activ_feat_inds:
                     test_weigh_vec[feat_ind] += 1
-                # np.add.at(test_weigh_vec, activ_feat_inds, 1)
-
-            # activ_feat_inds = [f_x[src].col[ind] for ind, val in enumerate(f_x[src].row) if val in trgs]
-            # # np.add.at(test_weigh_vec, activ_feat_inds, 1)
-            # for feat_ind in activ_feat_inds:
-            #     test_weigh_vec[feat_ind] += 1
         return test_weigh_vec
 
     def get_model(self):
