@@ -90,11 +90,11 @@ class test_model(unittest.TestCase):
         data = PreProcess(DATA_PATH).parser()
         test = PreProcess(TEST_PATH).parser()
         # BASE MODEL
-        bc = BootCamp(Features('base'))
+        bc = BootCamp(Features('bas'))
         model = DP_Model(boot_camp=bc)
         for n_epochs in NUM_EPOCHS:
             start_time = time.time()
-            model.fit(data, epochs=n_epochs, fast=False)
+            model.fit(data, epochs=n_epochs, fast=False, truncate=1)
             train_acc = model.score(data)
             test_acc = model.score(test)
             results_all.append(

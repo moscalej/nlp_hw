@@ -54,7 +54,8 @@ class DP_Model:
         self.bc.investigate_soldiers(obj_list)
         # Pick the truncate most important tests
         if truncate > 0:  # TODO: review boot camp usage flow
-            self.bc.truncate_features(truncate)
+            self.bc.features.truncate_by_thresh(truncate)
+            # self.bc.truncate_features(truncate)
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")
@@ -112,18 +113,21 @@ class DP_Model:
                 edge_weights = self.create_edge_weights(f_x)
                 # if epo not in [0, 1, 2]:
                 if False:
-                    n_top = max(int(len(f_x) / 2), 4)
+                    n_top = max(int(len(f_x) - epo), 5)
                     initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=n_top)
                 else:
                     initial_graph = obj_list[ind].graph_est
-                graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
+                graph_est = Digraph(initial_graph.copy(), get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if value}
                 diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
                 is_zero_diff = bool(np.sum(diff) == 0)
+                is_same_graphs = compare_graph_fast(graph_est, graph_tag)
+                # if not is_zero_diff and epo in list(range(10)) or not is_same_graphs:
                 if not is_zero_diff:
-                    self.w = self.w + diff
+                    lr = 0.1 if is_same_graphs else 1
+                    # if not is_same_graphs:
+                    self.w = self.w + lr * diff
                 else:
-                    is_same_graphs = compare_graph_fast(graph_est, graph_tag)
                     if is_same_graphs:
                         current += 1
 

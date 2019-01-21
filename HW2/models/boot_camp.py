@@ -22,6 +22,26 @@ Create key2token dict
 Graph_to_feature_tensor: given an object iterate over full graph edges,
 for each edge create keys by templates and fill their values in the tensor
 """
+suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
+                    'sion', 'tion']
+suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
+suffix_list_adj = ['able', 'ible', 'al', 'esque', 'ful', 'ic', 'ical', 'ious', 'ous', 'ish', 'ive', 'less', 'y']
+suffix_list_adverbs = ['ly', 'ward', 'wards', 'wise']
+all_suffix = suffix_list_base + suffix_list_adj + suffix_list_adverbs + suffix_list_verbs
+prefix_list = ['ante', 'ante', 'circum', 'co', 'de', 'dis', 'em', 'en', 'epi', 'ex', 'extra', 'fore', 'homo', 'hype',
+               'il', 'im', 'in', 'ir', 'im', 'in', 'infra', 'intra', 'inter', 'macro', 'micro', 'mid', 'mis', 'mono',
+               'non', 'omni', 'para', 'post', 'pre', 're', 'ag', 'semi', 'sub', 'super', 'therm', 'trans', 'tri', 'un',
+               'no', 'uni']
+stop_words = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself',
+              'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself',
+              'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these',
+              'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do',
+              'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while',
+              'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before',
+              'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
+              'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each',
+              'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than',
+              'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']
 
 
 class Features:
@@ -65,6 +85,15 @@ class Features:
         keys2keep = nlargest(n, self.features, key=self.features.get)
         # sorted(self.features, key=self.features.get, reverse=True)
         temp_dict = defaultdict(int)
+        for key in keys2keep:
+            temp_dict[key] = self.features[key]
+        self.features = temp_dict
+        self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
+        self.num_features = len(list(self.features.keys()))
+
+    def truncate_by_thresh(self, thresh):
+        temp_dict = defaultdict(int)
+        keys2keep = {key: val for key, val in self.features.items() if val > thresh}
         for key in keys2keep:
             temp_dict[key] = self.features[key]
         self.features = temp_dict
@@ -122,24 +151,105 @@ class Features:
 
         if self.model_type == 'base':
             return keys
-        # extended template list
+        # extended feature list
+        # distance between
+        self._add_key(keys, abs(trg_ind - src_ind) > 4, f'far_tag_src_tag_trg', src_tag, trg_tag)
+        self._add_key(keys, abs(trg_ind - src_ind) == 1, f'neighbour_tag_src_tag_trg', src_tag, trg_tag)
+        # stop words
+        src_is_stop = 0
+        if src_word in stop_words:
+            self._add_key(keys, True, f'stop_word_tag_src_tag_trg', src_word, src_tag, trg_tag)
+            src_is_stop = 1
+        if trg_word in stop_words:
+            self._add_key(keys, True, f'tag_src_stop_word_tag_trg', src_tag, trg_word, trg_tag)
+            return keys
+        if src_is_stop:
+            return keys
+
+        # suffix prefix
+        suffix_list_base
+        suffix_checker = lambda src_word, suffix: len(src_word) > len(suffix) and src_word[-len(suffix):] == suffix
+        # base suffix
+        [self._add_key(keys, True, f'suffix_base_src', src_word) for suffix in suffix_list_base if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_trg', trg_word) for suffix in suffix_list_base if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_src_word_trg', src_word, trg_word) for suffix in suffix_list_base if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_base if
+         suffix_checker(trg_word, suffix)]
+        # verb suffix
+        [self._add_key(keys, True, f'suffix_verb_src', src_word) for suffix in suffix_list_verbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_trg', trg_word) for suffix in suffix_list_verbs if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_src_word_trg', src_word, trg_word) for suffix in suffix_list_verbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_verbs if
+         suffix_checker(trg_word, suffix)]
+        # adj suffix
+        [self._add_key(keys, True, f'suffix_adj_src', src_word) for suffix in suffix_list_adj if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_trg', trg_word) for suffix in suffix_list_adj if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_src_word_trg', src_word, trg_word) for suffix in suffix_list_adj if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adj if
+         suffix_checker(trg_word, suffix)]
+        # adverb suffix
+        [self._add_key(keys, True, f'suffix_adverb_src', src_word) for suffix in suffix_list_adverbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_trg', trg_word) for suffix in suffix_list_adverbs if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_src_word_trg', src_word, trg_word) for suffix in suffix_list_adverbs
+         if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adverbs if
+         suffix_checker(trg_word, suffix)]
+        # prefix
+        prefix_checker = lambda src_word, prefix: len(src_word) > len(prefix) and src_word[
+                                                                                  :len(prefix)].lower() == prefix
+        [self._add_key(keys, True, f'prefix_tag_src', prefix, src_word) for prefix in prefix_list if
+         prefix_checker(src_word, prefix)]
+        [self._add_key(keys, True, f'prefix_tag_trg', prefix, trg_word) for prefix in prefix_list if
+         prefix_checker(trg_word, prefix)]
+        [self._add_key(keys, True, f'prefix_src_word_trg', prefix, src_word, trg_word) for prefix in prefix_list
+         if
+         prefix_checker(src_word, prefix)]
+        [self._add_key(keys, True, f'prefix_src_tag_trg', prefix, src_word, trg_tag) for prefix in prefix_list if
+         prefix_checker(trg_word, prefix)]
+        # left-right
+        self._add_key(keys, src_ind > trg_ind, f'left_tag_src_tag_trg', src_tag, trg_tag)
+        self._add_key(keys, src_ind < trg_ind, f'right_tag_src_tag_trg', src_tag, trg_tag)
+        # capital letters
+        # first letter
+        self._add_key(keys, (src_word[0].isupper() and src_ind != 1), f'upper_tag_src', src_tag)
+        self._add_key(keys, src_word[0].isupper() and src_ind != 1, f'upper_tag_src_tag_trg', src_tag, trg_tag)
+        # contains digit
+        self._add_key(keys, any(c.isdigit() for c in src_word), f'contains_digit_tag_src_tag_trg', src_tag, trg_tag)
+        self._add_key(keys, any(c.isdigit() for c in trg_word), f'tag_src_contains_digit_tag_trg', src_tag, trg_tag)
+        # grandchild, sibling
+
+        # context
+        self._add_key(keys, src_ind > 0, f'word[-1]_word_src', context[src_ind - 1], src_word)
+        self._add_key(keys, src_ind > 0, f'tag[-1]_word_src', tags[src_ind - 1], trg_word)
+
         # keys.append(self._get_key(f'{src_ind} tag_src', src_tag))
-        self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
+        # self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
         # keys.append(self._get_key(f'{src_ind} word_src', src_word))
-        self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
+        # self._add_key(keys, True, f'{src_ind} tag_src', src_tag)
         # keys.append(self._get_key(f'tag_src', src_tag))
-        self._add_key(keys, True, f'tag_src', src_tag)
+        # self._add_key(keys, True, f'tag_src', src_tag)
         # keys.append(self._get_key(f'{trg_ind} tag_trg', trg_tag))
-        self._add_key(keys, True, f'{trg_ind} tag_trg', trg_tag)
+        # self._add_key(keys, True, f'{trg_ind} tag_trg', trg_tag)
         # keys.append(self._get_key(f'{trg_ind} word_trg', trg_word))
-        self._add_key(keys, True, f'{trg_ind} word_trg', trg_word)
+        # self._add_key(keys, True, f'{trg_ind} word_trg', trg_word)
         # keys.append(self._get_key(f'{src_ind} to {trg_ind}', ''))
-        self._add_key(keys, True, f'{src_ind} to {trg_ind}', '')
+        # self._add_key(keys, True, f'{src_ind} to {trg_ind}', '')
         # if src_ind > 0:
         #     keys.append(self._get_key(f'{src_ind-1} word', context[src_ind - 1]))
-        self._add_key(keys, src_ind > 0, f'{src_ind-1} word', context[src_ind - 1])
         # keys.append(self._get_key(f'tag_trg', trg_tag))
-        #
+        # #
         return keys
 
     def create_init_graph(self, obj):
