@@ -1,21 +1,26 @@
 # imports
+from tqdm import tqdm
+
 from HW2.models.data_object import DP_sentence
 import pandas as pd
 import numpy as np
 from collections import defaultdict
 
+
 #
 
 class PreProcess:
 
-    def __init__(self, path):
+    def __init__(self, path, label: bool = True):
+        self.is_label = label
         self.path = path  # make sure the path is valid
         self.meta = dict()
 
-    def parser(self):
+    def parser(self)->list:
         """
+        Opens the file given to the PreProcess object and parse the file to create DS_objects
         :return: iterable of DP_sentence objects
-        :rtype:
+        :rtype: list
         """
         all_data = pd.read_csv(self.path,
                                names=['TC', 'TOKEN', 'n1', 'TP', 'n2', 'n3', 'TH', 'DL', 'n4', 'n5'],
@@ -52,27 +57,52 @@ class PreProcess:
         tags = np.concatenate((['<ROOT>'], df['TP'].values))
         # graph_dict = {key: [] for key in df['TH'].unique()}
         graph_dict = defaultdict(list)
-        for tc, th in zip(df['TC'], df['TH']):
-            graph_dict[th].append(tc)
+        if self.is_label:
+            for tc, th in zip(df['TC'], df['TH']):
+                graph_dict[th].append(tc)
         return DP_sentence(sentence=x,
                            tags=tags,
                            graph=graph_dict)
 
-    def from_ds_to_file(self, iter_ds):
+    def from_ds_to_file(self, iter_ds: list, path: str) -> bool:
+        """
+        Transform a list of DP_sentence to a file where it format the values
+        as espesefi by the hw
+        :param iter_ds: List of DP_sentence
+        :type iter_ds: list
+        :param path: Path with name of the file to save the output
+        :type path: str
+        """
+        texts = []
+        for ds in tqdm(iter_ds):
+            df = self._so2df(ds)
+            texts.append(df.to_csv(sep="\t", index=False, header=False))
+        text = "\n".join(texts)
+        with open(path, 'w') as fd:
+            fd.write(text)
 
-        pass
+    def _so2df(self, so: DP_sentence) -> pd.DataFrame:  # Sentence Object
+        """
+        Converts Sentence objects to a Data frame with the same format
+        as the hw
 
-    def _so2df(self, so):  # Sentence Object
-        # assert isinstance(so,DP_sentence)
-        tags = so.tags
-        th = np.zeros(so.sentence.shape[0])
-        tc = [x for x in range(1, so.sentence.shape[0] + 1)]
-        for key, value in so.tags:
+        Params
+        ----
+
+        :param so: Sentence Object from witch we take the information
+        :type so: DP_sentence
+
+        :return: A data frame containing the information
+        :rtype: pd.DataFrame
+        """
+        th = np.zeros(so.sentence.shape[0], dtype=np.int8)
+        tc = [x for x in range(0, so.sentence.shape[0])]
+        for key, value in so.graph_est.items():
             th[value] = key
         results = pd.DataFrame(columns=['TC', 'TOKEN', 'n1', 'TP', 'n2', 'n3', 'TH', 'DL', 'n4', 'n5'])
         results['TC'] = tc
         results['TOKEN'] = so.sentence
         results['TP'] = so.tags
         results['TH'] = th
-        results.fillna('_')
-        return results
+        results.fillna('_', inplace=True)
+        return results.loc[1:, :]
