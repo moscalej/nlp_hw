@@ -92,7 +92,7 @@ class DP_Model:
         result = [obj.graph_est for obj in obj_list]
         return result
 
-    def perceptron(self, obj_list, epochs, validation=None):
+    def perceptron(self, obj_list:list, epochs:int, validation:list=None) ->pd.DataFrame:
         """
         Same perceptron algorith from the Tirgul
         :param f_x_list: List of tensors
@@ -125,15 +125,15 @@ class DP_Model:
                 is_same_graphs = compare_graph_fast(graph_est, graph_tag)
                 # if not is_zero_diff and epo in list(range(10)) or not is_same_graphs:
                 if not is_zero_diff:
-                    lr = 0.1 if is_same_graphs else 1
+                    lr = 0.0 if is_same_graphs else 1
                     # if not is_same_graphs:
                     self.w = self.w + lr * diff
                 else:
                     if is_same_graphs:
                         current += 1
 
-            if validation is not None and epo % 4 == 0:
-                print('Doing VAl')
+            if validation is not None:
+                # print('Doing VAl')
                 test_acc = self.score(validation, epoch=epo)
             train_acc = current / total
             results_all.append([self.get_model(),
@@ -175,13 +175,21 @@ class DP_Model:
         weight_mat = np.array(results)
         return weight_mat
 
-    def keep_top_edges(self, obj, edge_weights, n_top=10):
+    def keep_top_edges(self, obj: DP_sentence, edge_weights: np.ndarray, n_top: int = 10) -> dict:
+        """
+
+        :param obj:
+        :param edge_weights:
+        :param n_top:
+        :return:
+        """
         new_graph = {}
         for src, trgs in obj.graph_est.items():
             new_graph[src] = nlargest(n_top, trgs, key=lambda j: edge_weights[src, j])
         return new_graph
 
-    def graph2vec(self, graph, f_x):
+    def graph2vec(self, graph: dict, f_x: list) -> np.ndarray:
+
         """
         returns a vector describing the contribution of each feature to the given graph weight
         :param graph:
