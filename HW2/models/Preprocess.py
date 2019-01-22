@@ -4,7 +4,7 @@ from tqdm import tqdm
 from HW2.models.data_object import DP_sentence
 import pandas as pd
 import numpy as np
-
+from collections import defaultdict
 
 #
 
@@ -52,7 +52,8 @@ class PreProcess:
         # assert (isinstance(group,pd.DataFrame))
         x = np.concatenate((['<ROOT>'], df['TOKEN'].values))
         tags = np.concatenate((['<ROOT>'], df['TP'].values))
-        graph_dict = {key: [] for key in df['TH'].unique()}
+        # graph_dict = {key: [] for key in df['TH'].unique()}
+        graph_dict = defaultdict(list)
         for tc, th in zip(df['TC'], df['TH']):
             graph_dict[th].append(tc)
         return DP_sentence(sentence=x,
