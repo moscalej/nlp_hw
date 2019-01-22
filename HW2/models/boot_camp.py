@@ -105,7 +105,6 @@ class Features:
     def fill_tensor(self, data_obj, fast=True):
         context = data_obj.sentence
         tags = data_obj.tags
-        graph = data_obj.graph_tag
         num_nodes = len(tags)
         data_obj.f = []
         if fast:
@@ -117,7 +116,7 @@ class Features:
             for trg_ind in range(0, num_nodes):
                 next_ptr = indptr[-1]
                 if trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
-                    keys = self.get_keys(src_ind, trg_ind, context, tags, graph)
+                    keys = self.get_keys(src_ind, trg_ind, context, tags, data_obj.full_graph) # Todo check this part
                     exist = self._check_keys(keys)
                     activ_feat_inds = [self.key2token[activ] for activ in exist]
                     for activ_ind in activ_feat_inds:
