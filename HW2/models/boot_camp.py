@@ -105,7 +105,7 @@ class Features:
     def fill_tensor(self, data_obj, fast=True):
         context = data_obj.sentence
         tags = data_obj.tags
-        graph = data_obj.graph_tag
+        # graph = data_obj.graph_tag
         num_nodes = len(tags)
         data_obj.f = []
         if fast:
@@ -117,7 +117,7 @@ class Features:
             for trg_ind in range(0, num_nodes):
                 next_ptr = indptr[-1]
                 if trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
-                    keys = self.get_keys(src_ind, trg_ind, context, tags, graph)
+                    keys = self.get_keys(src_ind, trg_ind, context, tags, data_obj.full_graph)
                     exist = self._check_keys(keys)
                     activ_feat_inds = [self.key2token[activ] for activ in exist]
                     for activ_ind in activ_feat_inds:
@@ -163,7 +163,6 @@ class Features:
         d_ind = src_ind
         c_ind = self.get_child(h_ind, d_ind, graph)  # child or sibling
         b_ind = int(min(src_ind, trg_ind) + (src_ind - trg_ind) / 2)
-        dict_help_valid = lambda value: {'valid': True, 'value': False}
 
         ## head values
         w_h = context[h_ind]
@@ -210,7 +209,7 @@ class Features:
             args_dict['pd+1']['value'] = w_d_next
 
         d_h_d = 'L' if d_ind > h_ind else 'R'
-        args_dict['d(hd)'] = {'valid': True, 'value': w_d_next}
+        args_dict['d(hd)'] = {'valid': True, 'value': d_h_d}
 
         ## between values
         valid_b = np.abs(src_ind - trg_ind) > 1
@@ -244,7 +243,7 @@ class Features:
                 args_dict['pb+1']['value'] = w_b_next
 
         ## child values
-        valid_c = np.abs(src_ind - trg_ind) > 1
+        valid_c = c_ind != []
         args_dict['wc'] = {'valid': valid_c}
         args_dict['pc'] = {'valid': valid_c}
         args_dict['wc-1'] = {'valid': valid_c}
@@ -465,7 +464,7 @@ class Features:
         return exist
 
     def get_child(self, h_ind, d_ind, graph):
-        if len(graph[h_ind]) != 0:
+        if h_ind in graph and graph[h_ind] != []:
             return graph[h_ind][0]
         elif len(graph[d_ind]) > 1:
             for sibling in graph[d_ind]:
