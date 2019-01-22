@@ -33,6 +33,8 @@ class DP_Model:
 
         Parameters
         ----------
+        :param validation: Subset of the dataset witch is use for validating the  Tests
+        :type validation: list
         :param obj_list: list DP_MOdel
         :type obj_list: DP_Model list
 
@@ -68,7 +70,7 @@ class DP_Model:
 
         return self.perceptron(obj_list, epochs, validation=validation)
 
-    def predict(self, obj_list, fast=False):
+    def predict(self, obj_list, fast=False, epoch=0):
         """
         Given a list array of Dp sentence wiill fill the predicted graph to each object
 
@@ -79,13 +81,12 @@ class DP_Model:
         :return: a list of dictionaries contanion graph relentions
         :rtype: list (dict)
         """
-        self.bc.train_soldiers(obj_list, fast=fast)  # create f_x for each
+        if epoch == 0:
+            self.bc.train_soldiers(obj_list, fast=fast)  # create f_x for each
+
         for obj in obj_list:
-            # full_graph, weight_dict = self.create_full_graph(obj.f, obj)
-            # initial_graph = self.create_init_graph(obj)
             edge_weights = self.create_edge_weights(obj.f)
-            # initial_graph = self.keep_top_edges(obj, edge_weights, n_top=10)
-            initial_graph = obj.graph_est
+            initial_graph = obj.full_graph.copy()
             graph_est = Digraph(initial_graph, get_score=lambda k, l: edge_weights[k, l]).mst().successors
             obj.graph_est = {key: value for key, value in graph_est.items() if value}  # remove empty
         result = [obj.graph_est for obj in obj_list]
@@ -116,7 +117,7 @@ class DP_Model:
                     n_top = max(int(len(f_x) - epo), 5)
                     initial_graph = self.keep_top_edges(obj_list[ind], edge_weights, n_top=n_top)
                 else:
-                    initial_graph = obj_list[ind].graph_est
+                    initial_graph = obj_list[ind].full_graph
                 graph_est = Digraph(initial_graph.copy(), get_score=lambda k, l: edge_weights[k, l]).mst().successors
                 graph_est = {key: value for key, value in graph_est.items() if value}
                 diff = self.graph2vec(graph_tag, f_x) - self.graph2vec(graph_est, f_x)
@@ -131,8 +132,9 @@ class DP_Model:
                     if is_same_graphs:
                         current += 1
 
-            if validation is not None:
-                test_acc = self.score(validation)
+            if validation is not None and epo % 4 == 0:
+                print('Doing VAl')
+                test_acc = self.score(validation, epoch=epo)
             train_acc = current / total
             results_all.append([self.get_model(),
                                 time.time() - start_time,
@@ -140,31 +142,17 @@ class DP_Model:
                                 train_acc,
                                 test_acc,
                                 self.bc.features.num_features])
-            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} train_acc{train_acc}')
+            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} train_acc {train_acc} Test {test_acc}')
         return pd.DataFrame(results_all, columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
 
-    def score(self, obj_list):
-        self.predict(obj_list)
+    def score(self, obj_list, epoch=0):
+        self.predict(obj_list, epoch=epoch)
         total = len(obj_list)
         correct = 0
         for obj in obj_list:
             isinstance(obj, DP_sentence)
             correct += 1 if compare_graph_fast(obj.graph_est, obj.graph_tag) else 0
         return correct / total
-
-    # def create_init_graph(self, obj):
-    #     feature_obj = self.bc.features
-    #     # full_graph = {src: range(1, len(f_x)) for src in range(len(f_x))}  # TODO: save in dictionary
-    #     full_graph = {}
-    #     debug_count = 0
-    #     for src in range(len(obj.f)):
-    #         full_graph[src] = []
-    #         for trg in range(len(obj.f)):
-    #             if feature_obj.features[feature_obj.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
-    #                 full_graph[src].append(trg)  # TODO: save in dictionary
-    #                 debug_count += 1
-    #     print(f"Created {debug_count} edges instead of {len(obj.f)*len(obj.f)}")
-    #     return full_graph
 
     def create_edge_weights(self, f_x):
         """
@@ -175,7 +163,7 @@ class DP_Model:
         :param f_x: feature space of edges in sentence
         :type f_x: list of sparse matrices
         :return: full_graph and weighted matrix
-        :rtype: dict, np.array
+        :rtype:  np.array
         """
 
         results = []
