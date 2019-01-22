@@ -49,6 +49,7 @@ stop_dict = defaultdict(bool)
 for word in stop_words:
     stop_dict[word] = True
 
+
 # TODO: dict for each
 
 class Features:
@@ -327,9 +328,8 @@ class Features:
         # extended feature list
 
         # distance between
-        # self._add_key(keys, abs(trg_ind - src_ind) > 4, f'far_tag_src_tag_trg', src_tag, trg_tag)
-        # self._add_key(keys, abs(trg_ind - src_ind) == 1, f'neighbour_tag_src_tag_trg', src_tag, trg_tag)
-        #
+        self._add_key(keys, True, f'dist{trg_ind-src_ind}_src_tag_trg', src_tag, trg_tag, d_h_d)
+
         # # stop words
         # src_is_stop = 0
         # if src_word in stop_words:
@@ -391,11 +391,7 @@ class Features:
         #  if prefix_checker(src_word, prefix)]
         # [self._add_key(keys, True, f'prefix_src_tag_trg', prefix, src_word, trg_tag) for prefix in prefix_list if
         #  prefix_checker(trg_word, prefix)]
-        #
-        # # left-right
-        # self._add_key(keys, src_ind > trg_ind, f'left_tag_src_tag_trg', src_tag, trg_tag)
-        # self._add_key(keys, src_ind < trg_ind, f'right_tag_src_tag_trg', src_tag, trg_tag)
-        #
+
         # # capital letters
         # # first letter
         # self._add_key(keys, (src_word[0].isupper() and src_ind != 1), f'upper_tag_src', src_tag)
@@ -405,11 +401,6 @@ class Features:
         # self._add_key(keys, any(c.isdigit() for c in src_word), f'contains_digit_tag_src_tag_trg', src_tag, trg_tag)
         # self._add_key(keys, any(c.isdigit() for c in trg_word), f'tag_src_contains_digit_tag_trg', src_tag, trg_tag)
         #
-        # # grandchild, sibling
-        #
-        # # context
-        # self._add_key(keys, src_ind > 0, f'word[-1]_word_src', context[src_ind - 1], src_word)
-        # self._add_key(keys, src_ind > 0, f'tag[-1]_word_src', tags[src_ind - 1], trg_word)
 
         return keys
 
