@@ -106,10 +106,10 @@ class Features:
         num_nodes = len(tags)
         data_obj.f = []
         if fast:
-            data_obj.graph_est = self.create_init_graph(data_obj)
+            data_obj.full_graph = self.create_init_graph(data_obj)
         else:
-            data_obj.graph_est = {src: range(1, num_nodes) for src in range(num_nodes)}
-        for src_ind, trg_inds in data_obj.graph_est.items():
+            data_obj.full_graph = {src: list(range(1, num_nodes)) for src in range(num_nodes)} #TODO check with alex if this is correct
+        for src_ind, trg_inds in data_obj.full_graph.items():
             rows, cols, data, indptr = [], [], [], [0]
             for trg_ind in range(0, num_nodes):
                 next_ptr = indptr[-1]

@@ -9,6 +9,7 @@ from collections import namedtuple
 class DP_sentence:
     def __init__(self, sentence, tags, graph=None, ):  # TODO validate about tags
         self.graph_tag = graph  # {1: [2], 2: [1, 3],3: [1]}
+        self.full_graph = None
         self.graph_est = None  # {1: [2], 2: [1, 3],3: [1]}
         self.sentence = sentence
         self.tags = tags
