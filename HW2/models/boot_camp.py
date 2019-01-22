@@ -1,13 +1,3 @@
-# imports
-from collections import defaultdict
-from heapq import nlargest
-from scipy import sparse as spar
-import numpy as np
-
-#
-
-# TODO: feature definition:
-# TODO remember we don't have output value restriction (can be a real number)
 """
 Features flow:
 Features is a DefaultDict, holding a count of the times this feature was seen
@@ -22,6 +12,19 @@ Create key2token dict
 Graph_to_feature_tensor: given an object iterate over full graph edges,
 for each edge create keys by templates and fill their values in the tensor
 """
+
+# imports
+from HW2.models.dp_model import DP_sentence
+from collections import defaultdict
+from heapq import nlargest
+from scipy import sparse as spar
+import numpy as np
+
+#
+
+# TODO: feature definition:
+# TODO remember we don't have output value restriction (can be a real number)
+
 suffix_list_base = ['acy', 'al', 'ance', 'ence', 'dom', 'er', 'or', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ship',
                     'sion', 'tion']
 suffix_list_verbs = ['ate', 'en', 'ify', 'fy', 'ise', 'ize']
@@ -54,12 +57,12 @@ class Features:
         self.num_features = 1
         self.key2token = dict()
 
-    def extract_features(self, data_obj):
+    def extract_features(self, data_obj: DP_sentence):
         """
         Creates keys in dict, a key corresponds to a feature
         The key holds the count that the feature was seen
         :param data_obj:
-        :type data_obj:
+        :type data_obj: DP_sentence
         :return:
         :rtype:
         """
@@ -76,7 +79,7 @@ class Features:
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
-    def truncate_features(self, n):
+    def truncate_features(self, n: int):
         """
         Truncate n most frequent features
         :param n:
@@ -102,22 +105,22 @@ class Features:
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
-    def fill_tensor(self, data_obj, fast=True):
+    def fill_tensor(self, data_obj: DP_sentence, fast: bool = True):
         context = data_obj.sentence
         tags = data_obj.tags
-        # graph = data_obj.graph_tag
         num_nodes = len(tags)
         data_obj.f = []
         if fast:
             data_obj.full_graph = self.create_init_graph(data_obj)
         else:
-            data_obj.full_graph = {src: list(range(1, num_nodes)) for src in range(num_nodes)} #TODO check with alex if this is correct
+            data_obj.full_graph = {src: list(range(1, num_nodes)) for src in
+                                   range(num_nodes)}  # TODO check with alex if this is correct
         for src_ind, trg_inds in data_obj.full_graph.items():
             rows, cols, data, indptr = [], [], [], [0]
             for trg_ind in range(0, num_nodes):
                 next_ptr = indptr[-1]
                 if trg_ind in trg_inds:  # edge in the graph (src_ind, trg_ind)
-                    keys = self.get_keys(src_ind, trg_ind, context, tags, data_obj.full_graph)
+                    keys = self.get_keys(src_ind, trg_ind, context, tags, data_obj.full_graph)  # Todo check this part
                     exist = self._check_keys(keys)
                     activ_feat_inds = [self.key2token[activ] for activ in exist]
                     for activ_ind in activ_feat_inds:
