@@ -42,7 +42,9 @@ stop_words = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you'
               'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each',
               'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than',
               'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']
-
+stop_dict = defaultdict(bool)
+for word in stop_words:
+    stop_dict[word] = True
 
 # TODO: dict for each
 
@@ -291,6 +293,8 @@ class Features:
         self.add_from_temp(keys, f'ph, ph+1, pd, pd+1, d(hd)', args_dict)
         self.add_from_temp(keys, f'ph-1, ph, pd, pd+1, d(hd)', args_dict)
 
+        if stop_dict[w_h] or stop_dict[w_d]:
+            return keys
         # second order
         self.add_from_temp(keys, f'ph, pd, pc, d(hdc)', args_dict)
         self.add_from_temp(keys, f'wh, wd, wc, d(hdc)', args_dict)
@@ -472,29 +476,7 @@ class Features:
                     return sibling
         else:
             return []
-        #####
 
-
-# features to add
-# TODO: add each template validates his input
-# add('src suffix3', src_word[-3:])  # add len_from_end
-# add('src pref1', src_word[0])
-# add(f'{i} tag_src', tags[src_ind])
-# add(f'{j} tag_trg', trg_tag)
-
-# add(f'{src_ind} pref2', src_word[0:1])
-# add('i-2 tag_trg', trg_tag)
-# add('i tag+i-2 tag', prev, prev2)
-# add('i word', context[i])
-# add('i-1 tag+i word', prev, context[i])
-# add('i-1 word', context[i - 1])
-# add('i-1 suffix', context[i - 1][-3:])
-# add('i-2 word', context[i - 2])
-# add('i+1 word', context[i + 1])
-# add('i+1 suffix', context[i + 1][-3:])
-# add('i+2 word', context[i + 2])
-
-#######
 
 class BootCamp:
 
