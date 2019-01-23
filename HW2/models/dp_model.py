@@ -21,7 +21,7 @@ class DP_Model:
     chu_liu maximon spaning tree
     """
 
-    def __init__(self, boot_camp, w=None):
+    def __init__(self, boot_camp: BootCamp, w=None):
         # assert isinstance(boot_camp, BootCamp)
         self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
@@ -55,9 +55,10 @@ class DP_Model:
         # Create tests
         self.bc.investigate_soldiers(obj_list)
         # Pick the truncate most important tests
-        if truncate_top > 0:  # TODO: review boot camp usage flow
-            self.bc.features.truncate_by_thresh(n_top=truncate_top, n_bottom=truncate_bottom)
-            # self.bc.truncate_features(n_top=truncate_top, n_bottom=truncate_bottom)
+        if truncate_top > 0:  # TODO: Cahnge to remoce
+
+            # self.bc.features.truncate_by_thresh(truncate)
+            self.bc.truncate_features(n_top=truncate_top, n_bottom=truncate_bottom)
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")
@@ -92,7 +93,7 @@ class DP_Model:
         result = [obj.graph_est for obj in obj_list]
         return result
 
-    def perceptron(self, obj_list:list, epochs:int, validation:list=None) ->pd.DataFrame:
+    def perceptron(self, obj_list: list, epochs: int, validation: list = None) -> pd.DataFrame:
         """
         Same perceptron algorith from the Tirgul
         :param f_x_list: List of tensors
@@ -142,17 +143,13 @@ class DP_Model:
                                 train_acc,
                                 test_acc,
                                 self.bc.features.num_features])
-            print(f'Finished {epo} epoch for base model at {time.strftime("%X %x")} train_acc {train_acc} Test {test_acc}')
+            print(
+                f'Finished {epo} epoch for base model at {time.time() - start_time} train_acc {train_acc} Test {test_acc}')
         return pd.DataFrame(results_all, columns=['Model', 'time', 'epochs', 'train_score', 'val_score', 'n_features'])
 
     def score(self, obj_list, epoch=0):
         self.predict(obj_list, epoch=epoch)
-        total = len(obj_list)
-        correct = 0
-        for obj in obj_list:
-            isinstance(obj, DP_sentence)
-            correct += 1 if compare_graph_fast(obj.graph_est, obj.graph_tag) else 0
-        return correct / total
+        return accuracy(obj_list)
 
     def create_edge_weights(self, f_x):
         """
@@ -236,3 +233,42 @@ def compare_graph_fast(graph_est, graph_tag):
             return False
 
     return True
+
+
+def accuracy(iter_1: list) -> np.ndarray:
+    """
+
+    :param iter_1: List of sentence objects
+    :type iter_1: list
+    :return: accuaracy
+    :rtype: float
+    """
+    res =[]
+    for so in iter_1:
+        res.append(so2df(so))
+
+    return np.mean(np.array(res),axis=-1)
+
+
+def so2df(so: DP_sentence) -> np.ndarray:  # Sentence Object
+    """
+    Converts Sentence objects to a Data frame with the same format
+    as the hw
+
+    Params
+    ----
+
+    :param so: Sentence Object from witch we take the information
+    :type so: DP_sentence
+
+    :return: A data frame containing the information
+    :rtype: np.ndarray
+    """
+    th = np.zeros(so.sentence.shape[0], dtype=np.int8)
+    for key, value in so.graph_est.items():
+        th[value] = key
+
+    th_2 = np.zeros(so.sentence.shape[0], dtype=np.int8)
+    for key_2, value_2 in so.graph_tag.items():
+        th_2[value_2] = key_2
+    return np.mean(th ==th_2)
