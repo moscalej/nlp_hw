@@ -3,7 +3,7 @@ import time
 
 from HW2.models.data_object import DP_sentence
 from HW2.models.chu_liu import Digraph
-from HW2.models.boot_camp import BootCamp
+from models.boot_camp import BootCamp
 from numba import njit
 import numpy as np
 from pandas import DataFrame

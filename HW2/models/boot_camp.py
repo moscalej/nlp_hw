@@ -14,7 +14,7 @@ for each edge create keys by templates and fill their values in the tensor
 """
 
 # imports
-from HW2.models.dp_model import DP_sentence
+from models.data_object import DP_sentence
 from collections import defaultdict
 from heapq import nlargest
 from scipy import sparse as spar
@@ -167,7 +167,7 @@ class Features:
         args_dict = {}
         h_ind = trg_ind
         d_ind = src_ind
-        c_ind = self.get_child(h_ind, d_ind, graph)  # child or sibling
+        c_inds = self.get_child_list(h_ind, d_ind, graph)  # child or sibling
         b_ind = int(min(src_ind, trg_ind) + (src_ind - trg_ind) / 2)
 
         ## head values
@@ -248,38 +248,7 @@ class Features:
                 args_dict['wb+1']['value'] = p_b_next
                 args_dict['pb+1']['value'] = w_b_next
 
-        ## child values
-        valid_c = c_ind != []
-        args_dict['wc'] = {'valid': valid_c}
-        args_dict['pc'] = {'valid': valid_c}
-        args_dict['wc-1'] = {'valid': valid_c}
-        args_dict['pc-1'] = {'valid': valid_c}
-        args_dict['wc+1'] = {'valid': valid_c}
-        args_dict['pc+1'] = {'valid': valid_c}
 
-        if valid_c:
-            w_c = context[c_ind]
-            p_c = tags[c_ind]
-            d_d_c = 'L' if h_ind > c_ind else 'R'
-            args_dict['d(hdc)'] = {'valid': True, 'value': d_h_d + d_d_c}
-            args_dict['wc'] = {'valid': True, 'value': w_c}
-            args_dict['pc'] = {'valid': True, 'value': p_c}
-            valid_prev_c = valid_prev_f(c_ind)
-            args_dict['wc-1'] = {'valid': valid_prev_c}
-            args_dict['pc-1'] = {'valid': valid_prev_c}
-            if valid_prev_c:
-                w_c_prev = context[c_ind - 1]
-                p_c_prev = tags[c_ind - 1]
-                args_dict['pc-1']['value'] = p_c_prev
-                args_dict['wc-1']['value'] = w_c_prev
-            valid_next_c = valid_next_f(c_ind)
-            args_dict['wc+1'] = {'valid': valid_next_c}
-            args_dict['pc+1'] = {'valid': valid_next_c}
-            if valid_next_c:
-                w_c_next = context[c_ind + 1]
-                p_c_next = tags[c_ind + 1]
-                args_dict['wc+1']['value'] = p_c_next
-                args_dict['pc+1']['value'] = w_c_next
 
         # first order
         self.add_from_temp(keys, f'[wp]h,[wp]d,d(hd)', args_dict)
@@ -300,30 +269,63 @@ class Features:
         if stop_dict[w_h] or stop_dict[w_d]:
             return keys
         # second order
-        self.add_from_temp(keys, f'ph, pd, pc, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'wh, wd, wc, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'ph, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'pd, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'wh, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'wd, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
-        self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
+            ## child values
+            valid_c = c_inds != []
+            args_dict['wc'] = {'valid': valid_c}
+            args_dict['pc'] = {'valid': valid_c}
+            args_dict['wc-1'] = {'valid': valid_c}
+            args_dict['pc-1'] = {'valid': valid_c}
+            args_dict['wc+1'] = {'valid': valid_c}
+            args_dict['pc+1'] = {'valid': valid_c}
+            args_dict['d(hdc)'] = {'valid': valid_c}
+            if valid_c:
+                for c_ind in c_inds:
+                    w_c = context[c_ind]
+                    p_c = tags[c_ind]
+                    d_d_c = 'L' if h_ind > c_ind else 'R'
+                    args_dict['d(hdc)'] = {'valid': True, 'value': d_h_d + d_d_c}
+                    args_dict['wc'] = {'valid': True, 'value': w_c}
+                    args_dict['pc'] = {'valid': True, 'value': p_c}
+                    valid_prev_c = valid_prev_f(c_ind)
+                    args_dict['wc-1'] = {'valid': valid_prev_c}
+                    args_dict['pc-1'] = {'valid': valid_prev_c}
+                    if valid_prev_c:
+                        w_c_prev = context[c_ind - 1]
+                        p_c_prev = tags[c_ind - 1]
+                        args_dict['pc-1']['value'] = p_c_prev
+                        args_dict['wc-1']['value'] = w_c_prev
+                    valid_next_c = valid_next_f(c_ind)
+                    args_dict['wc+1'] = {'valid': valid_next_c}
+                    args_dict['pc+1'] = {'valid': valid_next_c}
+                    if valid_next_c:
+                        w_c_next = context[c_ind + 1]
+                        p_c_next = tags[c_ind + 1]
+                        args_dict['wc+1']['value'] = p_c_next
+                        args_dict['pc+1']['value'] = w_c_next
+                self.add_from_temp(keys, f'ph, pd, pc, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'wh, wd, wc, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'ph, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'pd, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'wh, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'wd, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
+                self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
 
         # extended feature list
 
@@ -461,15 +463,19 @@ class Features:
                 exist.append(key)
         return exist
 
-    def get_child(self, h_ind, d_ind, graph):
-        if h_ind in graph and graph[h_ind] != []:
-            return graph[h_ind][0]
-        elif len(graph[d_ind]) > 1:
-            for sibling in graph[d_ind]:
-                if sibling != h_ind:
-                    return sibling
-        else:
-            return []
+    def get_child_list(self, h_ind, d_ind, graph):
+        h_childs = []
+        if h_ind in graph:
+            h_childs = graph[h_ind]
+        return [child for child in h_childs + graph[d_ind] if child != h_ind]
+        # if h_ind in graph and graph[h_ind] != []:
+        #     return graph[h_ind][0]
+        # elif len(graph[d_ind]) > 1:
+        #     for sibling in graph[d_ind]:
+        #         if sibling != h_ind:
+        #             return sibling
+        # else:
+        #     return []
 
 
 class BootCamp:
