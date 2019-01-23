@@ -57,6 +57,7 @@ class Features:
         self.model_type = model_type
         self.features = defaultdict(int)
         self.features['bias'] = 1
+        self.features_full = None
         self.num_features = 1
         self.key2token = dict()
 
@@ -79,6 +80,7 @@ class Features:
                 self._add_keys(keys)
 
     def tokenize(self):
+        self.features_full = self.features.copy()
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
@@ -94,14 +96,14 @@ class Features:
         if n_bottom:
             keys2keep_bottom = set(nsmallest(n_bottom, self.features, key=self.features.get))
             keys2keep = list(keys2keep_top.intersection(keys2keep_bottom))
-        keys2keep = keys2keep_top
+        else:
+            keys2keep = keys2keep_top
 
         # sorted(self.features, key=self.features.get, reverse=True)
         temp_dict = defaultdict(int)
         for key in keys2keep:
             temp_dict[key] = self.features[key]
-        keys2keep = nlargest(n_bottom, temp_dict, key=(-temp_dict.get))
-
+        self.features_full = self.features.copy()
         self.features = temp_dict
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
@@ -111,6 +113,7 @@ class Features:
         keys2keep = {key: val for key, val in self.features.items() if val > thresh}
         for key in keys2keep:
             temp_dict[key] = self.features[key]
+        self.features_full = self.features.copy()
         self.features = temp_dict
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
@@ -166,6 +169,8 @@ class Features:
             self._add_key(keys, True, f'word_src_word_trg', src_word, trg_word)
             self._add_key(keys, True, f'tag_src_tag_trg', src_tag, trg_tag)
             return keys
+        # keep track of
+        self._add_key(keys, True, f'tag_src_tag_trg', src_tag, trg_tag)
 
         # Bohnet (2010) Features
 
@@ -409,10 +414,8 @@ class Features:
         for src in range(sentence_len):
             full_graph[src] = []
             for trg in range(sentence_len):
-                if self.features[self.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
+                if self.features_full[self.get_key(f'tag_src_tag_trg', obj.tags[src], obj.tags[trg])]:
                     full_graph[src].append(trg)  # TODO: save in dictionary
-                    # debug_count += 1  #TODO: remove after debug
-        # print(f"Created {debug_count} edges instead of {sentence_len*sentence_len}")  #TODO: remove after debug
         return full_graph
 
     def add_from_temp(self, keys, sig, args_dict, acc_args=[], acc_valid=True, acc_name=''):

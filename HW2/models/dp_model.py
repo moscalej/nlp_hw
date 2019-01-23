@@ -26,7 +26,7 @@ class DP_Model:
         self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
 
-    def fit(self, obj_list, epochs, truncate_top=0, truncate_bottom=None, validation=None, fast=False):
+    def fit(self, obj_list, epochs, truncate_top=0, truncate_bottom=None, validation=None, fast=True):
         """
         Trains the model using the [perceptron alghorith](https://en.wikipedia.org/wiki/Perceptron)
         and chu liu.
