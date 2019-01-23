@@ -38,11 +38,11 @@ total = model.bc.features.num_features
 print(model.bc.features.num_features)
 
 # %%
-TRUNCATE_TOP = 0.05
+TRUNCATE_TOP = 0.03
 TRUNCATE_BOT = 0.10
 remove_top = int(total * TRUNCATE_TOP)
 remove_bot = int(total * TRUNCATE_BOT)
-model.bc.features.truncate_by_thresh(10_000,3)
+model.bc.features.truncate_by_thresh(15_000,1)
 # model.bc.truncate_features(n_top=remove_top, n_bottom=remove_bot)
 print(model.bc.features.num_features)
 # %%
