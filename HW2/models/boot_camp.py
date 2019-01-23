@@ -377,45 +377,21 @@ class Features:
                     p_c_next = tags[c_ind + 1]
                     args_dict['wc+1']['value'] = p_c_next
                     args_dict['pc+1']['value'] = w_c_next
-                # self.add_from_temp(keys, f'ph, pd, pc, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'wh, wd, wc, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'ph, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'pd, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'wh, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'wd, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h-1, [wp]h, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]h, [wp]h+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d, [wp]d+1, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c-1, [wp]c, d(hdc)', args_dict)
-                # self.add_from_temp(keys, f'[wp]d-1, [wp]d, [wp]c, [wp]c+1, d(hdc)', args_dict)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phpcpc+1d(hdc),', p_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phpcpc+1d(hdc),', p_h, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phpcwc+1d(hdc),', p_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phpcwc+1d(hdc),', p_h, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phwcpc+1d(hdc),', p_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phwcpc+1d(hdc),', p_h, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phwcwc+1d(hdc),', p_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phwcwc+1d(hdc),', p_h, w_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whpcpc+1d(hdc),', w_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whpcpc+1d(hdc),', w_h, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whpcwc+1d(hdc),', w_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whpcwc+1d(hdc),', w_h, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whwcpc+1d(hdc),', w_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whwcpc+1d(hdc),', w_h, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whwcwc+1d(hdc),', w_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whwcwc+1d(hdc),', w_h, w_c,
                               w_c_next, d_h_d + d_d_c)
                 self._add_key(keys, True and valid_c and valid_c, 'phpdpcd(hdc),', p_h, p_d, p_c,
                               d_h_d + d_d_c)
@@ -477,237 +453,237 @@ class Features:
                 self._add_key(keys, True and valid_prev_h and True and valid_c and valid_c, 'wh-1whwcd(hdc),', w_h_prev,
                               w_h,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'phpc-1pcd(hdc),', p_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'phpc-1pcd(hdc),', p_h,
                               p_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'phpc-1wcd(hdc),', p_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'phpc-1wcd(hdc),', p_h,
                               p_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'phwc-1pcd(hdc),', p_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'phwc-1pcd(hdc),', p_h,
                               w_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'phwc-1wcd(hdc),', p_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'phwc-1wcd(hdc),', p_h,
                               w_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'whpc-1pcd(hdc),', w_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'whpc-1pcd(hdc),', w_h,
                               p_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'whpc-1wcd(hdc),', w_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'whpc-1wcd(hdc),', w_h,
                               p_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'whwc-1pcd(hdc),', w_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'whwc-1pcd(hdc),', w_h,
                               w_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'whwc-1wcd(hdc),', w_h,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'whwc-1wcd(hdc),', w_h,
                               w_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phpcpc+1d(hdc),', p_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phpcpc+1d(hdc),', p_h, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phpcwc+1d(hdc),', p_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phpcwc+1d(hdc),', p_h, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phwcpc+1d(hdc),', p_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phwcpc+1d(hdc),', p_h, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'phwcwc+1d(hdc),', p_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'phwcwc+1d(hdc),', p_h, w_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whpcpc+1d(hdc),', w_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whpcpc+1d(hdc),', w_h, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whpcwc+1d(hdc),', w_h, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whpcwc+1d(hdc),', w_h, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whwcpc+1d(hdc),', w_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whwcpc+1d(hdc),', w_h, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'whwcwc+1d(hdc),', w_h, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'whwcwc+1d(hdc),', w_h, w_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1pcd(hdc),', p_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1wcd(hdc),', p_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1pcd(hdc),', p_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1wcd(hdc),', p_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1pcd(hdc),', p_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1wcd(hdc),', p_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1pcd(hdc),', p_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1wcd(hdc),', p_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1pcd(hdc),', w_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1wcd(hdc),', w_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1pcd(hdc),', w_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1wcd(hdc),', w_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1pcd(hdc),', w_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1wcd(hdc),', w_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1pcd(hdc),', w_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1wcd(hdc),', w_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1pcd(hdc),', p_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1wcd(hdc),', p_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1pcd(hdc),', p_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1wcd(hdc),', p_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1pcd(hdc),', p_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1wcd(hdc),', p_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1pcd(hdc),', p_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1wcd(hdc),', p_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1pcd(hdc),', w_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1wcd(hdc),', w_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1pcd(hdc),', w_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1wcd(hdc),', w_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1pcd(hdc),', w_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1wcd(hdc),', w_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1pcd(hdc),', w_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1wcd(hdc),', w_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1pcd(hdc),', p_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phpc-1wcd(hdc),', p_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1pcd(hdc),', p_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1phwc-1wcd(hdc),', p_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1pcd(hdc),', p_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whpc-1wcd(hdc),', p_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1pcd(hdc),', p_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'ph-1whwc-1wcd(hdc),', p_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1pcd(hdc),', w_h_prev, p_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phpc-1wcd(hdc),', w_h_prev, p_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1pcd(hdc),', w_h_prev, p_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1phwc-1wcd(hdc),', w_h_prev, p_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1pcd(hdc),', w_h_prev, w_h, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whpc-1wcd(hdc),', w_h_prev, w_h, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1pcd(hdc),', w_h_prev, w_h, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_c and True and valid_prev_h and valid_c and valid_c,
                               'wh-1whwc-1wcd(hdc),', w_h_prev, w_h, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phph+1pc-1pcd(hdc),', p_h, p_h_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phph+1pc-1wcd(hdc),', p_h, p_h_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phph+1wc-1pcd(hdc),', p_h, p_h_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phph+1wc-1wcd(hdc),', p_h, p_h_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phwh+1pc-1pcd(hdc),', p_h, w_h_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phwh+1pc-1wcd(hdc),', p_h, w_h_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phwh+1wc-1pcd(hdc),', p_h, w_h_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'phwh+1wc-1wcd(hdc),', p_h, w_h_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whph+1pc-1pcd(hdc),', w_h, p_h_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whph+1pc-1wcd(hdc),', w_h, p_h_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whph+1wc-1pcd(hdc),', w_h, p_h_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whph+1wc-1wcd(hdc),', w_h, p_h_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whwh+1pc-1pcd(hdc),', w_h, w_h_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whwh+1pc-1wcd(hdc),', w_h, w_h_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whwh+1wc-1pcd(hdc),', w_h, w_h_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_prev_c and valid_c and valid_c,
                               'whwh+1wc-1wcd(hdc),', w_h, w_h_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1phpcpc+1d(hdc),', p_h_prev, p_h, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1phpcwc+1d(hdc),', p_h_prev, p_h, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1phwcpc+1d(hdc),', p_h_prev, p_h, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1phwcwc+1d(hdc),', p_h_prev, p_h, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1whpcpc+1d(hdc),', p_h_prev, w_h, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1whpcwc+1d(hdc),', p_h_prev, w_h, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1whwcpc+1d(hdc),', p_h_prev, w_h, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'ph-1whwcwc+1d(hdc),', p_h_prev, w_h, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1phpcpc+1d(hdc),', w_h_prev, p_h, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1phpcwc+1d(hdc),', w_h_prev, p_h, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1phwcpc+1d(hdc),', w_h_prev, p_h, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1phwcwc+1d(hdc),', w_h_prev, p_h, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1whpcpc+1d(hdc),', w_h_prev, w_h, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1whpcwc+1d(hdc),', w_h_prev, w_h, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1whwcpc+1d(hdc),', w_h_prev, w_h, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_h and True and valid_c and valid_next_c and valid_c,
                               'wh-1whwcwc+1d(hdc),', w_h_prev, w_h, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phph+1pcpc+1d(hdc),', p_h, p_h_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phph+1pcwc+1d(hdc),', p_h, p_h_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phph+1wcpc+1d(hdc),', p_h, p_h_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phph+1wcwc+1d(hdc),', p_h, p_h_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phwh+1pcpc+1d(hdc),', p_h, w_h_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phwh+1pcwc+1d(hdc),', p_h, w_h_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phwh+1wcpc+1d(hdc),', p_h, w_h_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'phwh+1wcwc+1d(hdc),', p_h, w_h_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whph+1pcpc+1d(hdc),', w_h, p_h_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whph+1pcwc+1d(hdc),', w_h, p_h_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whph+1wcpc+1d(hdc),', w_h, p_h_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whph+1wcwc+1d(hdc),', w_h, p_h_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whwh+1pcpc+1d(hdc),', w_h, w_h_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whwh+1pcwc+1d(hdc),', w_h, w_h_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whwh+1wcpc+1d(hdc),', w_h, w_h_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_h and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_h and valid_c and valid_next_c and valid_c,
                               'whwh+1wcwc+1d(hdc),', w_h, w_h_next, w_c, w_c_next, d_h_d + d_d_c)
                 self._add_key(keys, True and valid_next_d and valid_c and valid_c, 'pdpd+1pcd(hdc),', p_d,
                               p_d_next,
@@ -757,173 +733,173 @@ class Features:
                 self._add_key(keys, True and valid_prev_d and True and valid_c and valid_c, 'wd-1wdwcd(hdc),', w_d_prev,
                               w_d,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'pdpc-1pcd(hdc),', p_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'pdpc-1pcd(hdc),', p_d,
                               p_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'pdpc-1wcd(hdc),', p_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'pdpc-1wcd(hdc),', p_d,
                               p_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'pdwc-1pcd(hdc),', p_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'pdwc-1pcd(hdc),', p_d,
                               w_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'pdwc-1wcd(hdc),', p_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'pdwc-1wcd(hdc),', p_d,
                               w_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'wdpc-1pcd(hdc),', w_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'wdpc-1pcd(hdc),', w_d,
                               p_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'wdpc-1wcd(hdc),', w_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'wdpc-1wcd(hdc),', w_d,
                               p_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'wdwc-1pcd(hdc),', w_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'wdwc-1pcd(hdc),', w_d,
                               w_c_prev,
                               p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_h and valid_c and valid_c, 'wdwc-1wcd(hdc),', w_d,
+                self._add_key(keys, True and valid_prev_c and valid_c and valid_c, 'wdwc-1wcd(hdc),', w_d,
                               w_c_prev,
                               w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'pdpcpc+1d(hdc),', p_d, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'pdpcpc+1d(hdc),', p_d, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'pdpcwc+1d(hdc),', p_d, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'pdpcwc+1d(hdc),', p_d, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'pdwcpc+1d(hdc),', p_d, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'pdwcpc+1d(hdc),', p_d, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'pdwcwc+1d(hdc),', p_d, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'pdwcwc+1d(hdc),', p_d, w_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'wdpcpc+1d(hdc),', w_d, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'wdpcpc+1d(hdc),', w_d, p_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'wdpcwc+1d(hdc),', w_d, p_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'wdpcwc+1d(hdc),', w_d, p_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'wdwcpc+1d(hdc),', w_d, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'wdwcpc+1d(hdc),', w_d, w_c,
                               p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_c and valid_next_h and valid_c, 'wdwcwc+1d(hdc),', w_d, w_c,
+                self._add_key(keys, True and valid_c and valid_next_c and valid_c, 'wdwcwc+1d(hdc),', w_d, w_c,
                               w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdpd+1pc-1pcd(hdc),', p_d, p_d_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdpd+1pc-1wcd(hdc),', p_d, p_d_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdpd+1wc-1pcd(hdc),', p_d, p_d_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdpd+1wc-1wcd(hdc),', p_d, p_d_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdwd+1pc-1pcd(hdc),', p_d, w_d_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdwd+1pc-1wcd(hdc),', p_d, w_d_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdwd+1wc-1pcd(hdc),', p_d, w_d_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'pdwd+1wc-1wcd(hdc),', p_d, w_d_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdpd+1pc-1pcd(hdc),', w_d, p_d_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdpd+1pc-1wcd(hdc),', w_d, p_d_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdpd+1wc-1pcd(hdc),', w_d, p_d_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdpd+1wc-1wcd(hdc),', w_d, p_d_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdwd+1pc-1pcd(hdc),', w_d, w_d_next, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdwd+1pc-1wcd(hdc),', w_d, w_d_next, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdwd+1wc-1pcd(hdc),', w_d, w_d_next, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_prev_c and valid_c and valid_c,
                               'wdwd+1wc-1wcd(hdc),', w_d, w_d_next, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
-                              'pdpd+1pcpc+1d(hdc),', p_d, p_d_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
+                              'pdpd+1pcpc+1d(hdc),', p_d, p_d_next, p_c, p_c_next, d_h_d + d_d_c) #startt
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdpd+1pcwc+1d(hdc),', p_d, p_d_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdpd+1wcpc+1d(hdc),', p_d, p_d_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdpd+1wcwc+1d(hdc),', p_d, p_d_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdwd+1pcpc+1d(hdc),', p_d, w_d_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdwd+1pcwc+1d(hdc),', p_d, w_d_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdwd+1wcpc+1d(hdc),', p_d, w_d_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'pdwd+1wcwc+1d(hdc),', p_d, w_d_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdpd+1pcpc+1d(hdc),', w_d, p_d_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdpd+1pcwc+1d(hdc),', w_d, p_d_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdpd+1wcpc+1d(hdc),', w_d, p_d_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdpd+1wcwc+1d(hdc),', w_d, p_d_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdwd+1pcpc+1d(hdc),', w_d, w_d_next, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdwd+1pcwc+1d(hdc),', w_d, w_d_next, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
                               'wdwd+1wcpc+1d(hdc),', w_d, w_d_next, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_next_d and valid_c and valid_next_h and valid_c,
-                              'wdwd+1wcwc+1d(hdc),', w_d, w_d_next, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_next_d and valid_c and valid_next_c and valid_c,
+                              'wdwd+1wcwc+1d(hdc),', w_d, w_d_next, w_c, w_c_next, d_h_d + d_d_c) #finish
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1pdpc-1pcd(hdc),', p_d_prev, p_d, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1pdpc-1wcd(hdc),', p_d_prev, p_d, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1pdwc-1pcd(hdc),', p_d_prev, p_d, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1pdwc-1wcd(hdc),', p_d_prev, p_d, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1wdpc-1pcd(hdc),', p_d_prev, w_d, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1wdpc-1wcd(hdc),', p_d_prev, w_d, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1wdwc-1pcd(hdc),', p_d_prev, w_d, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'pd-1wdwc-1wcd(hdc),', p_d_prev, w_d, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1pdpc-1pcd(hdc),', w_d_prev, p_d, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1pdpc-1wcd(hdc),', w_d_prev, p_d, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1pdwc-1pcd(hdc),', w_d_prev, p_d, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1pdwc-1wcd(hdc),', w_d_prev, p_d, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1wdpc-1pcd(hdc),', w_d_prev, w_d, p_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1wdpc-1wcd(hdc),', w_d_prev, w_d, p_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1wdwc-1pcd(hdc),', w_d_prev, w_d, w_c_prev, p_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_prev_h and valid_c and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_prev_c and valid_c and valid_c,
                               'wd-1wdwc-1wcd(hdc),', w_d_prev, w_d, w_c_prev, w_c, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1pdpcpc+1d(hdc),', p_d_prev, p_d, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1pdpcwc+1d(hdc),', p_d_prev, p_d, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1pdwcpc+1d(hdc),', p_d_prev, p_d, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1pdwcwc+1d(hdc),', p_d_prev, p_d, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1wdpcpc+1d(hdc),', p_d_prev, w_d, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1wdpcwc+1d(hdc),', p_d_prev, w_d, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1wdwcpc+1d(hdc),', p_d_prev, w_d, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'pd-1wdwcwc+1d(hdc),', p_d_prev, w_d, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1pdpcpc+1d(hdc),', w_d_prev, p_d, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1pdpcwc+1d(hdc),', w_d_prev, p_d, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1pdwcpc+1d(hdc),', w_d_prev, p_d, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1pdwcwc+1d(hdc),', w_d_prev, p_d, w_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1wdpcpc+1d(hdc),', w_d_prev, w_d, p_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1wdpcwc+1d(hdc),', w_d_prev, w_d, p_c, w_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1wdwcpc+1d(hdc),', w_d_prev, w_d, w_c, p_c_next, d_h_d + d_d_c)
-                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_h and valid_c,
+                self._add_key(keys, True and valid_prev_d and True and valid_c and valid_next_c and valid_c,
                               'wd-1wdwcwc+1d(hdc),', w_d_prev, w_d, w_c, w_c_next, d_h_d + d_d_c)
 
         # extended feature list

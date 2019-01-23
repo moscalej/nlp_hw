@@ -5,54 +5,50 @@
 """
 
 import time
-
 import pandas as pd
 import yaml
-
-from HW2.models.Preprocess import PreProcess
-from HW2.models.boot_camp import BootCamp, Features
+from HW2.models.boot_camp import Features
 from HW2.models.dp_model import DP_Model
+from HW2.models.Preprocess import PreProcess
+from HW2.models.boot_camp import BootCamp
+import numpy as np
 
-with open(r'local_paths.YAML') as f:
+with open(r'C:\Users\amoscoso\Documents\Technion\nlp\nlp_hw\HW2\local_paths.YAML') as f:
     paths = yaml.load(f)
-toy_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
-test_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled'
-train_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\train.labeled'
-unlable_data = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\comp.unlabeled'
-results_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\tests'
-weights = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\tests\weights'
-NUM_EPOCHS = [10]
-MODELS = ['base', 'advance']
-NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
-DATA_PATH = train_data
-TEST_PATH = test_data
-TEST_PATH = toy_data
-RESULTS_PATH = results_path
-WEIGHTS_PATH = results_path
-results_all = []
 
+NUM_EPOCHS = 15
+MODELS = ['base', 'advance']
+DATA_PATH = paths['train_data']  # 'toy_data'
+TEST_PATH = paths['toy_10_test']
+RESULTS_PATH = paths['results_path']
+WEIGHTS_PATH = paths['weights']
+results_all = []
+TRUNCATE_TOP = 0.15
+TRUNCATE_BOT = 0.30
 data = PreProcess(DATA_PATH).parser()
 test = PreProcess(TEST_PATH).parser()
 # BASE MODEL
-bc = BootCamp(Features('base'))
+bc = BootCamp(Features('Advanse'))
 model = DP_Model(boot_camp=bc)
-for n_epochs in NUM_EPOCHS:
-    start_time = time.time()
-    result = model.fit(data, epochs=n_epochs, truncate=100_000)
-    results_all.append(result)
-#
-# # Advance
-# for n_epochs in NUM_EPOCHS:
-#     for n_features in NUMBER_OF_FEATURES:
-#         start_time = time.time()
-#         bc = BootCamp(Features('base'))
-#         model = DP_Model(boot_camp=bc)
-#         model.fit(data, epochs=n_epochs, truncate=0)
-#         train_acc = model.score(data)
-#         test_acc = model.score(test)
-#         results_all.append(['base', time.time() - start_time, n_epochs, train_acc, test_acc, n_features])
-#         print(f'Finish advance model with {n_epochs} epochs and {n_features} features at {time.strftime("%X %x")}')
-#
+
+start_time = time.time()
+model.bc.investigate_soldiers(data)
+model.bc.truncate_features(n_top=0, n_bottom=0)
+total = model.bc.features.num_features
+print(model.bc.features.num_features)
+
+# %%
+remove_top = int(total * TRUNCATE_TOP)
+remove_bot = int(total * TRUNCATE_BOT)
+model.bc.truncate_features(n_top=remove_top, n_bottom=remove_bot)
+print(model.bc.features.num_features)
+# %%
+model.bc.train_soldiers(data, fast=False)
+# %%
+model.w = np.zeros(model.bc.features.num_features)
+result = model.perceptron(data, epochs=NUM_EPOCHS, validation=test)
+results_all.append(result)
+
 df_results = pd.DataFrame(pd.concat(results_all))
 df_results.to_csv(f'{RESULTS_PATH}\\re_{time.strftime("%d_%b_%y_%S_%M_%H")}.csv')
-model.w.tofile(f'{WEIGHTS_PATH}\\w_{time.strftime("%d_%b_%y_%S_%M_%H")}.h5')
+# model.w.tofile(f'{WEIGHTS_PATH}\\w_{time.strftime("%d_%b_%y_%S_%M_%H")}.h5')
