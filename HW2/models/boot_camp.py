@@ -14,6 +14,7 @@ for each edge create keys by templates and fill their values in the tensor
 """
 
 # imports
+from tqdm import tqdm, tqdm_gui
 from models.data_object import DP_sentence
 from collections import defaultdict
 from heapq import nlargest, nsmallest
@@ -92,15 +93,17 @@ class Features:
         :return:
         :rtype:
         """
-        self.num_features = len(list(self.features.keys()))
-        n_top = self.num_features - remove_bottom
-        n_bottom = self.num_features - remove_top
+        num_features = len(list(self.features.keys()))
+
+        n_top = num_features - remove_bottom
+        n_bottom = num_features - remove_top
         keys2keep_top = set(nlargest(n_top, self.features, key=self.features.get))
         if n_bottom:
             keys2keep_bottom = set(nsmallest(n_bottom, self.features, key=self.features.get))
             keys2keep = list(keys2keep_top.intersection(keys2keep_bottom))
         else:
             keys2keep = keys2keep_top
+
         # sorted(self.features, key=self.features.get, reverse=True)
         temp_dict = defaultdict(int)
         for key in keys2keep:
@@ -110,9 +113,10 @@ class Features:
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
-    def truncate_by_thresh(self, n_top, n_bottom):
+
+    def truncate_by_thresh(self,n_top,n_bottom):
         temp_dict = defaultdict(int)
-        keys2keep = {key: val for key, val in self.features.items() if val < n_top and val > n_bottom}
+        keys2keep = {key: val for key,val in self.features.items() if val < n_top and val > n_bottom}
         for key in keys2keep:
             temp_dict[key] = self.features[key]
         self.features_full = self.features.copy()
@@ -171,8 +175,7 @@ class Features:
             self._add_key(keys, True, f'word_src_word_trg', src_word, trg_word)
             self._add_key(keys, True, f'tag_src_tag_trg', src_tag, trg_tag)
             return keys
-        # keep track of
-        self._add_key(keys, True, f'tag_src_tag_trg', src_tag, trg_tag)
+
 
         # Bohnet (2010) Features
 
@@ -1068,14 +1071,22 @@ class BootCamp:
         assert isinstance(features, Features)
         self.features = features
 
-    def investigate_soldiers(self, soldier_list):
-        for soldier in soldier_list:
+    def investigate_soldiers(self, soldier_list:list, verbose:bool=True):
+        """
+
+        :param verbose: Display Progress bar
+        :type verbose: bool
+        :param soldier_list:
+        :type soldier_list:
+        """
+        print("Investigating Soldiers")
+        for soldier in tqdm(soldier_list,leave=False,disable=not verbose,unit=' Soldier',mininterval=5):
             self.features.extract_features(soldier)
 
     def truncate_features(self, n_top, n_bottom=None):
         self.features.truncate_features(n_top, n_bottom)
 
-    def train_soldiers(self, soldier_list, fast=True):
+    def train_soldiers(self, soldier_list, fast=True,verbose:bool=True):
         """
         Create feature tensor for each object
         :param soldier_list:
@@ -1084,10 +1095,11 @@ class BootCamp:
         :rtype:
         """
         # if no truncation has been made, generate key2token
+        print('Training soldiers')
         if len(list(self.features.key2token.keys())) == 0:
             self.features.tokenize()
         # fill tensor
-        for soldier in soldier_list:
+        for soldier in tqdm(soldier_list,leave=False,disable=not verbose,unit=' Soldier',mininterval=5):
             self.features.fill_tensor(soldier, fast=fast)
 
         # return soldier_list  # inplace
