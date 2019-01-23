@@ -26,7 +26,7 @@ class DP_Model:
         self.w = w  # TODO make sure sparse
         self.bc = boot_camp  # defines feature space
 
-    def fit(self, obj_list, epochs, truncate=0, validation=None, fast=False):
+    def fit(self, obj_list, epochs, truncate_top=0, truncate_bottom=None, validation=None, fast=False):
         """
         Trains the model using the [perceptron alghorith](https://en.wikipedia.org/wiki/Perceptron)
         and chu liu.
@@ -55,9 +55,9 @@ class DP_Model:
         # Create tests
         self.bc.investigate_soldiers(obj_list)
         # Pick the truncate most important tests
-        if truncate > 0:  # TODO: review boot camp usage flow
-            self.bc.features.truncate_by_thresh(truncate)
-            # self.bc.truncate_features(truncate)
+        if truncate_top > 0:  # TODO: review boot camp usage flow
+            # self.bc.features.truncate_by_thresh(truncate)
+            self.bc.truncate_features(n_top=truncate_top, n_bottom=truncate_bottom)
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")

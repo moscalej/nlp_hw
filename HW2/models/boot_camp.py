@@ -16,7 +16,7 @@ for each edge create keys by templates and fill their values in the tensor
 # imports
 from models.data_object import DP_sentence
 from collections import defaultdict
-from heapq import nlargest
+from heapq import nlargest, nsmallest
 from scipy import sparse as spar
 import numpy as np
 
@@ -82,7 +82,7 @@ class Features:
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
 
-    def truncate_features(self, n: int):
+    def truncate_features(self, n_top: int, n_bottom: int):
         """
         Truncate n most frequent features
         :param n:
@@ -90,11 +90,18 @@ class Features:
         :return:
         :rtype:
         """
-        keys2keep = nlargest(n, self.features, key=self.features.get)
+        keys2keep_top = set(nlargest(n_top, self.features, key=self.features.get))
+        if n_bottom:
+            keys2keep_bottom = set(nsmallest(n_bottom, self.features, key=self.features.get))
+            keys2keep = list(keys2keep_top.intersection(keys2keep_bottom))
+        keys2keep = keys2keep_top
+
         # sorted(self.features, key=self.features.get, reverse=True)
         temp_dict = defaultdict(int)
         for key in keys2keep:
             temp_dict[key] = self.features[key]
+        keys2keep = nlargest(n_bottom, temp_dict, key=(-temp_dict.get))
+
         self.features = temp_dict
         self.key2token = {key: ind for ind, key in enumerate(self.features.keys())}
         self.num_features = len(list(self.features.keys()))
@@ -269,39 +276,39 @@ class Features:
         if stop_dict[w_h] or stop_dict[w_d]:
             return keys
         # second order
-            ## child values
-            valid_c = c_inds != []
-            args_dict['wc'] = {'valid': valid_c}
-            args_dict['pc'] = {'valid': valid_c}
-            args_dict['wc-1'] = {'valid': valid_c}
-            args_dict['pc-1'] = {'valid': valid_c}
-            args_dict['wc+1'] = {'valid': valid_c}
-            args_dict['pc+1'] = {'valid': valid_c}
-            args_dict['d(hdc)'] = {'valid': valid_c}
-            if valid_c:
-                for c_ind in c_inds:
-                    w_c = context[c_ind]
-                    p_c = tags[c_ind]
-                    d_d_c = 'L' if h_ind > c_ind else 'R'
-                    args_dict['d(hdc)'] = {'valid': True, 'value': d_h_d + d_d_c}
-                    args_dict['wc'] = {'valid': True, 'value': w_c}
-                    args_dict['pc'] = {'valid': True, 'value': p_c}
-                    valid_prev_c = valid_prev_f(c_ind)
-                    args_dict['wc-1'] = {'valid': valid_prev_c}
-                    args_dict['pc-1'] = {'valid': valid_prev_c}
-                    if valid_prev_c:
-                        w_c_prev = context[c_ind - 1]
-                        p_c_prev = tags[c_ind - 1]
-                        args_dict['pc-1']['value'] = p_c_prev
-                        args_dict['wc-1']['value'] = w_c_prev
-                    valid_next_c = valid_next_f(c_ind)
-                    args_dict['wc+1'] = {'valid': valid_next_c}
-                    args_dict['pc+1'] = {'valid': valid_next_c}
-                    if valid_next_c:
-                        w_c_next = context[c_ind + 1]
-                        p_c_next = tags[c_ind + 1]
-                        args_dict['wc+1']['value'] = p_c_next
-                        args_dict['pc+1']['value'] = w_c_next
+        ## child values
+        valid_c = c_inds != []
+        args_dict['wc'] = {'valid': valid_c}
+        args_dict['pc'] = {'valid': valid_c}
+        args_dict['wc-1'] = {'valid': valid_c}
+        args_dict['pc-1'] = {'valid': valid_c}
+        args_dict['wc+1'] = {'valid': valid_c}
+        args_dict['pc+1'] = {'valid': valid_c}
+        args_dict['d(hdc)'] = {'valid': valid_c}
+        if valid_c:
+            for c_ind in c_inds:
+                w_c = context[c_ind]
+                p_c = tags[c_ind]
+                d_d_c = 'L' if h_ind > c_ind else 'R'
+                args_dict['d(hdc)'] = {'valid': True, 'value': d_h_d + d_d_c}
+                args_dict['wc'] = {'valid': True, 'value': w_c}
+                args_dict['pc'] = {'valid': True, 'value': p_c}
+                valid_prev_c = valid_prev_f(c_ind)
+                args_dict['wc-1'] = {'valid': valid_prev_c}
+                args_dict['pc-1'] = {'valid': valid_prev_c}
+                if valid_prev_c:
+                    w_c_prev = context[c_ind - 1]
+                    p_c_prev = tags[c_ind - 1]
+                    args_dict['pc-1']['value'] = p_c_prev
+                    args_dict['wc-1']['value'] = w_c_prev
+                valid_next_c = valid_next_f(c_ind)
+                args_dict['wc+1'] = {'valid': valid_next_c}
+                args_dict['pc+1'] = {'valid': valid_next_c}
+                if valid_next_c:
+                    w_c_next = context[c_ind + 1]
+                    p_c_next = tags[c_ind + 1]
+                    args_dict['wc+1']['value'] = p_c_next
+                    args_dict['pc+1']['value'] = w_c_next
                 self.add_from_temp(keys, f'ph, pd, pc, d(hdc)', args_dict)
                 self.add_from_temp(keys, f'wh, wd, wc, d(hdc)', args_dict)
                 self.add_from_temp(keys, f'ph, [wp]c, d(hdc)', args_dict)
@@ -331,7 +338,6 @@ class Features:
 
         # distance between
         self._add_key(keys, True, f'dist{trg_ind-src_ind}_src_tag_trg', src_tag, trg_tag, d_h_d)
-
         #
         # suffix features
         suffix_checker = lambda src_word, suffix: len(src_word) > len(suffix) and src_word[-len(suffix):] == suffix
@@ -479,8 +485,8 @@ class BootCamp:
         for soldier in soldier_list:
             self.features.extract_features(soldier)
 
-    def truncate_features(self, n):
-        self.features.truncate_features(n)
+    def truncate_features(self, n_top, n_bottom=None):
+        self.features.truncate_features(n_top, n_bottom)
 
     def train_soldiers(self, soldier_list, fast=True):
         """
