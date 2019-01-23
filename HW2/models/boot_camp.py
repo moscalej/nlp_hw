@@ -332,77 +332,67 @@ class Features:
         # distance between
         self._add_key(keys, True, f'dist{trg_ind-src_ind}_src_tag_trg', src_tag, trg_tag, d_h_d)
 
-        # # stop words
-        # src_is_stop = 0
-        # if src_word in stop_words:
-        #     self._add_key(keys, True, f'stop_word_tag_src_tag_trg', src_word, src_tag, trg_tag)
-        #     src_is_stop = 1
-        # if trg_word in stop_words:
-        #     self._add_key(keys, True, f'tag_src_stop_word_tag_trg', src_tag, trg_word, trg_tag)
-        #     return keys
-        # if src_is_stop:
-        #     return keys
         #
-        # # suffix features
-        # suffix_checker = lambda src_word, suffix: len(src_word) > len(suffix) and src_word[-len(suffix):] == suffix
-        # # base suffix
-        # [self._add_key(keys, True, f'suffix_base_src', src_word) for suffix in suffix_list_base if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_base_trg', trg_word) for suffix in suffix_list_base if
-        #  suffix_checker(trg_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_base_src_word_trg', src_word, trg_word) for suffix in suffix_list_base if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_base_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_base if
-        #  suffix_checker(trg_word, suffix)]
-        # # verb suffix
-        # [self._add_key(keys, True, f'suffix_verb_src', src_word) for suffix in suffix_list_verbs if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_verb_trg', trg_word) for suffix in suffix_list_verbs if
-        #  suffix_checker(trg_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_verb_src_word_trg', src_word, trg_word) for suffix in suffix_list_verbs if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_verb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_verbs if
-        #  suffix_checker(trg_word, suffix)]
-        # # adj suffix
-        # [self._add_key(keys, True, f'suffix_adj_src', src_word) for suffix in suffix_list_adj if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adj_trg', trg_word) for suffix in suffix_list_adj if
-        #  suffix_checker(trg_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adj_src_word_trg', src_word, trg_word) for suffix in suffix_list_adj if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adj_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adj if
-        #  suffix_checker(trg_word, suffix)]
-        # # adverb suffix
-        # [self._add_key(keys, True, f'suffix_adverb_src', src_word) for suffix in suffix_list_adverbs if
-        #  suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adverb_trg', trg_word) for suffix in suffix_list_adverbs if
-        #  suffix_checker(trg_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adverb_src_word_trg', src_word, trg_word) for suffix in suffix_list_adverbs
-        #  if suffix_checker(src_word, suffix)]
-        # [self._add_key(keys, True, f'suffix_adverb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adverbs if
-        #  suffix_checker(trg_word, suffix)]
-        #
-        # # prefix templates
-        # prefix_checker = lambda src_word, prefix: len(src_word) > len(prefix) and src_word[
-        #                                                                           :len(prefix)].lower() == prefix
-        # [self._add_key(keys, True, f'prefix_tag_src', prefix, src_word) for prefix in prefix_list if
-        #  prefix_checker(src_word, prefix)]
-        # [self._add_key(keys, True, f'prefix_tag_trg', prefix, trg_word) for prefix in prefix_list if
-        #  prefix_checker(trg_word, prefix)]
-        # [self._add_key(keys, True, f'prefix_src_word_trg', prefix, src_word, trg_word) for prefix in prefix_list
-        #  if prefix_checker(src_word, prefix)]
-        # [self._add_key(keys, True, f'prefix_src_tag_trg', prefix, src_word, trg_tag) for prefix in prefix_list if
-        #  prefix_checker(trg_word, prefix)]
+        # suffix features
+        suffix_checker = lambda src_word, suffix: len(src_word) > len(suffix) and src_word[-len(suffix):] == suffix
+        # base suffix
+        [self._add_key(keys, True, f'suffix_base_src', src_word) for suffix in suffix_list_base if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_trg', trg_word) for suffix in suffix_list_base if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_src_word_trg', src_word, trg_word) for suffix in suffix_list_base if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_base_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_base if
+         suffix_checker(trg_word, suffix)]
+        # verb suffix
+        [self._add_key(keys, True, f'suffix_verb_src', src_word) for suffix in suffix_list_verbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_trg', trg_word) for suffix in suffix_list_verbs if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_src_word_trg', src_word, trg_word) for suffix in suffix_list_verbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_verb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_verbs if
+         suffix_checker(trg_word, suffix)]
+        # adj suffix
+        [self._add_key(keys, True, f'suffix_adj_src', src_word) for suffix in suffix_list_adj if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_trg', trg_word) for suffix in suffix_list_adj if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_src_word_trg', src_word, trg_word) for suffix in suffix_list_adj if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adj_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adj if
+         suffix_checker(trg_word, suffix)]
+        # adverb suffix
+        [self._add_key(keys, True, f'suffix_adverb_src', src_word) for suffix in suffix_list_adverbs if
+         suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_trg', trg_word) for suffix in suffix_list_adverbs if
+         suffix_checker(trg_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_src_word_trg', src_word, trg_word) for suffix in suffix_list_adverbs
+         if suffix_checker(src_word, suffix)]
+        [self._add_key(keys, True, f'suffix_adverb_src_tag_trg', src_word, trg_tag) for suffix in suffix_list_adverbs if
+         suffix_checker(trg_word, suffix)]
 
-        # # capital letters
-        # # first letter
-        # self._add_key(keys, (src_word[0].isupper() and src_ind != 1), f'upper_tag_src', src_tag)
-        # self._add_key(keys, src_word[0].isupper() and src_ind != 1, f'upper_tag_src_tag_trg', src_tag, trg_tag)
-        #
-        # # contains digit
-        # self._add_key(keys, any(c.isdigit() for c in src_word), f'contains_digit_tag_src_tag_trg', src_tag, trg_tag)
-        # self._add_key(keys, any(c.isdigit() for c in trg_word), f'tag_src_contains_digit_tag_trg', src_tag, trg_tag)
-        #
+        # prefix templates
+        prefix_checker = lambda src_word, prefix: len(src_word) > len(prefix) and src_word[
+                                                                                  :len(prefix)].lower() == prefix
+        [self._add_key(keys, True, f'prefix_tag_src', prefix, src_word) for prefix in prefix_list if
+         prefix_checker(src_word, prefix)]
+        [self._add_key(keys, True, f'prefix_tag_trg', prefix, trg_word) for prefix in prefix_list if
+         prefix_checker(trg_word, prefix)]
+        [self._add_key(keys, True, f'prefix_src_word_trg', prefix, src_word, trg_word) for prefix in prefix_list
+         if prefix_checker(src_word, prefix)]
+        [self._add_key(keys, True, f'prefix_src_tag_trg', prefix, src_word, trg_tag) for prefix in prefix_list if
+         prefix_checker(trg_word, prefix)]
+
+        # capital letters
+        # first letter
+        self._add_key(keys, (src_word[0].isupper() and src_ind != 1), f'upper_tag_src', src_tag)
+        self._add_key(keys, src_word[0].isupper() and src_ind != 1, f'upper_tag_src_tag_trg', src_tag, trg_tag)
+
+        # contains digit
+        self._add_key(keys, any(c.isdigit() for c in src_word), f'contains_digit_tag_src_tag_trg', src_tag, trg_tag)
+        self._add_key(keys, any(c.isdigit() for c in trg_word), f'tag_src_contains_digit_tag_trg', src_tag, trg_tag)
+
 
         return keys
 
