@@ -56,8 +56,8 @@ class DP_Model:
         self.bc.investigate_soldiers(obj_list)
         # Pick the truncate most important tests
         if truncate_top > 0:  # TODO: review boot camp usage flow
-            # self.bc.features.truncate_by_thresh(truncate)
-            self.bc.truncate_features(n_top=truncate_top, n_bottom=truncate_bottom)
+            self.bc.features.truncate_by_thresh(n_top=truncate_top, n_bottom=truncate_bottom)
+            # self.bc.truncate_features(n_top=truncate_top, n_bottom=truncate_bottom)
         else:
             self.bc.features.tokenize()
         print(f"Training model with {self.bc.features.num_features} features")
