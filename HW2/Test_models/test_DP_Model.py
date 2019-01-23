@@ -73,7 +73,7 @@ class test_model(unittest.TestCase):
         print(graph_w)
 
     def test_main(self):
-        NUM_EPOCHS = [100]
+        NUM_EPOCHS = [10]
         MODELS = ['base', 'advance']
         NUMBER_OF_FEATURES = [500, 5000, 50000, 100_000, 0]
         toy_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy.labeled'
@@ -82,8 +82,8 @@ class test_model(unittest.TestCase):
         toy_10_test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\toy_10_test.labeled'
         train_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\train.labeled'
         test_path = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\data\test.labeled'
-        DATA_PATH = train_path
-        TEST_PATH = test_path
+        DATA_PATH = toy_path
+        TEST_PATH = toy_path
         RESULTS_PATH = r'C:\Users\afinkels\Desktop\private\Technion\Master studies\עיבוד שפה טבעית\HW\hw_repo\nlp_hw\HW2\Test_models'
         results_all = []
 
@@ -94,7 +94,7 @@ class test_model(unittest.TestCase):
         model = DP_Model(boot_camp=bc)
         for n_epochs in NUM_EPOCHS:
             start_time = time.time()
-            model.fit(data, epochs=n_epochs, fast=False, truncate=0)
+            model.fit(data, epochs=n_epochs, fast=True, truncate_top=4, truncate_bottom=1)
             train_acc = model.score(data)
             test_acc = model.score(test)
             results_all.append(
